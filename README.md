@@ -40,6 +40,8 @@ Don't worry if this looks like a lot of work--if your web service is RESTful, `A
 ## Getting Started
 
 Check out the example project included in the repository. It's a simple demonstration of an app that uses Core Data with `AFIncrementalStore` to communicate with an API for faulted properties and relationships. Note that there are no explicit network requests being made in the app--it's all done automatically by Core Data.
+Don't forget to pull down AFNetworking if you want to run the example.  
+    git submodule init && git submodule update
 
 ## Requirements
 
