@@ -22,13 +22,16 @@
 
 #import "SongAPIClient.h"
 
+//static NSString * const kAFIncrementalStoreExampleAPIBaseURLString = @"http://localhost:5000";
+static NSString * const kAFIncrementalStoreExampleAPIBaseURLString = @"http://afincrementalstore-example-api.herokuapp.com";
+
 @implementation SongAPIClient
 
 + (SongAPIClient *)sharedClient {
     static SongAPIClient *_sharedClient = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        _sharedClient = [[self alloc] initWithBaseURL:[NSURL URLWithString:@"http://afincrementalstore-example-api.herokuapp.com"]];
+        _sharedClient = [[self alloc] initWithBaseURL:[NSURL URLWithString:kAFIncrementalStoreExampleAPIBaseURLString]];
     });
     
     return _sharedClient;
