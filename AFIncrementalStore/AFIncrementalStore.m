@@ -107,7 +107,7 @@ NSString * AFIncrementalStoreUnimplementedMethodException = @"com.alamofire.incr
                 }];
                 
                 if (![backgroundManagedObjectContext save:error]) {
-                    NSLog(@"Error: %@", error);
+                    NSLog(@"Error: %@", *error);
                 }
             } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
                 NSLog(@"Error: %@", error);
@@ -140,7 +140,10 @@ NSString * AFIncrementalStoreUnimplementedMethodException = @"com.alamofire.incr
     _error: {
         NSMutableDictionary *mutableUserInfo = [NSMutableDictionary dictionary];
         [mutableUserInfo setValue:[NSString stringWithFormat:NSLocalizedString(@"Unsupported NSFetchRequestResultType, %d", nil), persistentStoreRequest.requestType] forKey:NSLocalizedDescriptionKey];
-        *error = [[NSError alloc] initWithDomain:AFNetworkingErrorDomain code:0 userInfo:mutableUserInfo]; 
+        if (error) {
+            *error = [[NSError alloc] initWithDomain:AFNetworkingErrorDomain code:0 userInfo:mutableUserInfo];
+        }
+        
         return nil;
     }
 }
@@ -172,7 +175,7 @@ NSString * AFIncrementalStoreUnimplementedMethodException = @"com.alamofire.incr
                 [self cachePropertyValues:mutablePropertyValues forObjectID:objectID];
 
                 if (![backgroundManagedObjectContext save:error]) {
-                    NSLog(@"Error: %@", error);
+                    NSLog(@"Error: %@", *error);
                 }
             } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
                 NSLog(@"Error: %@, %@", operation, error);
@@ -225,7 +228,7 @@ NSString * AFIncrementalStoreUnimplementedMethodException = @"com.alamofire.incr
                     [destinationObject setValuesForKeysWithDictionary:propertyValues];
                     
                     if (![backgroundManagedObjectContext save:error]) {
-                        NSLog(@"Error: %@", error);
+                        NSLog(@"Error: %@", *error);
                     }
                     
                     [mutableDestinationObjects addObject:destinationObject];
@@ -241,7 +244,7 @@ NSString * AFIncrementalStoreUnimplementedMethodException = @"com.alamofire.incr
                 [self cacheObjectIDs:[[mutableDestinationObjects allObjects] valueForKeyPath:@"objectID"] forRelationship:relationship forObjectID:objectID];
                 
                 if (![backgroundManagedObjectContext save:error]) {
-                    NSLog(@"Error: %@", error);
+                    NSLog(@"Error: %@", *error);
                 }
             } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
                 NSLog(@"Error: %@, %@", operation, error);
