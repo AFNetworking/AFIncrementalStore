@@ -44,13 +44,26 @@
     
     [_artist.managedObjectContext refreshObject:_artist mergeChanges:NO];
     
-    [[NSNotificationCenter defaultCenter] addObserverForName:NSManagedObjectContextDidSaveNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
-        _orderedSongs = [_artist.songs allObjects];
-        _descriptionLabel.text = _artist.artistDescription;
-        [self.tableView reloadData];
-    }];
-        
+    [_artist addObserver:self forKeyPath:@"artistDescription" options:0 context:nil];
+    [_artist addObserver:self forKeyPath:@"songs" options:0 context:nil];
+    
     return self;
+}
+
+- (void)dealloc {
+    [_artist removeObserver:self forKeyPath:@"artistDescription"];
+    [_artist removeObserver:self forKeyPath:@"songs"];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+    if ([object isEqual:_artist]) {
+        if ([keyPath isEqualToString:@"artistDescription"]) {
+            _descriptionLabel.text = _artist.artistDescription;
+        } else if ([keyPath isEqualToString:@"songs"]) {
+            _orderedSongs = [_artist.songs allObjects];
+            [self.tableView reloadData];
+        }
+    }
 }
 
 #pragma mark - UIViewController
