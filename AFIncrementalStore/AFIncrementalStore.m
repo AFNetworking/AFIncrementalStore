@@ -98,10 +98,12 @@ NSString * AFIncrementalStoreUnimplementedMethodException = @"com.alamofire.incr
                     NSString *resourceIdentifier = [self.HTTPClient resourceIdentifierForRepresentation:representation ofEntity:entity];
                     
                     NSManagedObjectID *objectID = [self newObjectIDForEntity:entity referenceObject:resourceIdentifier];
-                    
-                    NSManagedObject *managedObject = [context existingObjectWithID:objectID error:error];
                     NSDictionary *propertyValues = [self.HTTPClient propertyValuesForRepresentation:representation ofEntity:entity fromResponse:operation.response];
-                    [managedObject setValuesForKeysWithDictionary:propertyValues];
+
+                    dispatch_sync(dispatch_get_main_queue(), ^{
+                        NSManagedObject *managedObject = [context existingObjectWithID:objectID error:error];
+                        [managedObject setValuesForKeysWithDictionary:propertyValues];
+                    });
                     
                     [self cachePropertyValues:propertyValues forObjectID:objectID];
                 }];
@@ -113,6 +115,7 @@ NSString * AFIncrementalStoreUnimplementedMethodException = @"com.alamofire.incr
                 NSLog(@"Error: %@", error);
             }];
             
+            operation.successCallbackQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
             [self.HTTPClient enqueueHTTPRequestOperation:operation];
         }
 
