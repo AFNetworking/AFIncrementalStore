@@ -206,7 +206,7 @@ NSString * AFIncrementalStoreUnimplementedMethodException = @"com.alamofire.incr
         
         if ([request URL]) {
             AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, id responseObject) {
-                __block NSManagedObject *managedObject;
+                __block NSManagedObject *managedObject = nil;
 
                 dispatch_sync(dispatch_get_main_queue(), ^{
                     managedObject = [backgroundManagedObjectContext objectWithID:objectID];
