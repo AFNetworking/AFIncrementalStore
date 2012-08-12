@@ -98,10 +98,12 @@ NSString * AFIncrementalStoreUnimplementedMethodException = @"com.alamofire.incr
                     NSString *resourceIdentifier = [self.HTTPClient resourceIdentifierForRepresentation:representation ofEntity:entity];
                     
                     NSManagedObjectID *objectID = [self newObjectIDForEntity:entity referenceObject:resourceIdentifier];
-                    
-                    NSManagedObject *managedObject = [context existingObjectWithID:objectID error:error];
                     NSDictionary *propertyValues = [self.HTTPClient propertyValuesForRepresentation:representation ofEntity:entity fromResponse:operation.response];
-                    [managedObject setValuesForKeysWithDictionary:propertyValues];
+
+                    dispatch_sync(dispatch_get_main_queue(), ^{
+                        NSManagedObject *managedObject = [context existingObjectWithID:objectID error:error];
+                        [managedObject setValuesForKeysWithDictionary:propertyValues];
+                    });
                     
                     [self cachePropertyValues:propertyValues forObjectID:objectID];
                 }];
@@ -113,6 +115,7 @@ NSString * AFIncrementalStoreUnimplementedMethodException = @"com.alamofire.incr
                 NSLog(@"Error: %@", error);
             }];
             
+            operation.successCallbackQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
             [self.HTTPClient enqueueHTTPRequestOperation:operation];
         }
 
@@ -203,7 +206,11 @@ NSString * AFIncrementalStoreUnimplementedMethodException = @"com.alamofire.incr
         
         if ([request URL]) {
             AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, id responseObject) {
-                NSManagedObject *managedObject = [backgroundManagedObjectContext objectWithID:objectID];
+                __block NSManagedObject *managedObject;
+
+                dispatch_sync(dispatch_get_main_queue(), ^{
+                    managedObject = [backgroundManagedObjectContext objectWithID:objectID];
+                });
                 
                 id representationOrArrayOfRepresentations = [self.HTTPClient representationOrArrayOfRepresentationsFromResponseObject:responseObject];
                 
@@ -221,25 +228,31 @@ NSString * AFIncrementalStoreUnimplementedMethodException = @"com.alamofire.incr
                     NSString *resourceIdentifier = [self.HTTPClient resourceIdentifierForRepresentation:representation ofEntity:entity];
                     
                     NSManagedObjectID *destinationObjectID = [self newObjectIDForEntity:entity referenceObject:resourceIdentifier];
-                    
-                    NSManagedObject *destinationObject = [backgroundManagedObjectContext existingObjectWithID:destinationObjectID error:error];
-                    
                     NSDictionary *propertyValues = [self.HTTPClient propertyValuesForRepresentation:representation ofEntity:entity fromResponse:operation.response];
-                    [destinationObject setValuesForKeysWithDictionary:propertyValues];
+
+                    __block NSManagedObject *destinationObject;
+                    dispatch_sync(dispatch_get_main_queue(), ^{
+                        destinationObject = [backgroundManagedObjectContext existingObjectWithID:destinationObjectID error:error];
+                        [destinationObject setValuesForKeysWithDictionary:propertyValues];
+                    });
                     
                     if (![backgroundManagedObjectContext save:error]) {
                         NSLog(@"Error: %@", *error);
                     }
-                    
-                    [mutableDestinationObjects addObject:destinationObject];
+
+                    dispatch_sync(dispatch_get_main_queue(), ^{
+                        [mutableDestinationObjects addObject:destinationObject];
+                    });
                     [self cachePropertyValues:propertyValues forObjectID:destinationObjectID];
                 }];
-                
-                if ([relationship isToMany]) {
-                    [managedObject setValue:mutableDestinationObjects forKey:relationship.name];
-                } else {
-                    [managedObject setValue:[mutableDestinationObjects anyObject] forKey:relationship.name];
-                }
+
+                dispatch_sync(dispatch_get_main_queue(), ^{
+                    if ([relationship isToMany]) {
+                        [managedObject setValue:mutableDestinationObjects forKey:relationship.name];
+                    } else {
+                        [managedObject setValue:[mutableDestinationObjects anyObject] forKey:relationship.name];
+                    }
+                });
                 
                 [self cacheObjectIDs:[[mutableDestinationObjects allObjects] valueForKeyPath:@"objectID"] forRelationship:relationship forObjectID:objectID];
                 
@@ -249,7 +262,8 @@ NSString * AFIncrementalStoreUnimplementedMethodException = @"com.alamofire.incr
             } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
                 NSLog(@"Error: %@, %@", operation, error);
             }];
-            
+
+            operation.successCallbackQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
             [self.HTTPClient enqueueHTTPRequestOperation:operation];
         }
     }
