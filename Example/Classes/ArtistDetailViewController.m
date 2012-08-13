@@ -20,8 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "ArtistDetailViewController.h"
 #import <CoreData/CoreData.h>
+#import "ArtistDetailViewController.h"
 
 #import "Artist.h"
 
@@ -55,7 +55,11 @@
     [_artist removeObserver:self forKeyPath:@"songs"];
 }
 
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+- (void)observeValueForKeyPath:(NSString *)keyPath
+                      ofObject:(id)object
+                        change:(NSDictionary *)change
+                       context:(void *)context
+{
     if ([object isEqual:_artist]) {
         if ([keyPath isEqualToString:@"artistDescription"]) {
             _descriptionLabel.text = _artist.artistDescription;
@@ -71,7 +75,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    self.title = NSLocalizedString(@"Songs", nil);
+    self.title = _artist.name;
     
     UIView *tableHeaderView = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.tableView.frame.size.width, 80.0f)];
     _descriptionLabel = [[UILabel alloc] initWithFrame:CGRectInset(tableHeaderView.bounds, 10.0f, 10.0f)];
@@ -84,26 +88,6 @@
     [self.tableView reloadData];
     
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:_fetchedResultsController action:@selector(performFetch:)];
-}
-
-- (void)viewDidUnload {
-    [super viewDidUnload];
-}
-
-- (void)viewWillAppear:(BOOL)animated {
-    [super viewWillAppear:animated];
-}
-
-- (void)viewDidAppear:(BOOL)animated {
-    [super viewDidAppear:animated];
-}
-
-- (void)viewWillDisappear:(BOOL)animated {
-	[super viewWillDisappear:animated];
-}
-
-- (void)viewDidDisappear:(BOOL)animated {
-	[super viewDidDisappear:animated];
 }
 
 #pragma mark - UITableViewDataSource
@@ -125,12 +109,6 @@
     cell.detailTextLabel.text = [managedObject valueForKeyPath:@"artist.name"];
     
     return cell;
-}
-
-#pragma mark - NSFetchedResultsControllerDelegate
-
-- (void)controllerDidChangeContent:(NSFetchedResultsController *)controller {
-    [self.tableView reloadData];
 }
 
 @end

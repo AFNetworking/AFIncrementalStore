@@ -21,8 +21,6 @@
 // THE SOFTWARE.
 
 #import <UIKit/UIKit.h>
-#import <CoreData/CoreData.h>
 
-@interface ArtistsListViewController : UITableViewController <NSFetchedResultsControllerDelegate>
-
+@interface ArtistsListViewController : UITableViewController
 @end

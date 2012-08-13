@@ -20,11 +20,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import <CoreData/CoreData.h>
+#import <UIKit/UIKit.h>
 
 @class Artist;
 
-@interface ArtistDetailViewController : UITableViewController <NSFetchedResultsControllerDelegate>
+@interface ArtistDetailViewController : UITableViewController
 
 - (id)initWithArtist:(Artist *)artist;
 
