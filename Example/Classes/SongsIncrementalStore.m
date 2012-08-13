@@ -30,7 +30,7 @@
 }
 
 + (NSString *)type {
-    return @"SongsIncrementalStore";
+    return NSStringFromClass(self);
 }
 
 + (NSManagedObjectModel *)model {
