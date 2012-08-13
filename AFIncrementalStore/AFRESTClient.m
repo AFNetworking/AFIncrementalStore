@@ -50,9 +50,9 @@ static NSString * AFPluralizedString(NSString *string) {
 #pragma mark - AFIncrementalStoreHTTPClient
 
 - (id)representationOrArrayOfRepresentationsFromResponseObject:(id)responseObject {
-    if ([responseObject isKindOfClass:[NSArray array]]) {
+    if ([responseObject isKindOfClass:[NSArray class]]) {
         return responseObject;
-    } else if ([responseObject isKindOfClass:[NSDictionary dictionary]]) {
+    } else if ([responseObject isKindOfClass:[NSDictionary class]]) {
         // Distinguish between keyed array or individual representation
         if ([[responseObject allKeys] count] == 1) {
             id value = [responseObject valueForKey:[[responseObject allKeys] lastObject]];

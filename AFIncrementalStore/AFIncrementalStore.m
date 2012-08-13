@@ -282,7 +282,6 @@ NSString * AFIncrementalStoreUnimplementedMethodException = @"com.alamofire.incr
             return [NSNull null];
         } 
     }
-    
 }
 
 #pragma mark - NSIncrementalStore
