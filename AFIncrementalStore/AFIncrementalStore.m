@@ -99,7 +99,7 @@ NSString * AFIncrementalStoreUnimplementedMethodException = @"com.alamofire.incr
                     
                     NSManagedObjectID *objectID = [self newObjectIDForEntity:entity referenceObject:resourceIdentifier];
                     NSDictionary *attributes = [self.HTTPClient attributesForRepresentation:representation ofEntity:entity fromResponse:operation.response];
-                    NSDictionary *relationshipRepresentations = [self.HTTPClient representationsForRelationshipsByNameFromRepresentation:representation ofEntity:entity fromResponse:operation.response];
+                    NSDictionary *relationshipRepresentations = [self.HTTPClient representationsForRelationshipsFromRepresentation:representation ofEntity:entity fromResponse:operation.response];
                     
                     dispatch_sync(dispatch_get_main_queue(), ^{
                         NSManagedObject *managedObject = [context existingObjectWithID:objectID error:error];

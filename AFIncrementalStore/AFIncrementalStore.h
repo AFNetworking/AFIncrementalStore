@@ -29,9 +29,9 @@ extern NSString * AFIncrementalStoreUnimplementedMethodException;
 
 - (id)representationOrArrayOfRepresentationsFromResponseObject:(id)responseObject;
 
-- (NSDictionary *)representationsForRelationshipsByNameFromRepresentation:(NSDictionary *)representation
-                                                                 ofEntity:(NSEntityDescription *)entity
-                                                             fromResponse:(NSHTTPURLResponse *)response;
+- (NSDictionary *)representationsForRelationshipsFromRepresentation:(NSDictionary *)representation
+                                                           ofEntity:(NSEntityDescription *)entity
+                                                       fromResponse:(NSHTTPURLResponse *)response;
 
 - (NSString *)resourceIdentifierForRepresentation:(NSDictionary *)representation
                                          ofEntity:(NSEntityDescription *)entity

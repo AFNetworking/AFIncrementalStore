@@ -67,7 +67,7 @@ static NSString * AFPluralizedString(NSString *string) {
     return responseObject;
 }
 
-- (NSDictionary *)representationsForRelationshipsByNameFromRepresentation:(NSDictionary *)representation
+- (NSDictionary *)representationsForRelationshipsFromRepresentation:(NSDictionary *)representation
                                                                  ofEntity:(NSEntityDescription *)entity
                                                              fromResponse:(NSHTTPURLResponse *)response
 {
