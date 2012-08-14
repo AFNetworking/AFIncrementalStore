@@ -102,36 +102,42 @@ NSString * AFIncrementalStoreUnimplementedMethodException = @"com.alamofire.incr
                     NSDictionary *relationshipRepresentations = [self.HTTPClient representationsForRelationshipsFromRepresentation:representation ofEntity:entity fromResponse:operation.response];
                     
                     dispatch_sync(dispatch_get_main_queue(), ^{
-                        NSManagedObject *managedObject = [context existingObjectWithID:objectID error:error];
+                        NSManagedObject *managedObject = [backgroundManagedObjectContext existingObjectWithID:objectID error:error];
+                        
                         [managedObject setValuesForKeysWithDictionary:attributes];
-                                                
+                        [backgroundManagedObjectContext insertObject:managedObject];
+                        [self cachePropertyValues:attributes forObjectID:objectID];
+
                         [relationshipRepresentations enumerateKeysAndObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id relationshipName, id relationshipRepresentationOrArrayOfRepresentations, BOOL *stop) {
                             NSRelationshipDescription *relationship = [[entity relationshipsByName] valueForKey:relationshipName];
                             if (relationship) {
                                 if ([relationship isToMany]) {
                                     for (NSDictionary *relationshipRepresentation in relationshipRepresentationOrArrayOfRepresentations) {
                                         NSString *relationshipResourceIdentifier = [self.HTTPClient resourceIdentifierForRepresentation:relationshipRepresentation ofEntity:relationship.destinationEntity fromResponse:operation.response];
-                                        NSDictionary *relationshipAttributes = [self.HTTPClient attributesForRepresentation:relationshipRepresentation ofEntity:relationship.destinationEntity fromResponse:operation.response];
                                         NSManagedObjectID *relationshipObjectID = [self newObjectIDForEntity:relationship.destinationEntity referenceObject:relationshipResourceIdentifier];
-                                        NSManagedObject *relationshipObject = [context existingObjectWithID:relationshipObjectID error:nil];
+                                        
+                                        NSManagedObject *relationshipObject = [backgroundManagedObjectContext existingObjectWithID:relationshipObjectID error:error];
+                                        NSDictionary *relationshipAttributes = [self.HTTPClient attributesForRepresentation:relationshipRepresentation ofEntity:relationship.destinationEntity fromResponse:operation.response];
+
                                         [relationshipObject setValuesForKeysWithDictionary:relationshipAttributes];
+                                        [backgroundManagedObjectContext insertObject:relationshipObject];
                                         [self cachePropertyValues:relationshipAttributes forObjectID:relationshipObjectID];
                                     }
                                 } else {
                                     NSString *relationshipResourceIdentifier = [self.HTTPClient resourceIdentifierForRepresentation:relationshipRepresentationOrArrayOfRepresentations ofEntity:relationship.entity fromResponse:operation.response];
                                     NSManagedObjectID *relationshipObjectID = [self newObjectIDForEntity:relationship.destinationEntity referenceObject:relationshipResourceIdentifier];
-                                    NSManagedObject *relationshipObject = [context existingObjectWithID:relationshipObjectID error:nil];
+                                    NSManagedObject *relationshipObject = [backgroundManagedObjectContext existingObjectWithID:relationshipObjectID error:error];
+                                    
                                     NSDictionary *relationshipAttributes = [self.HTTPClient attributesForRepresentation:relationshipRepresentationOrArrayOfRepresentations ofEntity:relationship.destinationEntity fromResponse:operation.response];
-
                                     [relationshipObject setValuesForKeysWithDictionary:relationshipAttributes];
+                                    
                                     [managedObject setValue:relationshipObject forKey:relationship.name];
+                                    [backgroundManagedObjectContext insertObject:relationshipObject];
                                     [self cachePropertyValues:relationshipAttributes forObjectID:relationshipObject.objectID];
                                 }
                             }
                         }];
                     });
-                    
-                    [self cachePropertyValues:attributes forObjectID:objectID];
                 }];
                 
                 if (![backgroundManagedObjectContext save:error]) {
