@@ -73,7 +73,7 @@ NSString * AFIncrementalStoreUnimplementedMethodException = @"com.alamofire.incr
     if (persistentStoreRequest.requestType == NSFetchRequestType) {
         NSFetchRequest *fetchRequest = (NSFetchRequest *)persistentStoreRequest;
         
-        NSManagedObjectContext *backgroundManagedObjectContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
+        NSManagedObjectContext *backgroundManagedObjectContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
         backgroundManagedObjectContext.parentContext = context;
         backgroundManagedObjectContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy;
 
@@ -143,12 +143,6 @@ NSString * AFIncrementalStoreUnimplementedMethodException = @"com.alamofire.incr
                 if (![backgroundManagedObjectContext save:error]) {
                     NSLog(@"Error: %@", *error);
                 }
-                
-                [context performBlock:^{
-                    if (![context save:error]) {
-                        NSLog(@"Error: %@", *error);
-                    }
-                }];
             } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
                 NSLog(@"Error: %@", error);
             }];
