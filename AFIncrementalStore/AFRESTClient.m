@@ -67,16 +67,43 @@ static NSString * AFPluralizedString(NSString *string) {
     return responseObject;
 }
 
+- (NSDictionary *)representationsForRelationshipsByNameFromRepresentation:(NSDictionary *)representation
+                                                                 ofEntity:(NSEntityDescription *)entity
+                                                             fromResponse:(NSHTTPURLResponse *)response
+{
+    NSMutableDictionary *mutableRelationshipRepresentations = [NSMutableDictionary dictionaryWithCapacity:[entity.relationshipsByName count]];
+    [entity.relationshipsByName enumerateKeysAndObjectsUsingBlock:^(id name, id relationship, BOOL *stop) {
+        id value = [representation valueForKey:name];
+        if (value) {
+            if ([relationship isToMany]) {
+                NSArray *arrayOfRelationshipRepresentations = nil;
+                if ([value isKindOfClass:[NSArray class]]) {
+                    arrayOfRelationshipRepresentations = value;
+                } else {
+                    arrayOfRelationshipRepresentations = [NSArray arrayWithObject:value];
+                }
+                                
+                [mutableRelationshipRepresentations setValue:arrayOfRelationshipRepresentations forKey:name];
+            } else {
+                [mutableRelationshipRepresentations setValue:value forKey:name];
+            }
+        }
+    }];
+    
+    return mutableRelationshipRepresentations;
+}
+
 - (NSString *)resourceIdentifierForRepresentation:(NSDictionary *)representation
                                          ofEntity:(NSEntityDescription *)entity
+                                     fromResponse:(NSHTTPURLResponse *)response
 {
-    static NSArray *_candidatePropertyNames = nil;
+    static NSArray *_candidateKeys = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        _candidatePropertyNames = [NSArray arrayWithObjects:@"ID", @"resourceIdentifier", @"identifier", @"url", @"URL", @"URLString", nil];
+        _candidateKeys = [NSArray arrayWithObjects:@"id", @"identifier", @"url", @"URL", nil];
     });
     
-    NSString *key = [[representation allKeys] firstObjectCommonWithArray:_candidatePropertyNames];
+    NSString *key = [[representation allKeys] firstObjectCommonWithArray:_candidateKeys];
     if (key) {
         id value = [representation valueForKey:key];
         if (value) {
@@ -91,57 +118,19 @@ static NSString * AFPluralizedString(NSString *string) {
                                      ofEntity:(NSEntityDescription *)entity
                                  fromResponse:(NSHTTPURLResponse *)response
 {
-    NSMutableDictionary *mutablePropertyValues = [representation mutableCopy];
+    NSMutableDictionary *mutableAttributes = [representation mutableCopy];
     @autoreleasepool {
         NSMutableSet *mutableKeys = [NSMutableSet setWithArray:[representation allKeys]];
         [mutableKeys minusSet:[NSSet setWithArray:[[entity propertiesByName] allKeys]]];
-        [mutablePropertyValues removeObjectsForKeys:[mutableKeys allObjects]];
+        [mutableAttributes removeObjectsForKeys:[mutableKeys allObjects]];
     }
     
-    NSSet *keysWithNestedValues = [mutablePropertyValues keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop) {
+    NSSet *keysWithNestedValues = [mutableAttributes keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop) {
         return [obj isKindOfClass:[NSArray class]] || [obj isKindOfClass:[NSDictionary class]];
     }];
-    NSLog(@"KEYS: %@", keysWithNestedValues);
-    [mutablePropertyValues removeObjectsForKeys:[keysWithNestedValues allObjects]];
+    [mutableAttributes removeObjectsForKeys:[keysWithNestedValues allObjects]];
     
-    return mutablePropertyValues;
-}
-
-- (NSDictionary *)relationshipAttributesForRepresentation:(NSDictionary *)representation
-                                                 ofEntity:(NSEntityDescription *)entity
-                                             fromResponse:(NSHTTPURLResponse *)response
-{
-    NSMutableDictionary *mutableRelationshipAttributes = [NSMutableDictionary dictionaryWithCapacity:[entity.relationshipsByName count]];
-    [entity.relationshipsByName enumerateKeysAndObjectsUsingBlock:^(id name, id relationship, BOOL *stop) {
-        id value = [representation valueForKey:name];
-        if (value) {
-            NSLog(@"!!! %@: %@", name, value);
-            if ([relationship isToMany]) {
-                NSArray *arrayOfRelationshipRepresentations = nil;
-                if ([value isKindOfClass:[NSArray class]]) {
-                    arrayOfRelationshipRepresentations = value;
-                } else {
-                    arrayOfRelationshipRepresentations = [NSArray arrayWithObject:value];
-                }
-                
-                NSMutableArray *mutableArrayOfRelationshipAttributes = [NSMutableArray arrayWithCapacity:[arrayOfRelationshipRepresentations count]];
-                for (NSDictionary *relationshipRepresentation in arrayOfRelationshipRepresentations) {
-                    NSDictionary *relationshipAttributes = [self attributesForRepresentation:relationshipRepresentation ofEntity:[relationship destinationEntity] fromResponse:response];
-                    [mutableArrayOfRelationshipAttributes addObject:relationshipAttributes];
-                }
-                
-                [mutableRelationshipAttributes setValue:mutableArrayOfRelationshipAttributes forKey:name];
-            } else {
-                NSDictionary *relationshipRepresentation = value;
-                NSDictionary *relationshipAttributes = [self attributesForRepresentation:relationshipRepresentation ofEntity:[relationship destinationEntity] fromResponse:response];
-                [mutableRelationshipAttributes setValue:relationshipAttributes forKey:name];
-            }
-        } else {
-            NSLog(@"!!!! %@", name);
-        }
-    }];
-    
-    return mutableRelationshipAttributes;
+    return mutableAttributes;
 }
 
 - (NSURLRequest *)requestForFetchRequest:(NSFetchRequest *)fetchRequest 

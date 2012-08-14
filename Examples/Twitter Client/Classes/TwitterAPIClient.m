@@ -70,11 +70,9 @@ static NSString * const kAFTwitterAPIBaseURLString = @"http://api.twitter.com/1/
         [mutablePropertyValues setValue:[representation valueForKey:@"id"] forKey:@"tweetID"];
     } else if ([entity.name isEqualToString:@"User"]) {
         [mutablePropertyValues setValue:[representation valueForKey:@"id"] forKey:@"userID"];
-        [mutablePropertyValues setValue:[representation valueForKey:@"id"] forKey:@"screen_name"];
+        [mutablePropertyValues setValue:[representation valueForKey:@"screen_name"] forKey:@"username"];
     }
-    
-    NSLog(@"property values: %@", mutablePropertyValues);
-    
+        
     return mutablePropertyValues;
 }
 
