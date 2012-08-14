@@ -143,6 +143,12 @@ NSString * AFIncrementalStoreUnimplementedMethodException = @"com.alamofire.incr
                 if (![backgroundManagedObjectContext save:error]) {
                     NSLog(@"Error: %@", *error);
                 }
+                
+                [context performBlock:^{
+                    if (![context save:error]) {
+                        NSLog(@"Error: %@", *error);
+                    }
+                }];
             } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
                 NSLog(@"Error: %@", error);
             }];
