@@ -37,7 +37,8 @@
     
     PublicTimelineViewController *viewController = [[PublicTimelineViewController alloc] initWithStyle:UITableViewStylePlain];
     self.navigationController = [[UINavigationController alloc] initWithRootViewController:viewController];
-    
+    self.navigationController.navigationBar.tintColor = [UIColor darkGrayColor];
+
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     [self.window addSubview:self.navigationController.view];
     [self.window makeKeyAndVisible];

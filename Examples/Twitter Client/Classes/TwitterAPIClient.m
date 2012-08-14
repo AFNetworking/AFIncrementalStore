@@ -71,8 +71,9 @@ static NSString * const kAFTwitterAPIBaseURLString = @"http://api.twitter.com/1/
     } else if ([entity.name isEqualToString:@"User"]) {
         [mutablePropertyValues setValue:[representation valueForKey:@"id"] forKey:@"userID"];
         [mutablePropertyValues setValue:[representation valueForKey:@"screen_name"] forKey:@"username"];
+        [mutablePropertyValues setValue:[representation valueForKey:@"profile_image_url"] forKey:@"profileImageURLString"];
     }
-        
+    
     return mutablePropertyValues;
 }
 

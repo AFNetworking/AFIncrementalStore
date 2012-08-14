@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F87CD18E15DAB2B200E4C166 /* TweetTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = F87CD18D15DAB2B200E4C166 /* TweetTableViewCell.m */; };
+		F87CD19215DAB45100E4C166 /* profile-image-placeholder.png in Resources */ = {isa = PBXBuildFile; fileRef = F87CD19015DAB45100E4C166 /* profile-image-placeholder.png */; };
+		F87CD19315DAB45100E4C166 /* profile-image-placeholder@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F87CD19115DAB45100E4C166 /* profile-image-placeholder@2x.png */; };
 		F8874F1615B08B770048680F /* PublicTimelineViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F8874F0915B08B770048680F /* PublicTimelineViewController.m */; };
 		F8874F1915B08B770048680F /* TwitterAPIClient.m in Sources */ = {isa = PBXBuildFile; fileRef = F8874F0C15B08B770048680F /* TwitterAPIClient.m */; };
 		F8874F1A15B08B770048680F /* TwitterIncrementalStore.m in Sources */ = {isa = PBXBuildFile; fileRef = F8874F0D15B08B770048680F /* TwitterIncrementalStore.m */; };
@@ -34,6 +37,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		F87CD18C15DAB2B200E4C166 /* TweetTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TweetTableViewCell.h; path = Classes/TweetTableViewCell.h; sourceTree = SOURCE_ROOT; };
+		F87CD18D15DAB2B200E4C166 /* TweetTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TweetTableViewCell.m; path = Classes/TweetTableViewCell.m; sourceTree = SOURCE_ROOT; };
+		F87CD19015DAB45100E4C166 /* profile-image-placeholder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "profile-image-placeholder.png"; sourceTree = "<group>"; };
+		F87CD19115DAB45100E4C166 /* profile-image-placeholder@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "profile-image-placeholder@2x.png"; sourceTree = "<group>"; };
 		F8874E7515B08AD30048680F /* Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Prefix.pch; sourceTree = SOURCE_ROOT; };
 		F8874E7615B08ADB0048680F /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = SOURCE_ROOT; };
 		F8874F0915B08B770048680F /* PublicTimelineViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PublicTimelineViewController.m; path = Classes/PublicTimelineViewController.m; sourceTree = SOURCE_ROOT; };
@@ -97,6 +104,32 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		F87CD18A15DAB2A700E4C166 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				F87CD18C15DAB2B200E4C166 /* TweetTableViewCell.h */,
+				F87CD18D15DAB2B200E4C166 /* TweetTableViewCell.m */,
+			);
+			name = Views;
+			sourceTree = "<group>";
+		};
+		F87CD18F15DAB45100E4C166 /* Images */ = {
+			isa = PBXGroup;
+			children = (
+				F87CD19015DAB45100E4C166 /* profile-image-placeholder.png */,
+				F87CD19115DAB45100E4C166 /* profile-image-placeholder@2x.png */,
+			);
+			path = Images;
+			sourceTree = SOURCE_ROOT;
+		};
+		F87CD19415DAB45D00E4C166 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				F87CD18F15DAB45100E4C166 /* Images */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
 		F8874E5915AF927D0048680F /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
@@ -163,6 +196,7 @@
 			isa = PBXGroup;
 			children = (
 				F8AFAFB915AB4F28003FE5BB /* Twitter */,
+				F87CD19415DAB45D00E4C166 /* Resources */,
 				F8AFAFB015AB4F28003FE5BB /* Frameworks */,
 				F8AFAFAE15AB4F28003FE5BB /* Products */,
 				F8AFB07215AB5010003FE5BB /* Vendor */,
@@ -198,6 +232,7 @@
 				F8874F1315B08B770048680F /* TwitterIncrementalStore.h */,
 				F8874F0D15B08B770048680F /* TwitterIncrementalStore.m */,
 				F8874E5B15AF92830048680F /* Models */,
+				F87CD18A15DAB2A700E4C166 /* Views */,
 				F8874E5915AF927D0048680F /* Controllers */,
 				F8AFAFBA15AB4F28003FE5BB /* Supporting Files */,
 			);
@@ -275,6 +310,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F87CD19215DAB45100E4C166 /* profile-image-placeholder.png in Resources */,
+				F87CD19315DAB45100E4C166 /* profile-image-placeholder@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -305,6 +342,7 @@
 				F8AD92E815D9A0BB00402FE9 /* AFRESTClient.m in Sources */,
 				F8AD92F815D9A2DB00402FE9 /* Tweet.m in Sources */,
 				F8AD92FB15D9A2E500402FE9 /* User.m in Sources */,
+				F87CD18E15DAB2B200E4C166 /* TweetTableViewCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
