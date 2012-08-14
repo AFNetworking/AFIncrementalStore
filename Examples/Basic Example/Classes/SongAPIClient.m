@@ -49,11 +49,11 @@ static NSString * const kAFIncrementalStoreExampleAPIBaseURLString = @"http://af
     return self;
 }
 
-- (NSDictionary *)propertyValuesForRepresentation:(NSDictionary *)representation 
-                                         ofEntity:(NSEntityDescription *)entity 
-                                     fromResponse:(NSHTTPURLResponse *)response 
+- (NSDictionary *)attributesForRepresentation:(NSDictionary *)representation
+                                     ofEntity:(NSEntityDescription *)entity
+                                 fromResponse:(NSHTTPURLResponse *)response 
 {
-    NSMutableDictionary *mutablePropertyValues = [[super propertyValuesForRepresentation:representation ofEntity:entity fromResponse:response] mutableCopy];
+    NSMutableDictionary *mutablePropertyValues = [[super attributesForRepresentation:representation ofEntity:entity fromResponse:response] mutableCopy];
     if ([entity.name isEqualToString:@"Artist"]) {
         NSString *description = [representation valueForKey:@"description"];
         [mutablePropertyValues setValue:description forKey:@"artistDescription"];
