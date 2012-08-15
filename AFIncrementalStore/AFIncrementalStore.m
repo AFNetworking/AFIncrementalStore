@@ -320,7 +320,7 @@ NSString * AFIncrementalStoreUnimplementedMethodException = @"com.alamofire.incr
 
 - (void)managedObjectContextDidUnregisterObjectsWithIDs:(NSArray *)objectIDs {
     for (NSManagedObjectID *objectID in objectIDs) {
-        [_propertyValuesCache removeObjectForKey:objectID];
+        [_propertyValuesCache removeObjectForKey:[self propertyValuesCacheKeyForObjectID:objectID]];
     }
 }
 
