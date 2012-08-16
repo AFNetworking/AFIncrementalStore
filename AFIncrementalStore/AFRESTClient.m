@@ -135,8 +135,11 @@ static NSString * AFPluralizedString(NSString *string) {
 
 - (NSURLRequest *)requestForFetchRequest:(NSFetchRequest *)fetchRequest 
                              withContext:(NSManagedObjectContext *)context
-{    
-    return [self requestWithMethod:@"GET" path:[self pathForEntity:fetchRequest.entity] parameters:nil];
+{
+    NSMutableURLRequest *mutableRequest =  [self requestWithMethod:@"GET" path:[self pathForEntity:fetchRequest.entity] parameters:nil];
+    mutableRequest.cachePolicy = NSURLRequestReturnCacheDataElseLoad;
+    
+    return mutableRequest;
 }
 
 - (NSURLRequest *)requestWithMethod:(NSString *)method
