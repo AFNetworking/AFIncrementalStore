@@ -11,6 +11,25 @@ AFIncrementalStore is an [`NSIncrementalStore`](http://nshipster.com/nsincrement
 
 Weighing in at just under 500 LOC, AFIncrementalStore is something you can get your head around. Integrating it into your project couldn't be easier--just swap out your `NSPersistentStore` for it. No monkey-patching, no extra properties on your models.
 
+## Incremental Store Persistence
+
+`AFIncrementalStore` does not persist data directly. Instead, _it manages a persistent store coordinator_ that can be configured to communicate with any number of persistent stores of your choice.
+
+In the Twitter example, a SQLite persistent store is added, which works to persist tweets between launches, and return locally-cached results while the network request finishes:
+
+``` objective-c
+NSURL *storeURL = [[self applicationDocumentsDirectory] URLByAppendingPathComponent:@"Twitter.sqlite"];
+NSDictionary *options = @{ NSInferMappingModelAutomaticallyOption : @(YES) };
+
+NSError *error = nil;
+if (![incrementalStore.backingPersistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeURL options:options error:&error]) {
+    NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
+    abort();
+}
+```
+
+If your data set is of a more fixed or ephemeral nature, you may want to use `NSInMemoryStoreType`.
+
 ## Mapping Core Data to HTTP
 
 The only thing you need to do is tell `AFIncrementalStore` how to map Core Data to an HTTP client. These methods are defined in the `AFIncrementalStoreHTTPClient` protocol:
@@ -42,23 +61,6 @@ The only thing you need to do is tell `AFIncrementalStore` how to map Core Data 
                 pathForRelationship:(NSRelationshipDescription *)relationship
                     forObjectWithID:(NSManagedObjectID *)objectID
                         withContext:(NSManagedObjectContext *)context;
-```
-
-## Incremental Store Persistence
-
-`AFIncrementalStore` does not persist data directly. Instead, _it manages a persistent store coordinator_ that can be configured to communicate with any number of persistent stores of your choice.
-
-In the Twitter example, a SQLite persistent store is added, which works to persist tweets between launches, and return locally-cached results while the network request finishes:
-
-``` objective-c
-NSURL *storeURL = [[self applicationDocumentsDirectory] URLByAppendingPathComponent:@"Twitter.sqlite"];
-NSDictionary *options = @{ NSInferMappingModelAutomaticallyOption : @(YES) };
-
-NSError *error = nil;
-if (![incrementalStore.backingPersistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeURL options:options error:&error]) {
-    NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
-    abort();
-}
 ```
 
 ## Getting Started
