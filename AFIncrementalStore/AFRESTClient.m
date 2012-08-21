@@ -159,6 +159,13 @@ static NSString * AFPluralizedString(NSString *string) {
     return [self requestWithMethod:method path:[self pathForRelationship:relationship forObject:object] parameters:nil];
 }
 
+- (BOOL)shouldFetchRemoteValuesForRelationship:(NSRelationshipDescription *)relationship
+                               forObjectWithID:(NSManagedObjectID *)objectID
+                        inManagedObjectContext:(NSManagedObjectContext *)context
+{
+    return [relationship isToMany] || ![relationship inverseRelationship];
+}
+
 #pragma mark - AFHTTPClient
 
 - (void)enqueueHTTPRequestOperation:(AFHTTPRequestOperation *)operation {

@@ -22,8 +22,8 @@
 
 #import "SongAPIClient.h"
 
-//static NSString * const kAFIncrementalStoreExampleAPIBaseURLString = @"http://localhost:5000";
-static NSString * const kAFIncrementalStoreExampleAPIBaseURLString = @"http://afincrementalstore-example-api.herokuapp.com";
+static NSString * const kAFIncrementalStoreExampleAPIBaseURLString = @"http://localhost:5000";
+//static NSString * const kAFIncrementalStoreExampleAPIBaseURLString = @"http://afincrementalstore-example-api.herokuapp.com";
 
 @implementation SongAPIClient
 
@@ -60,6 +60,14 @@ static NSString * const kAFIncrementalStoreExampleAPIBaseURLString = @"http://af
     }
     
     return mutablePropertyValues;
+}
+
+- (BOOL)shouldFetchRemoteAttributeValuesForObjectWithID:(NSManagedObjectID *)objectID inManagedObjectContext:(NSManagedObjectContext *)context {
+    return [[[objectID entity] name] isEqualToString:@"Artist"];
+}
+
+- (BOOL)shouldFetchRemoteValuesForRelationship:(NSRelationshipDescription *)relationship forObjectWithID:(NSManagedObjectID *)objectID inManagedObjectContext:(NSManagedObjectContext *)context {
+    return [[[objectID entity] name] isEqualToString:@"Artist"];
 }
 
 @end

@@ -101,17 +101,17 @@
         return __persistentStoreCoordinator;
     }
     
-    NSURL *storeURL = [[self applicationDocumentsDirectory] URLByAppendingPathComponent:@"IncrementalStoreExample.sqlite"];
-    
-    NSError *error = nil;
     __persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:[self managedObjectModel]];
-    if (![__persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeURL options:nil error:&error]) {
+    
+    AFIncrementalStore *incrementalStore = (AFIncrementalStore *)[__persistentStoreCoordinator addPersistentStoreWithType:[SongsIncrementalStore type] configuration:nil URL:nil options:nil error:nil];
+    NSError *error = nil;
+    if (![incrementalStore.backingPersistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:[[self applicationDocumentsDirectory] URLByAppendingPathComponent:@"Songs.sqlite"] options:@{ NSInferMappingModelAutomaticallyOption : @(YES) } error:&error]) {
         NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
         abort();
-    }    
-
-    [__persistentStoreCoordinator addPersistentStoreWithType:[SongsIncrementalStore type] configuration:nil URL:nil options:nil error:nil];
-
+    }
+    
+    NSLog(@"SQLite URL: %@", [[self applicationDocumentsDirectory] URLByAppendingPathComponent:@"Songs.sqlite"]);
+    
     return __persistentStoreCoordinator;
 }
 

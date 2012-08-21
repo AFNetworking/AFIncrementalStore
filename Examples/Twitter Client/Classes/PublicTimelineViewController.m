@@ -33,9 +33,17 @@
 @interface PublicTimelineViewController () <NSFetchedResultsControllerDelegate> {
     NSFetchedResultsController *_fetchedResultsController;
 }
+
+- (void)refetchData;
+
 @end
 
-@implementation PublicTimelineViewController 
+@implementation PublicTimelineViewController
+
+- (void)refetchData {
+    [_fetchedResultsController performSelectorOnMainThread:@selector(performFetch:) withObject:nil waitUntilDone:YES modes:@[ NSRunLoopCommonModes ]];
+    [_fetchedResultsController performFetch:nil];
+}
 
 #pragma mark - UIViewController
 
@@ -48,13 +56,12 @@
     
     NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"Tweet"];
     fetchRequest.sortDescriptors = [NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"tweetID" ascending:NO]];
-    fetchRequest.returnsObjectsAsFaults = NO;
-    
-    _fetchedResultsController = [[NSFetchedResultsController alloc] initWithFetchRequest:fetchRequest managedObjectContext:[(id)[[UIApplication sharedApplication] delegate] managedObjectContext] sectionNameKeyPath:nil cacheName:nil];
+    fetchRequest.fetchLimit = 50;
+    _fetchedResultsController = [[NSFetchedResultsController alloc] initWithFetchRequest:fetchRequest managedObjectContext:[(id)[[UIApplication sharedApplication] delegate] managedObjectContext] sectionNameKeyPath:nil cacheName:@"PublicTimeline"];
     _fetchedResultsController.delegate = self;
-    [_fetchedResultsController performFetch:nil];
+    [self refetchData];
     
-    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:_fetchedResultsController action:@selector(performFetch:)];
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(refetchData)];
 }
 
 #pragma mark - UITableViewDataSource
@@ -75,15 +82,30 @@
         cell = [[TweetTableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier];
     }
     
-    cell.tweet = (Tweet *)[_fetchedResultsController objectAtIndexPath:indexPath];
+    [self configureCell:cell atIndexPath:indexPath];
     
     return cell;
+}
+
+- (void)configureCell:(UITableViewCell *)cell
+          atIndexPath:(NSIndexPath *)indexPath
+{
+    @try {
+        [(TweetTableViewCell *)cell setTweet:(Tweet *)[_fetchedResultsController objectAtIndexPath:indexPath]];
+    }
+    @catch (NSException *exception) {
+        NSLog(@"Exception: %@", exception);
+    }
 }
 
 #pragma mark - UITableViewDelegate
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
     return [TweetTableViewCell heightForCellWithTweet:(Tweet *)[_fetchedResultsController objectAtIndexPath:indexPath]];
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 
 #pragma mark - NSFetchedResultsControllerDelegate

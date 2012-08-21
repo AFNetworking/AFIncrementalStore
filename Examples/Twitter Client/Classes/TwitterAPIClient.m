@@ -77,4 +77,17 @@ static NSString * const kAFTwitterAPIBaseURLString = @"http://api.twitter.com/1/
     return mutablePropertyValues;
 }
 
+- (BOOL)shouldFetchRemoteAttributeValuesForObjectWithID:(NSManagedObjectID *)objectID
+                                 inManagedObjectContext:(NSManagedObjectContext *)context
+{
+    return NO;
+}
+
+- (BOOL)shouldFetchRemoteValuesForRelationship:(NSRelationshipDescription *)relationship
+                               forObjectWithID:(NSManagedObjectID *)objectID
+                        inManagedObjectContext:(NSManagedObjectContext *)context
+{
+    return NO;
+}
+
 @end

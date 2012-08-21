@@ -37,7 +37,7 @@
     return [[NSManagedObjectModel alloc] initWithContentsOfURL:[[NSBundle mainBundle] URLForResource:@"IncrementalStoreExample" withExtension:@"xcdatamodeld"]];
 }
 
-- (id<AFIncrementalStoreHTTPClient>)HTTPClient {
+- (id <AFIncrementalStoreHTTPClient>)HTTPClient {
     return [SongAPIClient sharedClient];
 }
 

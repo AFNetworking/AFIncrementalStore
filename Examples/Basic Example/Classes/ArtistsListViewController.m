@@ -29,9 +29,15 @@
 @interface ArtistsListViewController () <NSFetchedResultsControllerDelegate> {
     NSFetchedResultsController *_fetchedResultsController;
 }
+- (void)refetchData;
 @end
 
-@implementation ArtistsListViewController 
+@implementation ArtistsListViewController
+
+- (void)refetchData {
+    _fetchedResultsController.fetchRequest.resultType = NSManagedObjectResultType;
+    [_fetchedResultsController performFetch:nil];
+}
 
 #pragma mark - UIViewController
 
@@ -48,7 +54,7 @@
     _fetchedResultsController.delegate = self;
     [_fetchedResultsController performFetch:nil];
     
-    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:_fetchedResultsController action:@selector(performFetch:)];
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(refetchData)];
 }
 
 #pragma mark - UITableViewDataSource
@@ -81,12 +87,11 @@
     Artist *artist = (Artist *)[_fetchedResultsController objectAtIndexPath:indexPath];
     ArtistDetailViewController *viewController = [[ArtistDetailViewController alloc] initWithArtist:artist];
     [self.navigationController pushViewController:viewController animated:YES];
-    [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 
 #pragma mark - NSFetchedResultsControllerDelegate
 
-- (void)controllerDidChangeContent:(NSFetchedResultsController *)controller {
+- (void)controllerDidChangeContent:(NSFetchedResultsController *)controller {    
     [self.tableView reloadData];
 }
 
