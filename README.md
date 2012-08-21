@@ -1,14 +1,17 @@
 # AFIncrementalStore
 **Core Data Persistence with AFNetworking, Done Right**
 
-> _This is still in early stages of development, so proceed with caution when using this in a production application. Any bug reports, feature requests, or general feedback at this point would be greatly appreciated._
+> _This is still in early stages of development, so proceed with caution when using this in a production application.  
+> Any bug reports, feature requests, or general feedback at this point would be greatly appreciated._
 
 **A lot of us have been burned by Core Data + REST frameworks in the past.**  
 **I can promise you that this is unlike anything you've seen before.**
 
-AFIncrementalStore is an [`NSIncrementalStore`](https://developer.apple.com/library/mac/#documentation/CoreData/Reference/NSIncrementalStore_Class/Reference/NSIncrementalStore.html) subclass that uses [AFNetworking](https://github.com/afnetworking/afnetworking) to automatically request resources as properties and relationships are needed. I had noticed `NSIncrementalStore` in the iOS 5 docs a while ago, but it was [this article](http://sealedabstract.com/code/nsincrementalstore-the-future-of-web-services-in-ios-mac-os-x/) that got me to realize how unbelievably cool it was.
+AFIncrementalStore is an [`NSIncrementalStore`](http://nshipster.com/nsincrementalstore/) subclass that uses [AFNetworking](https://github.com/afnetworking/afnetworking) to automatically request resources as properties and relationships are needed. 
 
-**Weighing in at just over 500 LOC, AFIncrementalStore is something you can get your head around.** Integrating it into your project couldn't be easier--just swap out your `NSPersistentStore` for it. No monkey-patching, no extra properties on your models.
+Weighing in at just under 500 LOC, AFIncrementalStore is something you can get your head around. Integrating it into your project couldn't be easier--just swap out your `NSPersistentStore` for it. No monkey-patching, no extra properties on your models.
+
+## Mapping Core Data to HTTP
 
 The only thing you need to do is tell `AFIncrementalStore` how to map Core Data to an HTTP client. These methods are defined in the `AFIncrementalStoreHTTPClient` protocol:
 
@@ -41,14 +44,32 @@ The only thing you need to do is tell `AFIncrementalStore` how to map Core Data 
                         withContext:(NSManagedObjectContext *)context;
 ```
 
+## Incremental Store Persistence
+
+`AFIncrementalStore` does not persist data directly. Instead, _it manages a persistent store coordinator_ that can be configured to communicate with any number of persistent stores of your choice.
+
+In the Twitter example, a SQLite persistent store is added, which works to persist tweets between launches, and return locally-cached results while the network request finishes:
+
+``` objective-c
+NSURL *storeURL = [[self applicationDocumentsDirectory] URLByAppendingPathComponent:@"Twitter.sqlite"];
+NSDictionary *options = @{ NSInferMappingModelAutomaticallyOption : @(YES) };
+
+NSError *error = nil;
+if (![incrementalStore.backingPersistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeURL options:options error:&error]) {
+    NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
+    abort();
+}
+```
+
 ## Getting Started
 
-Check out the example project included in the repository. It's a simple demonstration of an app that uses Core Data with `AFIncrementalStore` to communicate with an API for faulted properties and relationships. Note that there are no explicit network requests being made in the app--it's all done automatically by Core Data.
-Don't forget to pull down AFNetworking with `git submodule init && git submodule update` if you want to run the example. 
+Check out the example projects that are included in the repository. They are somewhat simple demonstration of an app that uses Core Data with `AFIncrementalStore` to communicate with an API for faulted properties and relationships. Note that there are no explicit network requests being made in the app--it's all done automatically by Core Data.
+
+Also, don't forget to pull down AFNetworking with `git submodule init && git submodule update` if you want to run the example. 
 
 ## Requirements
 
-AFIncrementalStore requires [iOS 5.0](http://developer.apple.com/library/ios/#releasenotes/General/WhatsNewIniPhoneOS/Articles/iOS5.html) and above, or [Mac OS 10.6](http://developer.apple.com/library/mac/#releasenotes/MacOSX/WhatsNewInOSX/Articles/MacOSX10_6.html#//apple_ref/doc/uid/TP40008898-SW7) ([64-bit with modern Cocoa runtime](https://developer.apple.com/library/mac/#documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtVersionsPlatforms.html)) and above, as well as [AFNetworking](https://github.com/afnetworking/afnetworking) 0.9 or higher.
+AFIncrementalStore requires Xcode 4.4 with either the [iOS 5.0](http://developer.apple.com/library/ios/#releasenotes/General/WhatsNewIniPhoneOS/Articles/iOS5.html) or [Mac OS 10.6](http://developer.apple.com/library/mac/#releasenotes/MacOSX/WhatsNewInOSX/Articles/MacOSX10_6.html#//apple_ref/doc/uid/TP40008898-SW7) ([64-bit with modern Cocoa runtime](https://developer.apple.com/library/mac/#documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtVersionsPlatforms.html)) SDK, as well as [AFNetworking](https://github.com/afnetworking/afnetworking) 0.9 or higher.
 
 ## Next Steps
 
