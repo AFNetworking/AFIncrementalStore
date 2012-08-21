@@ -105,8 +105,16 @@
     __persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:[self managedObjectModel]];
     
     AFIncrementalStore *incrementalStore = (AFIncrementalStore *)[__persistentStoreCoordinator addPersistentStoreWithType:[TwitterIncrementalStore type] configuration:nil URL:nil options:nil error:nil];
+    
+    NSURL *storeURL = [[self applicationDocumentsDirectory] URLByAppendingPathComponent:@"Twitter.sqlite"];
+    
+    NSDictionary *options = @{
+        NSInferMappingModelAutomaticallyOption : @(YES),
+        NSMigratePersistentStoresAutomaticallyOption: @(YES)
+    };
+    
     NSError *error = nil;
-    if (![incrementalStore.backingPersistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:[[self applicationDocumentsDirectory] URLByAppendingPathComponent:@"Twitter.sqlite"] options:@{ NSInferMappingModelAutomaticallyOption : @(YES) } error:&error]) {
+    if (![incrementalStore.backingPersistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeURL options:options error:&error]) {
         NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
         abort();
     }
