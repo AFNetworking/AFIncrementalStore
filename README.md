@@ -8,12 +8,18 @@
 
 AFIncrementalStore is an [`NSIncrementalStore`](https://developer.apple.com/library/mac/#documentation/CoreData/Reference/NSIncrementalStore_Class/Reference/NSIncrementalStore.html) subclass that uses [AFNetworking](https://github.com/afnetworking/afnetworking) to automatically request resources as properties and relationships are needed. I had noticed `NSIncrementalStore` in the iOS 5 docs a while ago, but it was [this article](http://sealedabstract.com/code/nsincrementalstore-the-future-of-web-services-in-ios-mac-os-x/) that got me to realize how unbelievably cool it was.
 
-**Weighing in at just over 300 LOC, AFIncrementalStore is something you can get your head around.** Integrating it into your project couldn't be easier--just swap out your `NSPersistentStore` for it. No monkey-patching, no extra properties on your models.
+**Weighing in at just over 500 LOC, AFIncrementalStore is something you can get your head around.** Integrating it into your project couldn't be easier--just swap out your `NSPersistentStore` for it. No monkey-patching, no extra properties on your models.
 
 The only thing you need to do is tell `AFIncrementalStore` how to map Core Data to an HTTP client. These methods are defined in the `AFIncrementalStoreHTTPClient` protocol:
 
+> Don't worry if this looks like a lot of work--if your web service is RESTful, `AFRESTClient` does a lot of the heavy lifting for you. If your target web service is SOAP, RPC, or kinda ad-hoc, you can easily use these protocol methods to get everything hooked up.
+
 ```objective-c
 - (id)representationOrArrayOfRepresentationsFromResponseObject:(id)responseObject;
+
+- (NSDictionary *)representationsForRelationshipsFromRepresentation:(NSDictionary *)representation
+                                                           ofEntity:(NSEntityDescription *)entity
+                                                       fromResponse:(NSHTTPURLResponse *)response;
 
 - (NSString *)resourceIdentifierForRepresentation:(NSDictionary *)representation
                                          ofEntity:(NSEntityDescription *)entity;
@@ -34,8 +40,6 @@ The only thing you need to do is tell `AFIncrementalStore` how to map Core Data 
                     forObjectWithID:(NSManagedObjectID *)objectID
                         withContext:(NSManagedObjectContext *)context;
 ```
-
-Don't worry if this looks like a lot of work--if your web service is RESTful, `AFRESTClient` does a lot of the heavy lifting for you. If your target web service is SOAP, RPC, or kinda ad-hoc, you can easily use these protocol methods to get everything hooked up.
 
 ## Getting Started
 
