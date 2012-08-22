@@ -30,7 +30,6 @@ static NSString * const kAFIncrementalStoreResourceIdentifierAttributeName = @"_
 @interface AFIncrementalStore ()
 
 - (NSManagedObjectContext *)backingManagedObjectContext;
-- (id)attributesForObjectWithID:(NSManagedObjectID *)objectID;
 
 - (NSManagedObjectID *)objectIDForEntity:(NSEntityDescription *)entity
                   withResourceIdentifier:(NSString *)resourceIdentifier;
