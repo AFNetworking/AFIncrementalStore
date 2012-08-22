@@ -46,7 +46,7 @@ The only thing you need to do is tell `AFIncrementalStore` how to map Core Data 
 - (NSString *)resourceIdentifierForRepresentation:(NSDictionary *)representation
                                          ofEntity:(NSEntityDescription *)entity;
 
-- (NSDictionary *)propertyValuesForRepresentation:(NSDictionary *)representation
+- (NSDictionary *)attributesForRepresentation:(NSDictionary *)representation
                                          ofEntity:(NSEntityDescription *)entity
                                      fromResponse:(NSHTTPURLResponse *)response;
 
