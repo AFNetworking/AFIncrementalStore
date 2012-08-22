@@ -67,7 +67,7 @@ static NSString * const kAFIncrementalStoreResourceIdentifierAttributeName = @"_
         _propertyValuesCache = [[NSCache alloc] init];
         _relationshipsCache = [[NSCache alloc] init];
         _backingObjectIDByObjectID = [[NSCache alloc] init];
-        _registeredObjectIDsByResourceIdentifier = [NSMutableDictionary dictionary];
+        _registeredObjectIDsByResourceIdentifier = [[NSMutableDictionary alloc] init];
         
         NSManagedObjectModel *model = [self.persistentStoreCoordinator.managedObjectModel copy];
         for (NSEntityDescription *entity in model.entities) {
