@@ -73,6 +73,23 @@ Also, don't forget to pull down AFNetworking with `git submodule init && git sub
 
 AFIncrementalStore requires Xcode 4.4 with either the [iOS 5.0](http://developer.apple.com/library/ios/#releasenotes/General/WhatsNewIniPhoneOS/Articles/iOS5.html) or [Mac OS 10.6](http://developer.apple.com/library/mac/#releasenotes/MacOSX/WhatsNewInOSX/Articles/MacOSX10_6.html#//apple_ref/doc/uid/TP40008898-SW7) ([64-bit with modern Cocoa runtime](https://developer.apple.com/library/mac/#documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtVersionsPlatforms.html)) SDK, as well as [AFNetworking](https://github.com/afnetworking/afnetworking) 0.9 or higher.
 
+## Installation
+
+[CocoaPods](http://cocoapods.org) is the recommended way to add AFIncrementalStore to your project.
+
+Here's an example podfile that installs AFIncrementalStore and its dependency, AFNetworking. 
+### Podfile
+
+```ruby
+platform :ios, '5.0'
+
+pod 'AFIncrementalStore', '0.1.0'
+```
+
+Note the specification of iOS 5.0 as the platform; leaving out the 5.0 will cause CocoaPods to fail with the following message:
+
+> [!] AFIncrementalStore (0.1.0) is not compatible with iOS 4.3.
+
 ## Next Steps
 
 This project is just getting started. Next up for `AFIncrementalStore` are the following:
