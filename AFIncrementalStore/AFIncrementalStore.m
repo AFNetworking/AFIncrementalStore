@@ -71,6 +71,10 @@ static NSString * const kAFIncrementalStoreResourceIdentifierAttributeName = @"_
         
         NSManagedObjectModel *model = [self.persistentStoreCoordinator.managedObjectModel copy];
         for (NSEntityDescription *entity in model.entities) {
+            // Skip subentity in entity inheritance hierarchy. The root entity inherits from NSManagedObject and thus has no superentity set.
+            // All subentities of the root entity in an inheritance hierarchy will contain the attribute description anyway.
+            if (nil != [entity superentity]) continue;
+            
             NSAttributeDescription *resourceIdentifierProperty = [[NSAttributeDescription alloc] init];
             [resourceIdentifierProperty setName:kAFIncrementalStoreResourceIdentifierAttributeName];
             [resourceIdentifierProperty setAttributeType:NSStringAttributeType];
