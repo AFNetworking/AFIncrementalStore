@@ -42,7 +42,6 @@
 
 - (void)refetchData {
     [_fetchedResultsController performSelectorOnMainThread:@selector(performFetch:) withObject:nil waitUntilDone:YES modes:@[ NSRunLoopCommonModes ]];
-    [_fetchedResultsController performFetch:nil];
 }
 
 #pragma mark - UIViewController
