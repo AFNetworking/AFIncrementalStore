@@ -71,6 +71,11 @@ static NSString * const kAFIncrementalStoreResourceIdentifierAttributeName = @"_
         
         NSManagedObjectModel *model = [self.persistentStoreCoordinator.managedObjectModel copy];
         for (NSEntityDescription *entity in model.entities) {
+            // Don't add resource identifier property for sub-entities, as they already exist in the super-entity 
+            if ([entity superentity]) {
+                continue;
+            }
+            
             NSAttributeDescription *resourceIdentifierProperty = [[NSAttributeDescription alloc] init];
             [resourceIdentifierProperty setName:kAFIncrementalStoreResourceIdentifierAttributeName];
             [resourceIdentifierProperty setAttributeType:NSStringAttributeType];
