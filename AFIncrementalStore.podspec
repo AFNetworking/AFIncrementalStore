@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   s.name         = "AFIncrementalStore"
   s.version      = "0.1.0"
-  s.summary      = "Core Data Persistence with AFNetworking, Done Right"
+  s.summary      = "Core Data Persistence with AFNetworking, Done Right."
   s.homepage     = "https://github.com/AFNetworking/AFIncrementalStore"
 
   s.license      = { :type => 'MIT', :file => 'LICENSE'}
