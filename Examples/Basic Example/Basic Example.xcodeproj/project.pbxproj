@@ -257,7 +257,7 @@
 				CLASSPREFIX = AF;
 				LastUpgradeCheck = 0430;
 			};
-			buildConfigurationList = F8AFAFA715AB4F28003FE5BB /* Build configuration list for PBXProject "IncrementalStoreExample" */;
+			buildConfigurationList = F8AFAFA715AB4F28003FE5BB /* Build configuration list for PBXProject "Basic Example" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -386,7 +386,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		F8AFAFA715AB4F28003FE5BB /* Build configuration list for PBXProject "IncrementalStoreExample" */ = {
+		F8AFAFA715AB4F28003FE5BB /* Build configuration list for PBXProject "Basic Example" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				F8AFAFC815AB4F28003FE5BB /* Debug */,
