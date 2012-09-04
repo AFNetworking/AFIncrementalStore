@@ -90,4 +90,17 @@ static NSString * const kAFTwitterAPIBaseURLString = @"http://api.twitter.com/1/
     return NO;
 }
 
+- (void)didFailWithError:(NSError *)error {
+    
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
+                                                    message:error.localizedDescription
+                                                   delegate:nil
+                                          cancelButtonTitle:@"OK"
+                                          otherButtonTitles:nil];
+    
+	[alert dismissWithClickedButtonIndex:0 animated:YES];
+	[alert show];
+    
+}
+
 @end

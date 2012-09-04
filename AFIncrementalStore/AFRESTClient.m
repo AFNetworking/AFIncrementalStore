@@ -166,20 +166,6 @@ static NSString * AFPluralizedString(NSString *string) {
     return [relationship isToMany] || ![relationship inverseRelationship];
 }
 
-- (void)didFailWithError:(NSError *)error {
-    
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
-                                                    message:error.localizedDescription
-                                                   delegate:nil
-                                          cancelButtonTitle:@"OK"
-                                          otherButtonTitles:nil];
-    
-	[alert dismissWithClickedButtonIndex:0 animated:YES];
-	[alert show];
-    
-}
-
-
 #pragma mark - AFHTTPClient
 
 - (void)enqueueHTTPRequestOperation:(AFHTTPRequestOperation *)operation {
