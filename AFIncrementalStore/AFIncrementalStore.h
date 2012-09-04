@@ -71,6 +71,8 @@ extern NSString * AFIncrementalStoreUnimplementedMethodException;
 
 @optional
 
+- (void)didFailWithError:(NSError *)error;
+
 - (BOOL)shouldFetchRemoteAttributeValuesForObjectWithID:(NSManagedObjectID *)objectID
                                  inManagedObjectContext:(NSManagedObjectContext *)context;
 

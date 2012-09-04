@@ -237,6 +237,7 @@ static NSString * const kAFIncrementalStoreResourceIdentifierAttributeName = @"_
                     }
                 }];
             } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+                [self didFailWithError:error];
                 NSLog(@"Error: %@", error);
             }];
             
@@ -293,6 +294,14 @@ static NSString * const kAFIncrementalStoreResourceIdentifierAttributeName = @"_
     }
 }
 
+- (void)didFailWithError:(NSError *)error {
+    
+    if ([self.HTTPClient respondsToSelector:@selector(didFailWithError:)]) {
+        [self.HTTPClient didFailWithError:error];
+    }
+    
+}
+
 #pragma mark -
 
 - (NSIncrementalStoreNode *)newValuesForObjectWithID:(NSManagedObjectID *)objectID
@@ -332,6 +341,7 @@ static NSString * const kAFIncrementalStoreResourceIdentifierAttributeName = @"_
                     }
                 } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
                     NSLog(@"Error: %@, %@", operation, error);
+                    [self didFailWithError:error];
                 }];
                 
                 [self.HTTPClient enqueueHTTPRequestOperation:operation];
@@ -412,6 +422,7 @@ static NSString * const kAFIncrementalStoreResourceIdentifierAttributeName = @"_
                 }];
             } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
                 NSLog(@"Error: %@, %@", operation, error);
+                [self didFailWithError:error];
             }];
             
             operation.successCallbackQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
