@@ -111,7 +111,7 @@ static NSString * AFPluralizedString(NSString *string) {
 }
 
 /**
- * Determines the resource identifier of an API response
+ * Determines the resource identifier of an API response.
  */
 - (NSString *)resourceIdentifierForRepresentation:(NSDictionary *)representation
                                          ofEntity:(NSEntityDescription *)entity
@@ -157,7 +157,7 @@ static NSString * AFPluralizedString(NSString *string) {
 }
 
 /**
- * Determines the URL to hit for a given fetchRequest to CoreData
+ * Determines the URL to hit for a given fetchRequest to CoreData.
  */
 - (NSURLRequest *)requestForFetchRequest:(NSFetchRequest *)fetchRequest 
                              withContext:(NSManagedObjectContext *)context
