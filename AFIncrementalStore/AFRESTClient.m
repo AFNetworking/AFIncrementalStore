@@ -34,6 +34,7 @@ static NSString * AFPluralizedString(NSString *string) {
 }
 
 @implementation AFRESTClient
+
 /**
  * Determines path for an entity from Core Data.
  */
@@ -79,8 +80,9 @@ static NSString * AFPluralizedString(NSString *string) {
     
     return responseObject;
 }
+
 /** 
- * Gets stuff from the API represenations, determines which are relationships, and gets representations of those.
+ * Gets data from the API response, determines which are relationships, and gets representations of those.
  */
 - (NSDictionary *)representationsForRelationshipsFromRepresentation:(NSDictionary *)representation
                                                                  ofEntity:(NSEntityDescription *)entity
@@ -157,7 +159,6 @@ static NSString * AFPluralizedString(NSString *string) {
 /**
  * Determines the URL to hit for a given fetchRequest to CoreData
  */
-
 - (NSURLRequest *)requestForFetchRequest:(NSFetchRequest *)fetchRequest 
                              withContext:(NSManagedObjectContext *)context
 {
