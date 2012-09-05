@@ -14,5 +14,6 @@
 @dynamic text;
 
 @dynamic user;
+@dynamic createdAt;
 
 @end
