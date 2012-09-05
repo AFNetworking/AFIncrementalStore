@@ -64,7 +64,7 @@ The only thing you need to do is tell `AFIncrementalStore` how to map Core Data 
 
 Check out the example projects that are included in the repository. They are somewhat simple demonstration of an app that uses Core Data with `AFIncrementalStore` to communicate with an API for faulted properties and relationships. Note that there are no explicit network requests being made in the app--it's all done automatically by Core Data.
 
-Also, don't forget to pull down AFNetworking with `git submodule init && git submodule update` if you want to run the example. 
+Also, don't forget to pull down AFNetworking with `git submodule update --init` if you want to run the example. 
 
 ## Requirements
 
