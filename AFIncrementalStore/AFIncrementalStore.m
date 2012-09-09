@@ -28,9 +28,7 @@ NSString * AFIncrementalStoreUnimplementedMethodException = @"com.alamofire.incr
 static NSString * const kAFIncrementalStoreResourceIdentifierAttributeName = @"__af_resourceIdentifier";
 
 @interface AFIncrementalStore ()
-
 - (NSManagedObjectContext *)backingManagedObjectContext;
-
 - (NSManagedObjectID *)objectIDForEntity:(NSEntityDescription *)entity
                   withResourceIdentifier:(NSString *)resourceIdentifier;
 - (NSManagedObjectID *)objectIDForBackingObjectForEntity:(NSEntityDescription *)entity
