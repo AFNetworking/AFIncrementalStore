@@ -35,8 +35,8 @@
  
  In a subclass of `AFIncrementalStore`, you _must_ override the following methods to provide behavior appropriate for your store:
     
-    - `+type`
-    - `+model`
+    - +type
+    - +model
  
  Additionally, all `NSPersistentStore` subclasses, and thus all `AFIncrementalStore` subclasses must do `NSPersistentStoreCoordinator +registerStoreClass:forStoreType:` in order to be created by `NSPersistentStoreCoordinator -addPersistentStoreWithType:configuration:URL:options:error:`. It is recommended that subclasses register themselves in their own `+initialize` method.
  */
