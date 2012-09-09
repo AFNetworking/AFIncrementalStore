@@ -22,6 +22,9 @@
 
 #import "AFRESTClient.h"
 
+/**
+ * Pluralizes a resource string.
+ */
 static NSString * AFPluralizedString(NSString *string) {
     if ([string hasSuffix:@"ss"] || [string hasSuffix:@"se"] || [string hasSuffix:@"sh"] || [string hasSuffix:@"ge"] || [string hasSuffix:@"ch"]) {
         return [[string stringByAppendingString:@"es"] lowercaseString];
@@ -32,15 +35,24 @@ static NSString * AFPluralizedString(NSString *string) {
 
 @implementation AFRESTClient
 
+/**
+ * Determines path for an entity from Core Data.
+ */
 - (NSString *)pathForEntity:(NSEntityDescription *)entity {
     return AFPluralizedString(entity.name);
 }
 
+/**
+ * Determines a path for a specific object from core data.
+ */
 - (NSString *)pathForObject:(NSManagedObject *)object {
     NSString *resourceIdentifier = [(NSIncrementalStore *)object.objectID.persistentStore referenceObjectForObjectID:object.objectID];
     return [[self pathForEntity:object.entity] stringByAppendingPathComponent:[resourceIdentifier lastPathComponent]];
 }
 
+/**
+ * Determines a path for a relationship.
+ */
 - (NSString *)pathForRelationship:(NSRelationshipDescription *)relationship 
                         forObject:(NSManagedObject *)object
 {
@@ -48,7 +60,9 @@ static NSString * AFPluralizedString(NSString *string) {
 }
 
 #pragma mark - AFIncrementalStoreHTTPClient
-
+/**
+ * Returns a single or multiple response objects.
+ */
 - (id)representationOrArrayOfRepresentationsFromResponseObject:(id)responseObject {
     if ([responseObject isKindOfClass:[NSArray class]]) {
         return responseObject;
@@ -67,6 +81,9 @@ static NSString * AFPluralizedString(NSString *string) {
     return responseObject;
 }
 
+/** 
+ * Gets data from the API response, determines which are relationships, and gets representations of those.
+ */
 - (NSDictionary *)representationsForRelationshipsFromRepresentation:(NSDictionary *)representation
                                                                  ofEntity:(NSEntityDescription *)entity
                                                              fromResponse:(NSHTTPURLResponse *)response
@@ -93,6 +110,9 @@ static NSString * AFPluralizedString(NSString *string) {
     return mutableRelationshipRepresentations;
 }
 
+/**
+ * Determines the resource identifier of an API response.
+ */
 - (NSString *)resourceIdentifierForRepresentation:(NSDictionary *)representation
                                          ofEntity:(NSEntityDescription *)entity
                                      fromResponse:(NSHTTPURLResponse *)response
@@ -114,6 +134,9 @@ static NSString * AFPluralizedString(NSString *string) {
     return nil;
 }
 
+/**
+ * Maps attributes from representation to core data.
+ */
 - (NSDictionary *)attributesForRepresentation:(NSDictionary *)representation
                                      ofEntity:(NSEntityDescription *)entity
                                  fromResponse:(NSHTTPURLResponse *)response
@@ -133,6 +156,9 @@ static NSString * AFPluralizedString(NSString *string) {
     return mutableAttributes;
 }
 
+/**
+ * Determines the URL to hit for a given fetchRequest to CoreData.
+ */
 - (NSURLRequest *)requestForFetchRequest:(NSFetchRequest *)fetchRequest 
                              withContext:(NSManagedObjectContext *)context
 {
