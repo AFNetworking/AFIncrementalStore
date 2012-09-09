@@ -121,7 +121,7 @@ static NSString * AFPluralizedString(NSString *string) {
     NSMutableDictionary *mutableAttributes = [representation mutableCopy];
     @autoreleasepool {
         NSMutableSet *mutableKeys = [NSMutableSet setWithArray:[representation allKeys]];
-        [mutableKeys minusSet:[NSSet setWithArray:[[entity attributesByName] allKeys]]];
+        [mutableKeys minusSet:[NSSet setWithArray:[[entity propertiesByName] allKeys]]];
         [mutableAttributes removeObjectsForKeys:[mutableKeys allObjects]];
     }
     
