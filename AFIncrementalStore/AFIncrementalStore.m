@@ -153,10 +153,6 @@ static NSString * const kAFIncrementalStoreResourceIdentifierAttributeName = @"_
                 NSManagedObjectContext *childContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
                 childContext.parentContext = context;
                 childContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy;
-                
-                [[NSNotificationCenter defaultCenter] addObserverForName:NSManagedObjectContextDidSaveNotification object:childContext queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
-                    [context mergeChangesFromContextDidSaveNotification:note];
-                }];
 
                 NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
                 [childContext performBlock:^{
