@@ -311,23 +311,30 @@ static NSString * const kAFIncrementalStoreResourceIdentifierAttributeName = @"_
     
     if ([self.HTTPClient respondsToSelector:@selector(shouldFetchRemoteAttributeValuesForObjectWithID:inManagedObjectContext:)] && [self.HTTPClient shouldFetchRemoteAttributeValuesForObjectWithID:objectID inManagedObjectContext:context]) {
         if (attributeValues) {
-            NSManagedObjectContext *backingManagedObjectContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
-            backingManagedObjectContext.parentContext = context;
-            backingManagedObjectContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy;
+            NSManagedObjectContext *childContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
+            childContext.parentContext = context;
+            childContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy;
             
             NSURLRequest *request = [self.HTTPClient requestWithMethod:@"GET" pathForObjectWithID:objectID withContext:context];
             
             if ([request URL]) {
                 AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, NSDictionary *representation) {
-                    NSManagedObject *managedObject = [backingManagedObjectContext existingObjectWithID:objectID error:error];
+                    NSManagedObject *managedObject = [childContext existingObjectWithID:objectID error:error];
                     
                     NSMutableDictionary *mutablePropertyValues = [attributeValues mutableCopy];
                     [mutablePropertyValues addEntriesFromDictionary:[self.HTTPClient attributesForRepresentation:representation ofEntity:managedObject.entity fromResponse:operation.response]];
                     [managedObject setValuesForKeysWithDictionary:mutablePropertyValues];
                     
-                    if (![backingManagedObjectContext save:error]) {
-                        NSLog(@"Error: %@", *error);
-                    }
+                    [childContext performBlock:^{
+                        if (![childContext save:error]) {
+                            NSLog(@"Error: %@", *error);
+                        }
+                        [context performBlock:^{
+                            if (![context save:error]) {
+                                NSLog(@"Error: %@", *error);
+                            }
+                        }];
+                    }];
                 } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
                     NSLog(@"Error: %@, %@", operation, error);
                 }];
