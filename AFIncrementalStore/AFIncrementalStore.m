@@ -24,6 +24,7 @@
 #import "AFHTTPClient.h"
 
 NSString * const AFIncrementalStoreUnimplementedMethodException = @"com.alamofire.incremental-store.exceptions.unimplemented-method";
+NSString * const AFIncrementalStoreRelationshipCardinalityException = @"com.alamofire.incremental-store.exceptions.relationship-cardinality";
 
 NSString * const AFIncrementalStoreContextWillFetchRemoteValues = @"AFIncrementalStoreContextWillFetchRemoteValues";
 NSString * const AFIncrementalStoreContextDidFetchRemoteValues = @"AFIncrementalStoreContextDidFetchRemoteValues";
@@ -211,6 +212,12 @@ static NSString * const kAFIncrementalStoreResourceIdentifierAttributeName = @"_
                             
                             if (relationship) {
                                 if ([relationship isToMany]) {
+
+                                    if (![relationshipRepresentationOrArrayOfRepresentations isKindOfClass:[NSArray class]]) {
+                                        
+                                        @throw([NSException exceptionWithName:AFIncrementalStoreRelationshipCardinalityException reason:NSLocalizedString(@"Cardinality of provided resource representation conflicts with Core Data model.", nil) userInfo:nil]);
+                                    }
+
                                     id mutableManagedRelationshipObjects = [relationship isOrdered] ? [NSMutableOrderedSet orderedSet] : [NSMutableSet set];
                                     id mutableBackingRelationshipObjects = [relationship isOrdered] ? [NSMutableOrderedSet orderedSet] : [NSMutableSet set];
                                     
@@ -236,6 +243,12 @@ static NSString * const kAFIncrementalStoreResourceIdentifierAttributeName = @"_
                                     [backingObject setValue:mutableBackingRelationshipObjects forKey:relationship.name];
                                     [managedObject setValue:mutableManagedRelationshipObjects forKey:relationship.name];
                                 } else {
+
+                                    if (![relationshipRepresentationOrArrayOfRepresentations isKindOfClass:[NSDictionary class]]) {
+                                        
+                                        @throw([NSException exceptionWithName:AFIncrementalStoreRelationshipCardinalityException reason:NSLocalizedString(@"Cardinality of provided resource representation conflicts with Core Data model.", nil) userInfo:nil]);
+                                    }
+                                    
                                     NSString *relationshipResourceIdentifier = [self.HTTPClient resourceIdentifierForRepresentation:relationshipRepresentationOrArrayOfRepresentations ofEntity:relationship.destinationEntity fromResponse:operation.response];
                                     NSDictionary *relationshipAttributes = [self.HTTPClient attributesForRepresentation:relationshipRepresentationOrArrayOfRepresentations ofEntity:relationship.destinationEntity fromResponse:operation.response];
 
