@@ -23,7 +23,12 @@
 #import "AFIncrementalStore.h"
 #import "AFHTTPClient.h"
 
-NSString * AFIncrementalStoreUnimplementedMethodException = @"com.alamofire.incremental-store.exceptions.unimplemented-method";
+NSString * const AFIncrementalStoreUnimplementedMethodException = @"com.alamofire.incremental-store.exceptions.unimplemented-method";
+
+NSString * const AFIncrementalStoreContextWillFetchRemoteValues = @"AFIncrementalStoreContextWillFetchRemoteValues";
+NSString * const AFIncrementalStoreContextDidFetchRemoteValues = @"AFIncrementalStoreContextDidFetchRemoteValues";
+NSString * const AFIncrementalStoreRequestOperationKey = @"AFIncrementalStoreRequestOperation";
+NSString * const AFIncrementalStorePersistentStoreRequestKey = @"AFIncrementalStorePersistentStoreRequest";
 
 static NSString * const kAFIncrementalStoreResourceIdentifierAttributeName = @"__af_resourceIdentifier";
 
@@ -33,6 +38,11 @@ static NSString * const kAFIncrementalStoreResourceIdentifierAttributeName = @"_
                   withResourceIdentifier:(NSString *)resourceIdentifier;
 - (NSManagedObjectID *)objectIDForBackingObjectForEntity:(NSEntityDescription *)entity
                                   withResourceIdentifier:(NSString *)resourceIdentifier;
+- (void)notifyManagedObjectContext:(NSManagedObjectContext *)context
+             aboutRequestOperation:(AFHTTPRequestOperation *)operation;
+- (void)notifyManagedObjectContext:(NSManagedObjectContext *)context
+             aboutRequestOperation:(AFHTTPRequestOperation *)operation
+         forPersistentStoreRequest:(NSPersistentStoreRequest *)request;
 @end
 
 @implementation AFIncrementalStore {
@@ -53,6 +63,27 @@ static NSString * const kAFIncrementalStoreResourceIdentifierAttributeName = @"_
 
 + (NSManagedObjectModel *)model {
     @throw([NSException exceptionWithName:AFIncrementalStoreUnimplementedMethodException reason:NSLocalizedString(@"Unimplemented method: +model. Must be overridden in a subclass", nil) userInfo:nil]);
+}
+
+- (void)notifyManagedObjectContext:(NSManagedObjectContext *)context
+             aboutRequestOperation:(AFHTTPRequestOperation *)operation
+{
+    [self notifyManagedObjectContext:context aboutRequestOperation:operation forPersistentStoreRequest:nil];
+}
+
+- (void)notifyManagedObjectContext:(NSManagedObjectContext *)context
+             aboutRequestOperation:(AFHTTPRequestOperation *)operation
+         forPersistentStoreRequest:(NSPersistentStoreRequest *)request
+{
+    NSString *notificationName = [operation isFinished] ? AFIncrementalStoreContextDidFetchRemoteValues : AFIncrementalStoreContextWillFetchRemoteValues;
+    
+    NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
+    [userInfo setObject:operation forKey:AFIncrementalStoreRequestOperationKey];
+    if (request) {
+        [userInfo setObject:request forKey:AFIncrementalStorePersistentStoreRequestKey];
+    }
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:notificationName object:context userInfo:userInfo];
 }
 
 - (BOOL)loadMetadata:(NSError *__autoreleasing *)error {
@@ -233,12 +264,17 @@ static NSString * const kAFIncrementalStoreResourceIdentifierAttributeName = @"_
                     if (![backingContext save:error] || ![childContext save:error]) {
                         NSLog(@"Error: %@", *error);
                     }
+                    
+                    [self notifyManagedObjectContext:context aboutRequestOperation:operation forPersistentStoreRequest:persistentStoreRequest];
                 }];
             } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
                 NSLog(@"Error: %@", error);
+                [self notifyManagedObjectContext:context aboutRequestOperation:operation forPersistentStoreRequest:persistentStoreRequest];
             }];
             
             operation.successCallbackQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
+            
+            [self notifyManagedObjectContext:context aboutRequestOperation:operation forPersistentStoreRequest:persistentStoreRequest];
             [self.HTTPClient enqueueHTTPRequestOperation:operation];
         }
         
@@ -272,7 +308,7 @@ static NSString * const kAFIncrementalStoreResourceIdentifierAttributeName = @"_
     } else {
         switch (persistentStoreRequest.requestType) {
             case NSSaveRequestType:
-                return @[];
+                return [NSArray array];
             default:
                 goto _error;
         }
@@ -328,10 +364,14 @@ static NSString * const kAFIncrementalStoreResourceIdentifierAttributeName = @"_
                     if (![backingManagedObjectContext save:error]) {
                         NSLog(@"Error: %@", *error);
                     }
+                    
+                    [self notifyManagedObjectContext:context aboutRequestOperation:operation];
                 } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
                     NSLog(@"Error: %@, %@", operation, error);
+                    [self notifyManagedObjectContext:context aboutRequestOperation:operation];
                 }];
                 
+                [self notifyManagedObjectContext:context aboutRequestOperation:operation];
                 [self.HTTPClient enqueueHTTPRequestOperation:operation];
             }
         }
@@ -407,12 +447,17 @@ static NSString * const kAFIncrementalStoreResourceIdentifierAttributeName = @"_
                     if (![backingContext save:error] || ![childContext save:error]) {
                         NSLog(@"Error: %@", *error);
                     }
+                    
+                    [self notifyManagedObjectContext:context aboutRequestOperation:operation];
                 }];
             } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
                 NSLog(@"Error: %@, %@", operation, error);
+                [self notifyManagedObjectContext:context aboutRequestOperation:operation];
             }];
             
             operation.successCallbackQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
+            
+            [self notifyManagedObjectContext:context aboutRequestOperation:operation];
             [self.HTTPClient enqueueHTTPRequestOperation:operation];
         }
     }
@@ -433,6 +478,7 @@ static NSString * const kAFIncrementalStoreResourceIdentifierAttributeName = @"_
         } else {
             NSString *resourceIdentifier = [backingRelationshipObject valueForKeyPath:kAFIncrementalStoreResourceIdentifierAttributeName];
             NSManagedObjectID *objectID = [self objectIDForEntity:relationship.destinationEntity withResourceIdentifier:resourceIdentifier];
+            
             return objectID ?: [NSNull null];
         }
     } else {
