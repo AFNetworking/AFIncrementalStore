@@ -118,6 +118,10 @@ static NSString * AFPluralizedString(NSString *string) {
                                      ofEntity:(NSEntityDescription *)entity
                                  fromResponse:(NSHTTPURLResponse *)response
 {
+    if ([representation isEqual:[NSNull null]]) {
+        return nil;
+    }
+    
     NSMutableDictionary *mutableAttributes = [representation mutableCopy];
     @autoreleasepool {
         NSMutableSet *mutableKeys = [NSMutableSet setWithArray:[representation allKeys]];
