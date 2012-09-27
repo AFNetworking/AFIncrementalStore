@@ -20,7 +20,6 @@
 		F8AD92D915D9A0B400402FE9 /* AFHTTPRequestOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = F8AD92C615D9A0B400402FE9 /* AFHTTPRequestOperation.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		F8AD92DA15D9A0B400402FE9 /* AFImageRequestOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = F8AD92C815D9A0B400402FE9 /* AFImageRequestOperation.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		F8AD92DB15D9A0B400402FE9 /* AFJSONRequestOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = F8AD92CA15D9A0B400402FE9 /* AFJSONRequestOperation.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		F8AD92DC15D9A0B400402FE9 /* AFJSONUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = F8AD92CC15D9A0B400402FE9 /* AFJSONUtilities.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		F8AD92DD15D9A0B400402FE9 /* AFNetworkActivityIndicatorManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F8AD92CE15D9A0B400402FE9 /* AFNetworkActivityIndicatorManager.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		F8AD92DE15D9A0B400402FE9 /* AFPropertyListRequestOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = F8AD92D115D9A0B400402FE9 /* AFPropertyListRequestOperation.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		F8AD92DF15D9A0B400402FE9 /* AFURLConnectionOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = F8AD92D315D9A0B400402FE9 /* AFURLConnectionOperation.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -61,8 +60,6 @@
 		F8AD92C815D9A0B400402FE9 /* AFImageRequestOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFImageRequestOperation.m; sourceTree = "<group>"; };
 		F8AD92C915D9A0B400402FE9 /* AFJSONRequestOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFJSONRequestOperation.h; sourceTree = "<group>"; };
 		F8AD92CA15D9A0B400402FE9 /* AFJSONRequestOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFJSONRequestOperation.m; sourceTree = "<group>"; };
-		F8AD92CB15D9A0B400402FE9 /* AFJSONUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFJSONUtilities.h; sourceTree = "<group>"; };
-		F8AD92CC15D9A0B400402FE9 /* AFJSONUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFJSONUtilities.m; sourceTree = "<group>"; };
 		F8AD92CD15D9A0B400402FE9 /* AFNetworkActivityIndicatorManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFNetworkActivityIndicatorManager.h; sourceTree = "<group>"; };
 		F8AD92CE15D9A0B400402FE9 /* AFNetworkActivityIndicatorManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFNetworkActivityIndicatorManager.m; sourceTree = "<group>"; };
 		F8AD92CF15D9A0B400402FE9 /* AFNetworking.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFNetworking.h; sourceTree = "<group>"; };
@@ -134,8 +131,6 @@
 				F8AD92C815D9A0B400402FE9 /* AFImageRequestOperation.m */,
 				F8AD92C915D9A0B400402FE9 /* AFJSONRequestOperation.h */,
 				F8AD92CA15D9A0B400402FE9 /* AFJSONRequestOperation.m */,
-				F8AD92CB15D9A0B400402FE9 /* AFJSONUtilities.h */,
-				F8AD92CC15D9A0B400402FE9 /* AFJSONUtilities.m */,
 				F8AD92CD15D9A0B400402FE9 /* AFNetworkActivityIndicatorManager.h */,
 				F8AD92CE15D9A0B400402FE9 /* AFNetworkActivityIndicatorManager.m */,
 				F8AD92CF15D9A0B400402FE9 /* AFNetworking.h */,
@@ -302,7 +297,6 @@
 				F8AD92D915D9A0B400402FE9 /* AFHTTPRequestOperation.m in Sources */,
 				F8AD92DA15D9A0B400402FE9 /* AFImageRequestOperation.m in Sources */,
 				F8AD92DB15D9A0B400402FE9 /* AFJSONRequestOperation.m in Sources */,
-				F8AD92DC15D9A0B400402FE9 /* AFJSONUtilities.m in Sources */,
 				F8AD92DD15D9A0B400402FE9 /* AFNetworkActivityIndicatorManager.m in Sources */,
 				F8AD92DE15D9A0B400402FE9 /* AFPropertyListRequestOperation.m in Sources */,
 				F8AD92DF15D9A0B400402FE9 /* AFURLConnectionOperation.m in Sources */,
