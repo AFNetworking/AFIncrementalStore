@@ -143,7 +143,7 @@ static NSString * AFPluralizedString(NSString *string) {
     }];
     [mutableAttributes removeObjectsForKeys:[keysWithNestedValues allObjects]];
     
-    [[entity propertiesByName] enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+    [[entity attributesByName] enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
         if ([(NSAttributeDescription *)obj attributeType] == NSDateAttributeType) {
             id value = [mutableAttributes valueForKey:key];
             if (value && ![value isEqual:[NSNull null]]) {
