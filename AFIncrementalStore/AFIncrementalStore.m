@@ -373,7 +373,18 @@ static char kAFResourceIdentifierObjectKey;
             
             return mutableObjects;
         }
-        case NSManagedObjectIDResultType:
+        case NSManagedObjectIDResultType: {
+            NSArray *backingObjectIDs = [backingContext executeFetchRequest:fetchRequest error:error];
+            NSMutableArray *managedObjectIDs = [NSMutableArray arrayWithCapacity:[backingObjectIDs count]];
+            
+            for (NSManagedObjectID *backingObjectID in backingObjectIDs) {
+                NSManagedObject *backingObject = [backingContext objectWithID:backingObjectID];
+                NSString *resourceID = [backingObject valueForKey:kAFIncrementalStoreResourceIdentifierAttributeName];
+                [managedObjectIDs addObject:[self objectIDForEntity:fetchRequest.entity withResourceIdentifier:resourceID]];
+            }
+            
+            return managedObjectIDs;
+        }
         case NSDictionaryResultType:
         case NSCountResultType:
             return [backingContext executeFetchRequest:fetchRequest error:error];
