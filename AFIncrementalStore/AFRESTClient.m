@@ -23,7 +23,7 @@
 #import "AFRESTClient.h"
 
 static NSString * AFPluralizedString(NSString *string) {
-    if ([string hasSuffix:@"ss"] || [string hasSuffix:@"se"] || [string hasSuffix:@"sh"] || [string hasSuffix:@"ge"] || [string hasSuffix:@"ch"]) {
+    if ([string hasSuffix:@"ss"] || [string hasSuffix:@"se"] || [string hasSuffix:@"sh"] || [string hasSuffix:@"ch"]) {
         return [[string stringByAppendingString:@"es"] lowercaseString];
     } else {
         return [[string stringByAppendingString:@"s"] lowercaseString];
@@ -137,7 +137,7 @@ static NSString * AFPluralizedString(NSString *string) {
     return mutableAttributes;
 }
 
-- (NSURLRequest *)requestForFetchRequest:(NSFetchRequest *)fetchRequest 
+- (NSMutableURLRequest *)requestForFetchRequest:(NSFetchRequest *)fetchRequest
                              withContext:(NSManagedObjectContext *)context
 {
     NSMutableURLRequest *mutableRequest =  [self requestWithMethod:@"GET" path:[self pathForEntity:fetchRequest.entity] parameters:nil];
@@ -146,7 +146,7 @@ static NSString * AFPluralizedString(NSString *string) {
     return mutableRequest;
 }
 
-- (NSURLRequest *)requestWithMethod:(NSString *)method
+- (NSMutableURLRequest *)requestWithMethod:(NSString *)method
                 pathForObjectWithID:(NSManagedObjectID *)objectID
                         withContext:(NSManagedObjectContext *)context
 {
@@ -154,7 +154,7 @@ static NSString * AFPluralizedString(NSString *string) {
     return [self requestWithMethod:method path:[self pathForObject:object] parameters:nil];
 }
 
-- (NSURLRequest *)requestWithMethod:(NSString *)method
+- (NSMutableURLRequest *)requestWithMethod:(NSString *)method
                 pathForRelationship:(NSRelationshipDescription *)relationship
                     forObjectWithID:(NSManagedObjectID *)objectID
                         withContext:(NSManagedObjectContext *)context
