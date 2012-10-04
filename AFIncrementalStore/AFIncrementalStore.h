@@ -156,7 +156,7 @@
  @return An `NSURLRequest` object corresponding to the specified fetch request.
  */
 - (NSMutableURLRequest *)requestForFetchRequest:(NSFetchRequest *)fetchRequest
-                             withContext:(NSManagedObjectContext *)context;
+                                    withContext:(NSManagedObjectContext *)context;
 
 /**
  Returns a URL request object with a given HTTP method for a particular managed object. This method is used in `AFIncrementalStore -newValuesForObjectWithID:withContext:error`.
@@ -170,8 +170,8 @@
  @return An `NSURLRequest` object with the provided HTTP method for the resource corresponding to the managed object.
  */
 - (NSMutableURLRequest *)requestWithMethod:(NSString *)method
-                pathForObjectWithID:(NSManagedObjectID *)objectID
-                        withContext:(NSManagedObjectContext *)context;
+                       pathForObjectWithID:(NSManagedObjectID *)objectID
+                               withContext:(NSManagedObjectContext *)context;
 
 /**
  Returns a URL request object with a given HTTP method for a particular relationship of a given managed object. This method is used in `AFIncrementalStore -newValueForRelationship:forObjectWithID:withContext:error:`.
@@ -187,15 +187,36 @@
 
  */
 - (NSMutableURLRequest *)requestWithMethod:(NSString *)method
-                pathForRelationship:(NSRelationshipDescription *)relationship
-                    forObjectWithID:(NSManagedObjectID *)objectID
-                        withContext:(NSManagedObjectContext *)context;
+                       pathForRelationship:(NSRelationshipDescription *)relationship
+                           forObjectWithID:(NSManagedObjectID *)objectID
+                               withContext:(NSManagedObjectContext *)context;
 
 @optional
 
 ///-----------------------
 /// @name Optional Methods
 ///-----------------------
+
+/**
+ 
+ */
+- (NSDictionary *)representationOfAttributes:(NSDictionary *)attributes
+                             ofManagedObject:(NSManagedObject *)managedObject;
+
+/**
+ 
+ */
+- (NSMutableURLRequest *)requestForInsertedObject:(NSManagedObject *)insertedObject;
+
+/**
+ 
+ */
+- (NSMutableURLRequest *)requestForUpdatedObject:(NSManagedObject *)updatedObject;
+
+/**
+ 
+ */
+- (NSMutableURLRequest *)requestForDeletedObject:(NSManagedObject *)deletedObject;
 
 /**
  Returns whether the client should fetch remote attribute values for a particular managed object. This method is consulted when a managed object faults on an attribute, and will call `-requestWithMethod:pathForObjectWithID:withContext:` if `YES`.
@@ -245,11 +266,21 @@ extern NSString * const AFIncrementalStoreUnimplementedMethodException;
 extern NSString * const AFIncrementalStoreContextWillFetchRemoteValues;
 
 /**
+ 
+ */
+extern NSString * const AFIncrementalStoreContextWillSaveRemoteValues;
+
+/**
  Posted after an HTTP request operation finishes. 
  The object is the managed object context of the request. 
  The notification `userInfo` contains the finished request operation, keyed at `AFIncrementalStoreRequestOperationKey`, as well as the associated persistent store request, if applicable, keyed at `AFIncrementalStorePersistentStoreRequestKey`.
  */
 extern NSString * const AFIncrementalStoreContextDidFetchRemoteValues;
+
+/**
+ 
+ */
+extern NSString * const AFIncrementalStoreContextDidSaveRemoteValues;
 
 /**
  A key in the `userInfo` dictionary in a `AFIncrementalStoreContextWillFetchRemoteValues` or `AFIncrementalStoreContextDidFetchRemoteValues` notification.

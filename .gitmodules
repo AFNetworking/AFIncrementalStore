@@ -1,3 +1,6 @@
 [submodule "AFNetworking"]
 	path = AFNetworking
 	url = git://github.com/AFNetworking/AFNetworking.git
+[submodule "ISO8601DateFormatter"]
+	path = ISO8601DateFormatter
+	url = https://github.com/AFNetworking/ISO8601DateFormatter.git

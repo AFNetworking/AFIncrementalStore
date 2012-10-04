@@ -21,6 +21,7 @@
 // THE SOFTWARE.
 
 #import "AFRESTClient.h"
+#import "ISO8601DateFormatter.h"
 
 static NSString * AFPluralizedString(NSString *string) {
     if ([string hasSuffix:@"ss"] || [string hasSuffix:@"se"] || [string hasSuffix:@"sh"] || [string hasSuffix:@"ch"]) {
@@ -49,6 +50,8 @@ static NSString * AFPluralizedString(NSString *string) {
 
 #pragma mark - AFIncrementalStoreHTTPClient
 
+#pragma mark Read Methods
+
 - (id)representationOrArrayOfRepresentationsFromResponseObject:(id)responseObject {
     if ([responseObject isKindOfClass:[NSArray class]]) {
         return responseObject;
@@ -68,8 +71,8 @@ static NSString * AFPluralizedString(NSString *string) {
 }
 
 - (NSDictionary *)representationsForRelationshipsFromRepresentation:(NSDictionary *)representation
-                                                                 ofEntity:(NSEntityDescription *)entity
-                                                             fromResponse:(NSHTTPURLResponse *)response
+                                                           ofEntity:(NSEntityDescription *)entity
+                                                       fromResponse:(NSHTTPURLResponse *)response
 {
     NSMutableDictionary *mutableRelationshipRepresentations = [NSMutableDictionary dictionaryWithCapacity:[entity.relationshipsByName count]];
     [entity.relationshipsByName enumerateKeysAndObjectsUsingBlock:^(id name, id relationship, BOOL *stop) {
@@ -118,6 +121,12 @@ static NSString * AFPluralizedString(NSString *string) {
                                      ofEntity:(NSEntityDescription *)entity
                                  fromResponse:(NSHTTPURLResponse *)response
 {
+    static ISO8601DateFormatter *_iso8601DateFormatter = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        _iso8601DateFormatter = [[ISO8601DateFormatter alloc] init];
+    });
+    
     if ([representation isEqual:[NSNull null]]) {
         return nil;
     }
@@ -134,11 +143,20 @@ static NSString * AFPluralizedString(NSString *string) {
     }];
     [mutableAttributes removeObjectsForKeys:[keysWithNestedValues allObjects]];
     
+    [[entity propertiesByName] enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+        if ([(NSAttributeDescription *)obj attributeType] == NSDateAttributeType) {
+            id value = [mutableAttributes valueForKey:key];
+            if (value && ![value isEqual:[NSNull null]]) {
+                [mutableAttributes setValue:[_iso8601DateFormatter dateFromString:value] forKey:key];
+            }
+        }
+    }];
+    
     return mutableAttributes;
 }
 
 - (NSMutableURLRequest *)requestForFetchRequest:(NSFetchRequest *)fetchRequest
-                             withContext:(NSManagedObjectContext *)context
+                                    withContext:(NSManagedObjectContext *)context
 {
     NSMutableURLRequest *mutableRequest =  [self requestWithMethod:@"GET" path:[self pathForEntity:fetchRequest.entity] parameters:nil];
     mutableRequest.cachePolicy = NSURLRequestReturnCacheDataElseLoad;
@@ -147,17 +165,17 @@ static NSString * AFPluralizedString(NSString *string) {
 }
 
 - (NSMutableURLRequest *)requestWithMethod:(NSString *)method
-                pathForObjectWithID:(NSManagedObjectID *)objectID
-                        withContext:(NSManagedObjectContext *)context
+                       pathForObjectWithID:(NSManagedObjectID *)objectID
+                               withContext:(NSManagedObjectContext *)context
 {
     NSManagedObject *object = [context objectWithID:objectID];
     return [self requestWithMethod:method path:[self pathForObject:object] parameters:nil];
 }
 
 - (NSMutableURLRequest *)requestWithMethod:(NSString *)method
-                pathForRelationship:(NSRelationshipDescription *)relationship
-                    forObjectWithID:(NSManagedObjectID *)objectID
-                        withContext:(NSManagedObjectContext *)context
+                       pathForRelationship:(NSRelationshipDescription *)relationship
+                           forObjectWithID:(NSManagedObjectID *)objectID
+                               withContext:(NSManagedObjectContext *)context
 {
     NSManagedObject *object = [context objectWithID:objectID];
     return [self requestWithMethod:method path:[self pathForRelationship:relationship forObject:object] parameters:nil];
@@ -168,6 +186,26 @@ static NSString * AFPluralizedString(NSString *string) {
                         inManagedObjectContext:(NSManagedObjectContext *)context
 {
     return [relationship isToMany] || ![relationship inverseRelationship];
+}
+
+#pragma mark Write Methods
+
+- (NSDictionary *)representationOfAttributes:(NSDictionary *)attributes
+                             ofManagedObject:(NSManagedObject *)managedObject
+{
+    return attributes;
+}
+
+- (NSMutableURLRequest *)requestForInsertedObject:(NSManagedObject *)insertedObject {
+    return [self requestWithMethod:@"POST" path:[self pathForEntity:insertedObject.entity] parameters:[self representationOfAttributes:[insertedObject dictionaryWithValuesForKeys:[insertedObject.entity.attributesByName allKeys]] ofManagedObject:insertedObject]];
+}
+
+- (NSMutableURLRequest *)requestForUpdatedObject:(NSManagedObject *)updatedObject {
+    return [self requestWithMethod:@"PUT" path:[self pathForObject:updatedObject] parameters:[self representationOfAttributes:[[updatedObject changedValuesForCurrentEvent] dictionaryWithValuesForKeys:[updatedObject.entity.attributesByName allKeys]] ofManagedObject:updatedObject]];
+}
+
+- (NSMutableURLRequest *)requestForDeletedObject:(NSManagedObject *)deletedObject {
+    return [self requestWithMethod:@"PUT" path:[self pathForObject:deletedObject] parameters:nil];
 }
 
 #pragma mark - AFHTTPClient
