@@ -155,7 +155,7 @@
  
  @return An `NSURLRequest` object corresponding to the specified fetch request.
  */
-- (NSURLRequest *)requestForFetchRequest:(NSFetchRequest *)fetchRequest
+- (NSMutableURLRequest *)requestForFetchRequest:(NSFetchRequest *)fetchRequest
                              withContext:(NSManagedObjectContext *)context;
 
 /**
@@ -169,7 +169,7 @@
  
  @return An `NSURLRequest` object with the provided HTTP method for the resource corresponding to the managed object.
  */
-- (NSURLRequest *)requestWithMethod:(NSString *)method
+- (NSMutableURLRequest *)requestWithMethod:(NSString *)method
                 pathForObjectWithID:(NSManagedObjectID *)objectID
                         withContext:(NSManagedObjectContext *)context;
 
@@ -186,7 +186,7 @@
  @return An `NSURLRequest` object with the provided HTTP method for the resource or resoures corresponding to the relationship of the managed object.
 
  */
-- (NSURLRequest *)requestWithMethod:(NSString *)method
+- (NSMutableURLRequest *)requestWithMethod:(NSString *)method
                 pathForRelationship:(NSRelationshipDescription *)relationship
                     forObjectWithID:(NSManagedObjectID *)objectID
                         withContext:(NSManagedObjectContext *)context;
