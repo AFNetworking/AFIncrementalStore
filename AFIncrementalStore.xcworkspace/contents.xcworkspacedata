@@ -23,4 +23,7 @@
    <FileRef
       location = "group:Examples/Twitter Client/Twitter Example.xcodeproj">
    </FileRef>
+   <FileRef
+      location = "group:Examples/CheckIns Example/CheckIns Example.xcodeproj">
+   </FileRef>
 </Workspace>
