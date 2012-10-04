@@ -1,4 +1,4 @@
-// SongAPIClient.h
+// CheckInsAPIClient.h
 //
 // Copyright (c) 2012 Mattt Thompson (http://mattt.me)
 // 
@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#import <SystemConfiguration/SystemConfiguration.h>
 #import "AFRESTClient.h"
 #import "AFIncrementalStore.h"
 

@@ -30,6 +30,7 @@
 		F8B77D78161E178D00A88B7F /* UIImageView+AFNetworking.m in Sources */ = {isa = PBXBuildFile; fileRef = F8B77D6F161E178D00A88B7F /* UIImageView+AFNetworking.m */; };
 		F8B77D7B161E17AF00A88B7F /* CheckIns.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = F8B77D79161E17AF00A88B7F /* CheckIns.xcdatamodeld */; };
 		F8B77D7E161E220B00A88B7F /* ISO8601DateFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = F8B77D7D161E220B00A88B7F /* ISO8601DateFormatter.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		F8B77D98161E43EC00A88B7F /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F8B77D97161E43EC00A88B7F /* SystemConfiguration.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -43,7 +44,6 @@
 		F889213E161E117C00D11FD2 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = SOURCE_ROOT; };
 		F889213F161E117C00D11FD2 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = SOURCE_ROOT; };
 		F8892140161E117C00D11FD2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = SOURCE_ROOT; };
-		F8892141161E118400D11FD2 /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = SOURCE_ROOT; };
 		F8892143161E119300D11FD2 /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = SOURCE_ROOT; };
 		F8892144161E119300D11FD2 /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = SOURCE_ROOT; };
 		F8892148161E11CE00D11FD2 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = SOURCE_ROOT; };
@@ -81,6 +81,7 @@
 		F8B77D7A161E17AF00A88B7F /* CheckIns.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CheckIns.xcdatamodel; sourceTree = "<group>"; };
 		F8B77D7C161E220B00A88B7F /* ISO8601DateFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ISO8601DateFormatter.h; path = ../../ISO8601DateFormatter/ISO8601DateFormatter.h; sourceTree = "<group>"; };
 		F8B77D7D161E220B00A88B7F /* ISO8601DateFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ISO8601DateFormatter.m; path = ../../ISO8601DateFormatter/ISO8601DateFormatter.m; sourceTree = "<group>"; };
+		F8B77D97161E43EC00A88B7F /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -88,6 +89,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F8B77D98161E43EC00A88B7F /* SystemConfiguration.framework in Frameworks */,
 				F8892111161E113100D11FD2 /* UIKit.framework in Frameworks */,
 				F8892113161E113100D11FD2 /* Foundation.framework in Frameworks */,
 				F8892115161E113100D11FD2 /* CoreGraphics.framework in Frameworks */,
@@ -119,6 +121,7 @@
 		F889210F161E113100D11FD2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				F8B77D97161E43EC00A88B7F /* SystemConfiguration.framework */,
 				F8892110161E113100D11FD2 /* UIKit.framework */,
 				F8892112161E113100D11FD2 /* Foundation.framework */,
 				F8892114161E113100D11FD2 /* CoreGraphics.framework */,
@@ -148,7 +151,6 @@
 			children = (
 				F8892148161E11CE00D11FD2 /* main.m */,
 				F889213B161E117C00D11FD2 /* Prefix.pch */,
-				F8892141161E118400D11FD2 /* AppDelegate.m */,
 				F889213D161E117C00D11FD2 /* Default-568h@2x.png */,
 				F889213E161E117C00D11FD2 /* Default.png */,
 				F889213F161E117C00D11FD2 /* Default@2x.png */,

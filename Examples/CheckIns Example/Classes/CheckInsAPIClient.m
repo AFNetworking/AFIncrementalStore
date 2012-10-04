@@ -1,4 +1,4 @@
-// SongAPIClient.m
+// CheckInsAPIClient.m
 //
 // Copyright (c) 2012 Mattt Thompson (http://mattt.me)
 // 
@@ -44,6 +44,10 @@ static NSString * const kAFIncrementalStoreExampleAPIBaseURLString = @"http://lo
     
     [self registerHTTPOperationClass:[AFJSONRequestOperation class]];
     [self setDefaultHeader:@"Accept" value:@"application/json"];
+    
+    [self setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
+        self.operationQueue.suspended = (status == AFNetworkReachabilityStatusNotReachable);
+    }];
     
     return self;
 }

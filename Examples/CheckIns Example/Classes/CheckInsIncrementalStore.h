@@ -1,4 +1,4 @@
-// SongsIncrementalStore.h
+// CheckInsIncrementalStore.h
 //
 // Copyright (c) 2012 Mattt Thompson (http://mattt.me)
 // 
