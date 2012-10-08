@@ -104,10 +104,10 @@ NSString * AFPluralizedString(NSString *string) {
                     arrayOfRelationshipRepresentations = [NSArray arrayWithObject:value];
                 }
                                 
-                [mutableRelationshipRepresentations setValue:arrayOfRelationshipRepresentations forKey:relationKey];
+                [mutableRelationshipRepresentations setValue:arrayOfRelationshipRepresentations forKey:name];
             } else {
                 if (self.supportRelationsByID) value = @{@"id" : value};
-                [mutableRelationshipRepresentations setValue:value forKey:relationKey];
+                [mutableRelationshipRepresentations setValue:value forKey:name];
             }
         }
     }];
