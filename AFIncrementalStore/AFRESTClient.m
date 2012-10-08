@@ -80,8 +80,13 @@ NSString * AFPluralizedString(NSString *string) {
     [entity.relationshipsByName enumerateKeysAndObjectsUsingBlock:^(id name, id relationship, BOOL *stop) {
         NSString *relationKey = name;
         if (self.supportRelationsByID) {
+            if ([relationship isToMany] && [relationKey hasSuffix:@"s"]) {
+                relationKey = [relationKey substringToIndex:(relationKey.length - 1)];
+            }
             relationKey = [relationKey stringByAppendingString:@"_id"];
-            if ([relationship isToMany]) relationKey = [relationKey stringByAppendingString:@"s"];
+            if ([relationship isToMany]) {
+                relationKey = [relationKey stringByAppendingString:@"s"];
+            }
         }
         
         id value = [representation valueForKey:relationKey];
