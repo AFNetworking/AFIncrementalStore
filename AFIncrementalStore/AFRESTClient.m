@@ -23,7 +23,7 @@
 #import "AFRESTClient.h"
 #import "ISO8601DateFormatter.h"
 
-static NSString * AFPluralizedString(NSString *string) {
+NSString * AFPluralizedString(NSString *string) {
     if ([string hasSuffix:@"ss"] || [string hasSuffix:@"se"] || [string hasSuffix:@"sh"] || [string hasSuffix:@"ch"]) {
         return [[string stringByAppendingString:@"es"] lowercaseString];
     } else {
