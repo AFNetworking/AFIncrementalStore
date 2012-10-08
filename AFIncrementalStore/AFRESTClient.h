@@ -70,3 +70,12 @@
 @property (nonatomic, assign) BOOL supportRelationsByID;
 
 @end
+
+///----------------
+/// @name Functions
+///----------------
+
+/**
+ Returns pluralized string.
+ */
+extern NSString * AFPluralizedString(NSString *string);
