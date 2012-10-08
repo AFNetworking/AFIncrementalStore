@@ -239,6 +239,12 @@ static char kAFResourceIdentifierObjectKey;
     NSURLRequest *request = [self.HTTPClient requestForFetchRequest:fetchRequest withContext:context];
     if ([request URL]) {
         AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, id responseObject) {
+            if (!responseObject) {
+                // Notify, just in case, to stop animations
+                [self notifyManagedObjectContext:context aboutRequestOperation:operation forFetchRequest:fetchRequest];
+                return;
+            }
+            
             id representationOrArrayOfRepresentations = [self.HTTPClient representationOrArrayOfRepresentationsFromResponseObject:responseObject];
             
             NSArray *representations = nil;
@@ -404,6 +410,8 @@ static char kAFResourceIdentifierObjectKey;
         for (NSManagedObject *insertedObject in [saveChangesRequest insertedObjects]) {
             NSURLRequest *request = [self.HTTPClient requestForInsertedObject:insertedObject];
             AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, id responseObject) {
+                if (!responseObject) return;
+                
                 NSString *resourceIdentifier = [self.HTTPClient resourceIdentifierForRepresentation:responseObject ofEntity:[insertedObject entity] fromResponse:operation.response];
                 NSManagedObjectID *objectID = [self objectIDForEntity:[insertedObject entity] withResourceIdentifier:resourceIdentifier];
                 insertedObject.af_resourceIdentifier = resourceIdentifier;
@@ -429,6 +437,8 @@ static char kAFResourceIdentifierObjectKey;
         for (NSManagedObject *updatedObject in [saveChangesRequest updatedObjects]) {
             NSURLRequest *request = [self.HTTPClient requestForUpdatedObject:updatedObject];
             AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, id responseObject) {
+                if (!responseObject) return;
+                
                 [updatedObject setValuesForKeysWithDictionary:[self.HTTPClient attributesForRepresentation:responseObject ofEntity:updatedObject.entity fromResponse:operation.response]];
                 
                 [backingContext performBlockAndWait:^{
@@ -448,6 +458,8 @@ static char kAFResourceIdentifierObjectKey;
         for (NSManagedObject *deletedObject in [saveChangesRequest deletedObjects]) {
             NSURLRequest *request = [self.HTTPClient requestForDeletedObject:deletedObject];
             AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, id responseObject) {
+                if (!responseObject) return;
+                
                 [backingContext performBlockAndWait:^{
                     NSManagedObject *backingObject = [backingContext existingObjectWithID:deletedObject.objectID error:nil];
                     [backingContext deleteObject:backingObject];
@@ -498,6 +510,8 @@ static char kAFResourceIdentifierObjectKey;
             
             if ([request URL]) {
                 AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, NSDictionary *representation) {
+                    if (!representation) return;
+                    
                     NSManagedObject *managedObject = [childContext existingObjectWithID:objectID error:error];
                     
                     NSMutableDictionary *mutablePropertyValues = [attributeValues mutableCopy];
@@ -547,6 +561,8 @@ static char kAFResourceIdentifierObjectKey;
             }];
             
             AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, id responseObject) {
+                if (!responseObject) return;
+                
                 id representationOrArrayOfRepresentations = [self.HTTPClient representationOrArrayOfRepresentationsFromResponseObject:responseObject];
                 
                 NSArray *representations = nil;
