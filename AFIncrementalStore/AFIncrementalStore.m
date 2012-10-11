@@ -143,7 +143,7 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
         
         NSManagedObjectModel *model = [self.persistentStoreCoordinator.managedObjectModel copy];
         for (NSEntityDescription *entity in model.entities) {
-            // Don't add resource identifier property for sub-entities, as they already exist in the super-entity 
+            // Don't add properties for sub-entities, as they already exist in the super-entity 
             if ([entity superentity]) {
                 continue;
             }
@@ -273,7 +273,6 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
         completionBlock(mutableManagedObjects, mutableBackingObjects);
     }
 }
-
 
 - (id)executeRequest:(NSPersistentStoreRequest *)persistentStoreRequest
          withContext:(NSManagedObjectContext *)context
