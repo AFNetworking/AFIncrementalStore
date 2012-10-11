@@ -211,12 +211,12 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     return [results lastObject];
 }
 
-- (void)processObjectsFromRepresentations:(id)representationOrArrayOfRepresentations
-                                 ofEntity:(NSEntityDescription *)entity
-                             fromResponse:(NSHTTPURLResponse *)response
-                              withContext:(NSManagedObjectContext *)context
-                                    error:(NSError *__autoreleasing *)error
-                          completionBlock:(void (^)(NSArray *managedObjects, NSArray *backingObjects))completionBlock
+- (void)insertOrUpdateObjectsFromRepresentations:(id)representationOrArrayOfRepresentations
+                                        ofEntity:(NSEntityDescription *)entity
+                                    fromResponse:(NSHTTPURLResponse *)response
+                                     withContext:(NSManagedObjectContext *)context
+                                           error:(NSError *__autoreleasing *)error
+                                 completionBlock:(void (^)(NSArray *managedObjects, NSArray *backingObjects))completionBlock
 {
     NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
     NSDate *lastModified = AFLastModifiedDateFromHTTPHeaders([response allHeaderFields]);
@@ -249,7 +249,7 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                 continue;
             }
             
-            [self processObjectsFromRepresentations:[relationshipRepresentations objectForKey:relationshipName] ofEntity:relationship.destinationEntity fromResponse:response withContext:context error:error completionBlock:^(NSArray *managedObjects, NSArray *backingObjects) {
+            [self insertOrUpdateObjectsFromRepresentations:[relationshipRepresentations objectForKey:relationshipName] ofEntity:relationship.destinationEntity fromResponse:response withContext:context error:error completionBlock:^(NSArray *managedObjects, NSArray *backingObjects) {
                 if ([relationship isToMany]) {
                     if ([relationship isOrdered]) {
                         [managedObject setValue:[NSOrderedSet orderedSetWithArray:managedObjects] forKey:relationship.name];
@@ -308,7 +308,7 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
             childContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy;
                         
             [childContext performBlock:^{
-                [self processObjectsFromRepresentations:representationOrArrayOfRepresentations ofEntity:fetchRequest.entity fromResponse:operation.response withContext:childContext error:error completionBlock:^(NSArray *managedObjects, NSArray *backingObjects) {
+                [self insertOrUpdateObjectsFromRepresentations:representationOrArrayOfRepresentations ofEntity:fetchRequest.entity fromResponse:operation.response withContext:childContext error:error completionBlock:^(NSArray *managedObjects, NSArray *backingObjects) {
                     if (![[self backingManagedObjectContext] save:error] || ![childContext save:error]) {
                         NSLog(@"Error: %@", *error);
                     }
