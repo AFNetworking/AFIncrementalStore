@@ -605,7 +605,12 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
 - (void)managedObjectContextDidRegisterObjectsWithIDs:(NSArray *)objectIDs {
     [super managedObjectContextDidRegisterObjectsWithIDs:objectIDs];
     for (NSManagedObjectID *objectID in objectIDs) {
-        [_registeredObjectIDsByResourceIdentifier setObject:objectID forKey:[self referenceObjectForObjectID:objectID]];
+        id key = [self referenceObjectForObjectID:objectID];
+        if (!key) {
+            continue;
+        }
+        
+        [_registeredObjectIDsByResourceIdentifier setObject:objectID forKey:key];
     }
 }
 
