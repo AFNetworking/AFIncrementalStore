@@ -182,8 +182,7 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
             [lastModifiedProperty setAttributeType:NSDateAttributeType];
             [lastModifiedProperty setIndexed:NO];
             
-            NSArray *additionalProperties = [NSArray arrayWithObjects:resourceIdentifierProperty, lastModifiedProperty, nil];
-            [entity setProperties:[entity.properties arrayByAddingObjectsFromArray:additionalProperties]];
+            [entity setProperties:[entity.properties arrayByAddingObjectsFromArray:[NSArray arrayWithObjects:resourceIdentifierProperty, lastModifiedProperty, nil]]];
         }
         
         _backingPersistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:model];
@@ -304,9 +303,7 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                         
                         if (relationship) {
                             if ([relationship isToMany]) {
-                                
                                 if (![relationshipRepresentationOrArrayOfRepresentations isKindOfClass:[NSArray class]]) {
-                                    
                                     @throw([NSException exceptionWithName:AFIncrementalStoreRelationshipCardinalityException reason:NSLocalizedString(@"Cardinality of provided resource representation conflicts with Core Data model.", nil) userInfo:nil]);
                                 }
                                 
@@ -335,9 +332,7 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                                 [backingObject setValue:mutableBackingRelationshipObjects forKey:relationship.name];
                                 [managedObject setValue:mutableManagedRelationshipObjects forKey:relationship.name];
                             } else {
-                                
                                 if (![relationshipRepresentationOrArrayOfRepresentations isKindOfClass:[NSDictionary class]]) {
-                                    
                                     @throw([NSException exceptionWithName:AFIncrementalStoreRelationshipCardinalityException reason:NSLocalizedString(@"Cardinality of provided resource representation conflicts with Core Data model.", nil) userInfo:nil]);
                                 }
                                 
