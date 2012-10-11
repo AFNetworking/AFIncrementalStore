@@ -211,31 +211,34 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     return [results lastObject];
 }
 
-- (NSArray *)objectsByInsertingOrUpdatingObjectsFromRepresentations:(id)representationOrArrayOfRepresentations
-                                                           ofEntity:(NSEntityDescription *)entity
-                                                       fromResponse:(NSHTTPURLResponse *)response
-                                                        withContext:(NSManagedObjectContext *)context
-                                                              error:(NSError *__autoreleasing *)error
+- (void)processObjectsFromRepresentations:(id)representationOrArrayOfRepresentations
+                                 ofEntity:(NSEntityDescription *)entity
+                             fromResponse:(NSHTTPURLResponse *)response
+                              withContext:(NSManagedObjectContext *)context
+                                    error:(NSError *__autoreleasing *)error
+                          completionBlock:(void (^)(NSArray *managedObjects, NSArray *backingObjects))completionBlock
 {
     NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
     NSDate *lastModified = AFLastModifiedDateFromHTTPHeaders([response allHeaderFields]);
     
-    NSMutableArray *mutableObjects = [NSMutableArray arrayWithCapacity:[representationOrArrayOfRepresentations count]];
+    NSMutableArray *mutableManagedObjects = [NSMutableArray arrayWithCapacity:[representationOrArrayOfRepresentations count]];
+    NSMutableArray *mutableBackingObjects = [NSMutableArray arrayWithCapacity:[representationOrArrayOfRepresentations count]];
+
     NSArray *representations = [representationOrArrayOfRepresentations isKindOfClass:[NSArray class]] ? representationOrArrayOfRepresentations : [NSArray arrayWithObject:representationOrArrayOfRepresentations];
     for (NSDictionary *representation in representations) {
         NSString *resourceIdentifier = [self.HTTPClient resourceIdentifierForRepresentation:representation ofEntity:entity fromResponse:response];
-        NSManagedObjectID *objectID = [self objectIDForBackingObjectForEntity:entity withResourceIdentifier:resourceIdentifier];
-        
         NSDictionary *attributes = [self.HTTPClient attributesForRepresentation:representation ofEntity:entity fromResponse:response];
         
-        NSManagedObject *backingObject = (objectID != nil) ? [backingContext existingObjectWithID:objectID error:nil] : [NSEntityDescription insertNewObjectForEntityForName:entity.name inManagedObjectContext:backingContext];
+        NSManagedObject *managedObject = [context existingObjectWithID:[self objectIDForEntity:entity withResourceIdentifier:resourceIdentifier] error:nil];
+        [managedObject setValuesForKeysWithDictionary:attributes];
+        
+        NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:entity withResourceIdentifier:resourceIdentifier];
+        NSManagedObject *backingObject = (backingObjectID != nil) ? [backingContext existingObjectWithID:backingObjectID error:nil] : [NSEntityDescription insertNewObjectForEntityForName:entity.name inManagedObjectContext:backingContext];
         [backingObject setValue:resourceIdentifier forKey:kAFIncrementalStoreResourceIdentifierAttributeName];
         [backingObject setValue:lastModified forKey:kAFIncrementalStoreLastModifiedAttributeName];
         [backingObject setValuesForKeysWithDictionary:attributes];
         
-        NSManagedObject *managedObject = [context existingObjectWithID:[self objectIDForEntity:entity withResourceIdentifier:resourceIdentifier] error:nil];
-        [managedObject setValuesForKeysWithDictionary:attributes];
-        if (objectID == nil) {
+        if (!backingObjectID) {
             [context insertObject:managedObject];
         }
         
@@ -246,18 +249,29 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                 continue;
             }
             
-            NSArray *relationshipObjects = [self objectsByInsertingOrUpdatingObjectsFromRepresentations:[relationshipRepresentations objectForKey:relationshipName] ofEntity:relationship.destinationEntity fromResponse:response withContext:context error:error];
-            if ([relationship isToMany]) {
-                [managedObject setValue:([relationship isOrdered] ? [NSOrderedSet orderedSetWithArray:relationshipObjects] : [NSSet setWithArray:relationshipObjects]) forKey:relationship.name];
-            } else {
-                [managedObject setValue:[relationshipObjects lastObject] forKey:relationship.name];
-            }
+            [self processObjectsFromRepresentations:[relationshipRepresentations objectForKey:relationshipName] ofEntity:relationship.destinationEntity fromResponse:response withContext:context error:error completionBlock:^(NSArray *managedObjects, NSArray *backingObjects) {
+                if ([relationship isToMany]) {
+                    if ([relationship isOrdered]) {
+                        [managedObject setValue:[NSOrderedSet orderedSetWithArray:managedObjects] forKey:relationship.name];
+                        [backingObject setValue:[NSOrderedSet orderedSetWithArray:managedObjects] forKey:relationship.name];
+                    } else {
+                        [managedObject setValue:[NSSet setWithArray:managedObjects] forKey:relationship.name];
+                        [backingObject setValue:[NSSet setWithArray:managedObjects] forKey:relationship.name];
+                    }
+                } else {
+                    [managedObject setValue:[managedObjects lastObject] forKey:relationship.name];
+                    [backingObject setValue:[backingObjects lastObject] forKey:relationship.name];
+                }
+            }];
         }
         
-        [mutableObjects addObject:managedObject];
+        [mutableManagedObjects addObject:managedObject];
+        [mutableBackingObjects addObject:backingObject];
     }
     
-    return mutableObjects;
+    if (completionBlock) {
+        completionBlock(mutableManagedObjects, mutableBackingObjects);
+    }
 }
 
 
@@ -292,17 +306,13 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
             NSManagedObjectContext *childContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
             childContext.parentContext = context;
             childContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy;
-            
-            NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
-            
+                        
             [childContext performBlock:^{
-                NSEntityDescription *entity = fetchRequest.entity;
-                
-                [self objectsByInsertingOrUpdatingObjectsFromRepresentations:representationOrArrayOfRepresentations ofEntity:entity fromResponse:operation.response withContext:childContext error:error];
-                
-                if (![backingContext save:error] || ![childContext save:error]) {
-                    NSLog(@"Error: %@", *error);
-                }
+                [self processObjectsFromRepresentations:representationOrArrayOfRepresentations ofEntity:fetchRequest.entity fromResponse:operation.response withContext:childContext error:error completionBlock:^(NSArray *managedObjects, NSArray *backingObjects) {
+                    if (![[self backingManagedObjectContext] save:error] || ![childContext save:error]) {
+                        NSLog(@"Error: %@", *error);
+                    }
+                }];
                 
                 [self notifyManagedObjectContext:context aboutRequestOperation:operation forFetchRequest:fetchRequest];
             }];
