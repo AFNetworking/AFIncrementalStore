@@ -73,30 +73,6 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
 
 #pragma mark -
 
-@interface AFIncrementalStore ()
-- (NSManagedObjectContext *)backingManagedObjectContext;
-- (NSManagedObjectID *)objectIDForEntity:(NSEntityDescription *)entity
-                  withResourceIdentifier:(NSString *)resourceIdentifier;
-- (NSManagedObjectID *)objectIDForBackingObjectForEntity:(NSEntityDescription *)entity
-                                  withResourceIdentifier:(NSString *)resourceIdentifier;
-
-- (id)executeFetchRequest:(NSFetchRequest *)fetchRequest
-              withContext:(NSManagedObjectContext *)context
-                    error:(NSError *__autoreleasing *)error;
-
-- (id)executeSaveChangesRequest:(NSSaveChangesRequest *)saveChangesRequest
-                    withContext:(NSManagedObjectContext *)context
-                          error:(NSError *__autoreleasing *)error;
-
-- (void)notifyManagedObjectContext:(NSManagedObjectContext *)context
-             aboutRequestOperation:(AFHTTPRequestOperation *)operation
-         forFetchRequest:(NSFetchRequest *)fetchRequest;
-
-- (void)notifyManagedObjectContext:(NSManagedObjectContext *)context
-            aboutRequestOperations:(NSArray *)operations
-             forSaveChangesRequest:(NSSaveChangesRequest *)saveChangesRequest;
-@end
-
 @implementation AFIncrementalStore {
 @private
     NSCache *_backingObjectIDByObjectID;
