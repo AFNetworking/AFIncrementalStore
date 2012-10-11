@@ -517,9 +517,7 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
             NSManagedObjectContext *childContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
             childContext.parentContext = context;
             childContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy;
-            
-            NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
-            
+                        
             [[NSNotificationCenter defaultCenter] addObserverForName:NSManagedObjectContextDidSaveNotification object:childContext queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
                 [context mergeChangesFromContextDidSaveNotification:note];
             }];
@@ -535,43 +533,11 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                 }
                 
                 [childContext performBlock:^{
-                    NSManagedObject *managedObject = [childContext existingObjectWithID:[self objectIDForEntity:[objectID entity] withResourceIdentifier:[self referenceObjectForObjectID:objectID]] error:nil];
-                    NSManagedObject *backingObject = [backingContext existingObjectWithID:[self objectIDForBackingObjectForEntity:[objectID entity] withResourceIdentifier:[self referenceObjectForObjectID:objectID]] error:nil];
-
-                    id mutableBackingRelationshipObjects = [relationship isOrdered] ? [NSMutableOrderedSet orderedSetWithCapacity:[representations count]] : [NSMutableSet setWithCapacity:[representations count]];
-                    id mutableManagedRelationshipObjects = [relationship isOrdered] ? [NSMutableOrderedSet orderedSetWithCapacity:[representations count]] : [NSMutableSet setWithCapacity:[representations count]];
-
-                    NSEntityDescription *entity = relationship.destinationEntity;
-                    
-                    for (NSDictionary *representation in representations) {
-                        NSString *relationshipResourceIdentifier = [self.HTTPClient resourceIdentifierForRepresentation:representation ofEntity:entity fromResponse:operation.response];
-
-                        NSManagedObjectID *relationshipObjectID = [self objectIDForBackingObjectForEntity:relationship.destinationEntity withResourceIdentifier:relationshipResourceIdentifier];
-                        NSDictionary *relationshipAttributes = [self.HTTPClient attributesForRepresentation:representation ofEntity:entity fromResponse:operation.response];
-                        
-                        NSManagedObject *backingRelationshipObject = (relationshipObjectID != nil) ? [backingContext existingObjectWithID:relationshipObjectID error:nil] : [NSEntityDescription insertNewObjectForEntityForName:[relationship.destinationEntity name] inManagedObjectContext:backingContext];
-                        [backingRelationshipObject setValuesForKeysWithDictionary:relationshipAttributes];
-                        [mutableBackingRelationshipObjects addObject:backingRelationshipObject];
-
-                        NSManagedObject *managedRelationshipObject = [childContext existingObjectWithID:[self objectIDForEntity:relationship.destinationEntity withResourceIdentifier:relationshipResourceIdentifier] error:nil];
-                        [managedRelationshipObject setValuesForKeysWithDictionary:relationshipAttributes];
-                        [mutableManagedRelationshipObjects addObject:managedRelationshipObject];
-                        if (relationshipObjectID == nil) {
-                            [childContext insertObject:managedRelationshipObject];
+                    [self insertOrUpdateObjectsFromRepresentations:representationOrArrayOfRepresentations ofEntity:[objectID entity] fromResponse:operation.response withContext:childContext error:error completionBlock:^(NSArray *managedObjects, NSArray *backingObjects) {
+                        if (![[self backingManagedObjectContext] save:error] || ![childContext save:error]) {
+                            NSLog(@"Error: %@", *error);
                         }
-                    }
-                    
-                    if ([relationship isToMany]) {
-                        [managedObject setValue:mutableManagedRelationshipObjects forKey:relationship.name];
-                        [backingObject setValue:mutableBackingRelationshipObjects forKey:relationship.name];
-                    } else {
-                        [managedObject setValue:[mutableManagedRelationshipObjects anyObject] forKey:relationship.name];
-                        [backingObject setValue:[mutableBackingRelationshipObjects anyObject] forKey:relationship.name];
-                    }
-                
-                    if (![backingContext save:error] || ![childContext save:error]) {
-                        NSLog(@"Error: %@", *error);
-                    }                    
+                    }];
                 }];
             } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
                 NSLog(@"Error: %@, %@", operation, error);
