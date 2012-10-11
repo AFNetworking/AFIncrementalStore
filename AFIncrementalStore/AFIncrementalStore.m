@@ -181,6 +181,10 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
 
 - (NSManagedObjectID *)objectIDForEntity:(NSEntityDescription *)entity
                   withResourceIdentifier:(NSString *)resourceIdentifier {
+    if (!resourceIdentifier) {
+        return nil;
+    }
+    
     NSManagedObjectID *objectID = [_registeredObjectIDsByResourceIdentifier objectForKey:resourceIdentifier];
     if (objectID == nil) {
         objectID = [self newObjectIDForEntity:entity referenceObject:resourceIdentifier];
