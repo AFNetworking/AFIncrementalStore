@@ -205,7 +205,7 @@ static NSString * AFPluralizedString(NSString *string) {
 }
 
 - (NSMutableURLRequest *)requestForDeletedObject:(NSManagedObject *)deletedObject {
-    return [self requestWithMethod:@"PUT" path:[self pathForObject:deletedObject] parameters:nil];
+    return [self requestWithMethod:@"DELETE" path:[self pathForObject:deletedObject] parameters:nil];
 }
 
 #pragma mark - AFHTTPClient
