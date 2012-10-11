@@ -22,6 +22,7 @@
 
 #import "AFIncrementalStore.h"
 #import "AFHTTPClient.h"
+#import "ISO8601DateFormatter.h"
 #import <objc/runtime.h>
 
 NSString * const AFIncrementalStoreUnimplementedMethodException = @"com.alamofire.incremental-store.exceptions.unimplemented-method";
@@ -35,8 +36,23 @@ NSString * const AFIncrementalStoreRequestOperationKey = @"AFIncrementalStoreReq
 NSString * const AFIncrementalStorePersistentStoreRequestKey = @"AFIncrementalStorePersistentStoreRequest";
 
 static NSString * const kAFIncrementalStoreResourceIdentifierAttributeName = @"__af_resourceIdentifier";
+static NSString * const kAFIncrementalStoreLastModifiedAttributeName = @"__af_lastModified";
 
 static char kAFResourceIdentifierObjectKey;
+
+static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
+    if ([headers valueForKey:@"Last-Modified"]) {
+        static ISO8601DateFormatter * _iso8601DateFormatter = nil;
+        static dispatch_once_t onceToken;
+        dispatch_once(&onceToken, ^{
+            _iso8601DateFormatter = [[ISO8601DateFormatter alloc] init];
+        });
+        
+        return [_iso8601DateFormatter dateFromString:[headers valueForKey:@"last-modified"]];
+    }
+    
+    return nil;
+}
 
 @interface NSManagedObject (_AFIncrementalStore)
 @property (readwrite, nonatomic, copy, setter = af_setResourceIdentifier:) NSString *af_resourceIdentifier;
@@ -160,7 +176,14 @@ static char kAFResourceIdentifierObjectKey;
             [resourceIdentifierProperty setName:kAFIncrementalStoreResourceIdentifierAttributeName];
             [resourceIdentifierProperty setAttributeType:NSStringAttributeType];
             [resourceIdentifierProperty setIndexed:YES];
-            [entity setProperties:[entity.properties arrayByAddingObject:resourceIdentifierProperty]];
+            
+            NSAttributeDescription *lastModifiedProperty = [[NSAttributeDescription alloc] init];
+            [lastModifiedProperty setName:kAFIncrementalStoreLastModifiedAttributeName];
+            [lastModifiedProperty setAttributeType:NSDateAttributeType];
+            [lastModifiedProperty setIndexed:NO];
+            
+            NSArray *additionalProperties = [NSArray arrayWithObjects:resourceIdentifierProperty, lastModifiedProperty, nil];
+            [entity setProperties:[entity.properties arrayByAddingObjectsFromArray:additionalProperties]];
         }
         
         _backingPersistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:model];
@@ -248,6 +271,8 @@ static char kAFResourceIdentifierObjectKey;
                 representations = [NSArray arrayWithObject:representationOrArrayOfRepresentations];
             }
             
+            NSDate *lastModified = AFLastModifiedDateFromHTTPHeaders([operation.response allHeaderFields]);
+
             NSManagedObjectContext *childContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
             childContext.parentContext = context;
             childContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy;
@@ -264,6 +289,7 @@ static char kAFResourceIdentifierObjectKey;
                     
                     NSManagedObject *backingObject = (objectID != nil) ? [backingContext existingObjectWithID:objectID error:nil] : [NSEntityDescription insertNewObjectForEntityForName:entity.name inManagedObjectContext:backingContext];
                     [backingObject setValue:resourceIdentifier forKey:kAFIncrementalStoreResourceIdentifierAttributeName];
+                    [backingObject setValue:lastModified forKey:kAFIncrementalStoreLastModifiedAttributeName];
                     [backingObject setValuesForKeysWithDictionary:attributes];
                     
                     NSManagedObject *managedObject = [childContext existingObjectWithID:[self objectIDForEntity:entity withResourceIdentifier:resourceIdentifier] error:nil];
@@ -494,9 +520,13 @@ static char kAFResourceIdentifierObjectKey;
             childContext.parentContext = context;
             childContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy;
             
-            NSURLRequest *request = [self.HTTPClient requestWithMethod:@"GET" pathForObjectWithID:objectID withContext:context];
+            NSMutableURLRequest *request = [self.HTTPClient requestWithMethod:@"GET" pathForObjectWithID:objectID withContext:context];
             
             if ([request URL]) {
+                if ([attributeValues valueForKey:kAFIncrementalStoreLastModifiedAttributeName]) {
+                    [request setValue:[[attributeValues valueForKey:kAFIncrementalStoreLastModifiedAttributeName] description] forHTTPHeaderField:@"If-Modified-Since"];
+                }
+                
                 AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, NSDictionary *representation) {
                     NSManagedObject *managedObject = [childContext existingObjectWithID:objectID error:error];
                     
