@@ -481,12 +481,16 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                 AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, NSDictionary *representation) {
                     NSManagedObject *managedObject = [childContext existingObjectWithID:objectID error:error];
                     
-                    NSMutableDictionary *mutablePropertyValues = [attributeValues mutableCopy];
-                    [mutablePropertyValues addEntriesFromDictionary:[self.HTTPClient attributesForRepresentation:representation ofEntity:managedObject.entity fromResponse:operation.response]];
-                    [managedObject setValuesForKeysWithDictionary:mutablePropertyValues];
+                    NSMutableDictionary *mutableAttributeValues = [attributeValues mutableCopy];
+                    [mutableAttributeValues addEntriesFromDictionary:[self.HTTPClient attributesForRepresentation:representation ofEntity:managedObject.entity fromResponse:operation.response]];
+                    [managedObject setValuesForKeysWithDictionary:mutableAttributeValues];
+                    
+                    NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:[objectID entity] withResourceIdentifier:[self referenceObjectForObjectID:objectID]];
+                    NSManagedObject *backingObject = [[self backingManagedObjectContext] existingObjectWithID:backingObjectID error:nil];
+                    [backingObject setValuesForKeysWithDictionary:mutableAttributeValues];
                     
                     [childContext performBlock:^{
-                        if (![childContext save:error]) {
+                        if (![[self backingManagedObjectContext] save:error] || ![childContext save:error]) {
                             NSLog(@"Error: %@", *error);
                         }
                         
