@@ -64,4 +64,18 @@
 - (NSString *)pathForRelationship:(NSRelationshipDescription *)relationship
                         forObject:(NSManagedObject *)object;
 
+/**
+ Set to `YES` to support relationship mapping by `name_id`. Such relation usualy returned by Ruby on Rails. This is `NO` by default.
+ */
+@property (nonatomic, assign) BOOL supportRelationsByID;
+
 @end
+
+///----------------
+/// @name Functions
+///----------------
+
+/**
+ Returns pluralized string.
+ */
+extern NSString * AFPluralizedString(NSString *string);

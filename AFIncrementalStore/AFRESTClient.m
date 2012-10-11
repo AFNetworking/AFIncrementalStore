@@ -23,7 +23,7 @@
 #import "AFRESTClient.h"
 #import "ISO8601DateFormatter.h"
 
-static NSString * AFPluralizedString(NSString *string) {
+NSString * AFPluralizedString(NSString *string) {
     if ([string hasSuffix:@"ss"] || [string hasSuffix:@"se"] || [string hasSuffix:@"sh"] || [string hasSuffix:@"ch"]) {
         return [[string stringByAppendingString:@"es"] lowercaseString];
     } else {
@@ -32,6 +32,8 @@ static NSString * AFPluralizedString(NSString *string) {
 }
 
 @implementation AFRESTClient
+
+@synthesize supportRelationsByID;
 
 - (NSString *)pathForEntity:(NSEntityDescription *)entity {
     return AFPluralizedString(entity.name);
@@ -76,18 +78,40 @@ static NSString * AFPluralizedString(NSString *string) {
 {
     NSMutableDictionary *mutableRelationshipRepresentations = [NSMutableDictionary dictionaryWithCapacity:[entity.relationshipsByName count]];
     [entity.relationshipsByName enumerateKeysAndObjectsUsingBlock:^(id name, id relationship, BOOL *stop) {
-        id value = [representation valueForKey:name];
+        NSString *relationKey = name;
+        if (self.supportRelationsByID) {
+            if ([relationship isToMany] && [relationKey hasSuffix:@"s"]) {
+                relationKey = [relationKey substringToIndex:(relationKey.length - 1)];
+            }
+            relationKey = [relationKey stringByAppendingString:@"_id"];
+            if ([relationship isToMany]) {
+                relationKey = [relationKey stringByAppendingString:@"s"];
+            }
+        }
+        
+        id value = [representation valueForKey:relationKey];
         if (value) {
             if ([relationship isToMany]) {
                 NSArray *arrayOfRelationshipRepresentations = nil;
                 if ([value isKindOfClass:[NSArray class]]) {
+                    
+                    if (self.supportRelationsByID) {
+                        NSMutableArray *valueArray = [NSMutableArray arrayWithCapacity:[(NSArray *)value count]];
+                        for (id oneValue in value) {
+                            [valueArray addObject:@{@"id" : oneValue}];
+                        }
+                        value = valueArray;
+                    }
+                    
                     arrayOfRelationshipRepresentations = value;
                 } else {
+                    if (self.supportRelationsByID) value = @{@"id" : value};
                     arrayOfRelationshipRepresentations = [NSArray arrayWithObject:value];
                 }
                                 
                 [mutableRelationshipRepresentations setValue:arrayOfRelationshipRepresentations forKey:name];
             } else {
+                if (self.supportRelationsByID) value = @{@"id" : value};
                 [mutableRelationshipRepresentations setValue:value forKey:name];
             }
         }
