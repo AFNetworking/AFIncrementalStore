@@ -1,4 +1,4 @@
-// ArtistsListViewController.h
+// SongAPIClient.h
 //
 // Copyright (c) 2012 Mattt Thompson (http://mattt.me)
 // 
@@ -20,7 +20,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import <UIKit/UIKit.h>
+#import "AFRESTClient.h"
+#import "AFIncrementalStore.h"
 
-@interface PublicTimelineViewController : UITableViewController
+@interface AppDotNetAPIClient : AFRESTClient <AFIncrementalStoreHTTPClient>
+
++ (AppDotNetAPIClient *)sharedClient;
+
 @end

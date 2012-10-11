@@ -20,17 +20,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "TwitterAPIClient.h"
+#import "AppDotNetAPIClient.h"
 
-static NSString * const kAFTwitterAPIBaseURLString = @"http://api.twitter.com/1/";
+static NSString * const kAFAppDotNetAPIBaseURLString = @"https://alpha-api.app.net/";
 
-@implementation TwitterAPIClient
+@implementation AppDotNetAPIClient
 
-+ (TwitterAPIClient *)sharedClient {
-    static TwitterAPIClient *_sharedClient = nil;
++ (AppDotNetAPIClient *)sharedClient {
+    static AppDotNetAPIClient *_sharedClient = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        _sharedClient = [[self alloc] initWithBaseURL:[NSURL URLWithString:kAFTwitterAPIBaseURLString]];
+        _sharedClient = [[self alloc] initWithBaseURL:[NSURL URLWithString:kAFAppDotNetAPIBaseURLString]];
     });
     
     return _sharedClient;
@@ -54,8 +54,8 @@ static NSString * const kAFTwitterAPIBaseURLString = @"http://api.twitter.com/1/
                              withContext:(NSManagedObjectContext *)context
 {
     NSMutableURLRequest *mutableURLRequest = nil;
-    if ([fetchRequest.entityName isEqualToString:@"Tweet"]) {
-        mutableURLRequest = [self requestWithMethod:@"GET" path:@"statuses/public_timeline.json" parameters:nil];
+    if ([fetchRequest.entityName isEqualToString:@"Post"]) {
+        mutableURLRequest = [self requestWithMethod:@"GET" path:@"stream/0/posts/stream/global" parameters:nil];
     }
     
     return mutableURLRequest;
@@ -66,12 +66,12 @@ static NSString * const kAFTwitterAPIBaseURLString = @"http://api.twitter.com/1/
                                      fromResponse:(NSHTTPURLResponse *)response 
 {
     NSMutableDictionary *mutablePropertyValues = [[super attributesForRepresentation:representation ofEntity:entity fromResponse:response] mutableCopy];
-    if ([entity.name isEqualToString:@"Tweet"]) {
-        [mutablePropertyValues setValue:[representation valueForKey:@"id"] forKey:@"tweetID"];
+    if ([entity.name isEqualToString:@"Post"]) {
+        [mutablePropertyValues setValue:[NSNumber numberWithInteger:[[representation valueForKey:@"id"] integerValue]] forKey:@"postID"];
     } else if ([entity.name isEqualToString:@"User"]) {
-        [mutablePropertyValues setValue:[representation valueForKey:@"id"] forKey:@"userID"];
-        [mutablePropertyValues setValue:[representation valueForKey:@"screen_name"] forKey:@"username"];
-        [mutablePropertyValues setValue:[representation valueForKey:@"profile_image_url"] forKey:@"profileImageURLString"];
+        [mutablePropertyValues setValue:[NSNumber numberWithInteger:[[representation valueForKey:@"id"] integerValue]] forKey:@"userID"];
+        [mutablePropertyValues setValue:[representation valueForKey:@"username"] forKey:@"username"];
+        [mutablePropertyValues setValue:[representation valueForKeyPath:@"avatar_image.url"] forKey:@"avatarImageURLString"];
     }
     
     return mutablePropertyValues;

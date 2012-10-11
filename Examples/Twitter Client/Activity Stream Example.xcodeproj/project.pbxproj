@@ -7,15 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		F87CD18E15DAB2B200E4C166 /* TweetTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = F87CD18D15DAB2B200E4C166 /* TweetTableViewCell.m */; };
+		F8478A69162729B80026615F /* AppDotNet.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = F8874F2115B08CA80048680F /* AppDotNet.xcdatamodeld */; };
+		F87CD18E15DAB2B200E4C166 /* PostTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = F87CD18D15DAB2B200E4C166 /* PostTableViewCell.m */; };
 		F87CD19215DAB45100E4C166 /* profile-image-placeholder.png in Resources */ = {isa = PBXBuildFile; fileRef = F87CD19015DAB45100E4C166 /* profile-image-placeholder.png */; };
 		F87CD19315DAB45100E4C166 /* profile-image-placeholder@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F87CD19115DAB45100E4C166 /* profile-image-placeholder@2x.png */; };
-		F8874F1615B08B770048680F /* PublicTimelineViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F8874F0915B08B770048680F /* PublicTimelineViewController.m */; };
-		F8874F1915B08B770048680F /* TwitterAPIClient.m in Sources */ = {isa = PBXBuildFile; fileRef = F8874F0C15B08B770048680F /* TwitterAPIClient.m */; };
-		F8874F1A15B08B770048680F /* TwitterIncrementalStore.m in Sources */ = {isa = PBXBuildFile; fileRef = F8874F0D15B08B770048680F /* TwitterIncrementalStore.m */; };
+		F8874F1615B08B770048680F /* GlobalStreamViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F8874F0915B08B770048680F /* GlobalStreamViewController.m */; };
+		F8874F1915B08B770048680F /* AppDotNetAPIClient.m in Sources */ = {isa = PBXBuildFile; fileRef = F8874F0C15B08B770048680F /* AppDotNetAPIClient.m */; };
+		F8874F1A15B08B770048680F /* AppDotNetIncrementalStore.m in Sources */ = {isa = PBXBuildFile; fileRef = F8874F0D15B08B770048680F /* AppDotNetIncrementalStore.m */; };
 		F8874F1F15B08C2A0048680F /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F8874F1E15B08C2A0048680F /* main.m */; };
 		F8874F2015B08C4B0048680F /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F8874F1B15B08BD30048680F /* AppDelegate.m */; };
-		F8874F2315B08CA80048680F /* Twitter.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = F8874F2115B08CA80048680F /* Twitter.xcdatamodeld */; };
 		F8AD92D815D9A0B400402FE9 /* AFHTTPClient.m in Sources */ = {isa = PBXBuildFile; fileRef = F8AD92C415D9A0B400402FE9 /* AFHTTPClient.m */; };
 		F8AD92D915D9A0B400402FE9 /* AFHTTPRequestOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = F8AD92C615D9A0B400402FE9 /* AFHTTPRequestOperation.m */; };
 		F8AD92DA15D9A0B400402FE9 /* AFImageRequestOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = F8AD92C815D9A0B400402FE9 /* AFImageRequestOperation.m */; };
@@ -27,7 +27,7 @@
 		F8AD92E115D9A0B400402FE9 /* UIImageView+AFNetworking.m in Sources */ = {isa = PBXBuildFile; fileRef = F8AD92D715D9A0B400402FE9 /* UIImageView+AFNetworking.m */; };
 		F8AD92E715D9A0BB00402FE9 /* AFIncrementalStore.m in Sources */ = {isa = PBXBuildFile; fileRef = F8AD92E415D9A0BB00402FE9 /* AFIncrementalStore.m */; };
 		F8AD92E815D9A0BB00402FE9 /* AFRESTClient.m in Sources */ = {isa = PBXBuildFile; fileRef = F8AD92E615D9A0BB00402FE9 /* AFRESTClient.m */; };
-		F8AD92F815D9A2DB00402FE9 /* Tweet.m in Sources */ = {isa = PBXBuildFile; fileRef = F8AD92F715D9A2DB00402FE9 /* Tweet.m */; };
+		F8AD92F815D9A2DB00402FE9 /* Post.m in Sources */ = {isa = PBXBuildFile; fileRef = F8AD92F715D9A2DB00402FE9 /* Post.m */; };
 		F8AD92FB15D9A2E500402FE9 /* User.m in Sources */ = {isa = PBXBuildFile; fileRef = F8AD92FA15D9A2E500402FE9 /* User.m */; };
 		F8AFAFB215AB4F28003FE5BB /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F8AFAFB115AB4F28003FE5BB /* UIKit.framework */; };
 		F8AFAFB415AB4F28003FE5BB /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F8AFAFB315AB4F28003FE5BB /* Foundation.framework */; };
@@ -37,22 +37,22 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		F87CD18C15DAB2B200E4C166 /* TweetTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TweetTableViewCell.h; path = Classes/TweetTableViewCell.h; sourceTree = SOURCE_ROOT; };
-		F87CD18D15DAB2B200E4C166 /* TweetTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TweetTableViewCell.m; path = Classes/TweetTableViewCell.m; sourceTree = SOURCE_ROOT; };
+		F87CD18C15DAB2B200E4C166 /* PostTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PostTableViewCell.h; path = Classes/PostTableViewCell.h; sourceTree = SOURCE_ROOT; };
+		F87CD18D15DAB2B200E4C166 /* PostTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PostTableViewCell.m; path = Classes/PostTableViewCell.m; sourceTree = SOURCE_ROOT; };
 		F87CD19015DAB45100E4C166 /* profile-image-placeholder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "profile-image-placeholder.png"; sourceTree = "<group>"; };
 		F87CD19115DAB45100E4C166 /* profile-image-placeholder@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "profile-image-placeholder@2x.png"; sourceTree = "<group>"; };
 		F8874E7515B08AD30048680F /* Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Prefix.pch; sourceTree = SOURCE_ROOT; };
 		F8874E7615B08ADB0048680F /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = SOURCE_ROOT; };
-		F8874F0915B08B770048680F /* PublicTimelineViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PublicTimelineViewController.m; path = Classes/PublicTimelineViewController.m; sourceTree = SOURCE_ROOT; };
-		F8874F0C15B08B770048680F /* TwitterAPIClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TwitterAPIClient.m; path = Classes/TwitterAPIClient.m; sourceTree = SOURCE_ROOT; };
-		F8874F0D15B08B770048680F /* TwitterIncrementalStore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TwitterIncrementalStore.m; path = Classes/TwitterIncrementalStore.m; sourceTree = SOURCE_ROOT; };
-		F8874F1015B08B770048680F /* PublicTimelineViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PublicTimelineViewController.h; path = Classes/PublicTimelineViewController.h; sourceTree = SOURCE_ROOT; };
-		F8874F1215B08B770048680F /* TwitterAPIClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TwitterAPIClient.h; path = Classes/TwitterAPIClient.h; sourceTree = SOURCE_ROOT; };
-		F8874F1315B08B770048680F /* TwitterIncrementalStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TwitterIncrementalStore.h; path = Classes/TwitterIncrementalStore.h; sourceTree = SOURCE_ROOT; };
+		F8874F0915B08B770048680F /* GlobalStreamViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GlobalStreamViewController.m; path = Classes/GlobalStreamViewController.m; sourceTree = SOURCE_ROOT; };
+		F8874F0C15B08B770048680F /* AppDotNetAPIClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDotNetAPIClient.m; path = Classes/AppDotNetAPIClient.m; sourceTree = SOURCE_ROOT; };
+		F8874F0D15B08B770048680F /* AppDotNetIncrementalStore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDotNetIncrementalStore.m; path = Classes/AppDotNetIncrementalStore.m; sourceTree = SOURCE_ROOT; };
+		F8874F1015B08B770048680F /* GlobalStreamViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GlobalStreamViewController.h; path = Classes/GlobalStreamViewController.h; sourceTree = SOURCE_ROOT; };
+		F8874F1215B08B770048680F /* AppDotNetAPIClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDotNetAPIClient.h; path = Classes/AppDotNetAPIClient.h; sourceTree = SOURCE_ROOT; };
+		F8874F1315B08B770048680F /* AppDotNetIncrementalStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDotNetIncrementalStore.h; path = Classes/AppDotNetIncrementalStore.h; sourceTree = SOURCE_ROOT; };
 		F8874F1B15B08BD30048680F /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = SOURCE_ROOT; };
 		F8874F1C15B08BD30048680F /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = SOURCE_ROOT; };
 		F8874F1E15B08C2A0048680F /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = SOURCE_ROOT; };
-		F8874F2215B08CA80048680F /* Twitter.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Twitter.xcdatamodel; sourceTree = "<group>"; };
+		F8874F2215B08CA80048680F /* AppDotNet.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = AppDotNet.xcdatamodel; sourceTree = "<group>"; };
 		F8AD92C315D9A0B400402FE9 /* AFHTTPClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFHTTPClient.h; sourceTree = "<group>"; };
 		F8AD92C415D9A0B400402FE9 /* AFHTTPClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFHTTPClient.m; sourceTree = "<group>"; };
 		F8AD92C515D9A0B400402FE9 /* AFHTTPRequestOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFHTTPRequestOperation.h; sourceTree = "<group>"; };
@@ -76,11 +76,11 @@
 		F8AD92E415D9A0BB00402FE9 /* AFIncrementalStore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFIncrementalStore.m; sourceTree = "<group>"; };
 		F8AD92E515D9A0BB00402FE9 /* AFRESTClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFRESTClient.h; sourceTree = "<group>"; };
 		F8AD92E615D9A0BB00402FE9 /* AFRESTClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFRESTClient.m; sourceTree = "<group>"; };
-		F8AD92F615D9A2DB00402FE9 /* Tweet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Tweet.h; path = Classes/Tweet.h; sourceTree = SOURCE_ROOT; };
-		F8AD92F715D9A2DB00402FE9 /* Tweet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Tweet.m; path = Classes/Tweet.m; sourceTree = SOURCE_ROOT; };
+		F8AD92F615D9A2DB00402FE9 /* Post.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Post.h; path = Classes/Post.h; sourceTree = SOURCE_ROOT; };
+		F8AD92F715D9A2DB00402FE9 /* Post.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Post.m; path = Classes/Post.m; sourceTree = SOURCE_ROOT; };
 		F8AD92F915D9A2E500402FE9 /* User.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = User.h; path = Classes/User.h; sourceTree = SOURCE_ROOT; };
 		F8AD92FA15D9A2E500402FE9 /* User.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = User.m; path = Classes/User.m; sourceTree = SOURCE_ROOT; };
-		F8AFAFAD15AB4F28003FE5BB /* Twitter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Twitter.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F8AFAFAD15AB4F28003FE5BB /* App.net.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = App.net.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F8AFAFB115AB4F28003FE5BB /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		F8AFAFB315AB4F28003FE5BB /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		F8AFAFB515AB4F28003FE5BB /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -107,8 +107,8 @@
 		F87CD18A15DAB2A700E4C166 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				F87CD18C15DAB2B200E4C166 /* TweetTableViewCell.h */,
-				F87CD18D15DAB2B200E4C166 /* TweetTableViewCell.m */,
+				F87CD18C15DAB2B200E4C166 /* PostTableViewCell.h */,
+				F87CD18D15DAB2B200E4C166 /* PostTableViewCell.m */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -133,8 +133,8 @@
 		F8874E5915AF927D0048680F /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
-				F8874F1015B08B770048680F /* PublicTimelineViewController.h */,
-				F8874F0915B08B770048680F /* PublicTimelineViewController.m */,
+				F8874F1015B08B770048680F /* GlobalStreamViewController.h */,
+				F8874F0915B08B770048680F /* GlobalStreamViewController.m */,
 			);
 			name = Controllers;
 			sourceTree = "<group>";
@@ -142,9 +142,9 @@
 		F8874E5B15AF92830048680F /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				F8874F2115B08CA80048680F /* Twitter.xcdatamodeld */,
-				F8AD92F615D9A2DB00402FE9 /* Tweet.h */,
-				F8AD92F715D9A2DB00402FE9 /* Tweet.m */,
+				F8874F2115B08CA80048680F /* AppDotNet.xcdatamodeld */,
+				F8AD92F615D9A2DB00402FE9 /* Post.h */,
+				F8AD92F715D9A2DB00402FE9 /* Post.m */,
 				F8AD92F915D9A2E500402FE9 /* User.h */,
 				F8AD92FA15D9A2E500402FE9 /* User.m */,
 			);
@@ -193,7 +193,7 @@
 		F8AFAFA215AB4F28003FE5BB = {
 			isa = PBXGroup;
 			children = (
-				F8AFAFB915AB4F28003FE5BB /* Twitter */,
+				F8AFAFB915AB4F28003FE5BB /* AppDotNet */,
 				F87CD19415DAB45D00E4C166 /* Resources */,
 				F8AFAFB015AB4F28003FE5BB /* Frameworks */,
 				F8AFAFAE15AB4F28003FE5BB /* Products */,
@@ -204,7 +204,7 @@
 		F8AFAFAE15AB4F28003FE5BB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				F8AFAFAD15AB4F28003FE5BB /* Twitter.app */,
+				F8AFAFAD15AB4F28003FE5BB /* App.net.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -220,21 +220,21 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		F8AFAFB915AB4F28003FE5BB /* Twitter */ = {
+		F8AFAFB915AB4F28003FE5BB /* AppDotNet */ = {
 			isa = PBXGroup;
 			children = (
 				F8874F1C15B08BD30048680F /* AppDelegate.h */,
 				F8874F1B15B08BD30048680F /* AppDelegate.m */,
-				F8874F1215B08B770048680F /* TwitterAPIClient.h */,
-				F8874F0C15B08B770048680F /* TwitterAPIClient.m */,
-				F8874F1315B08B770048680F /* TwitterIncrementalStore.h */,
-				F8874F0D15B08B770048680F /* TwitterIncrementalStore.m */,
+				F8874F1215B08B770048680F /* AppDotNetAPIClient.h */,
+				F8874F0C15B08B770048680F /* AppDotNetAPIClient.m */,
+				F8874F1315B08B770048680F /* AppDotNetIncrementalStore.h */,
+				F8874F0D15B08B770048680F /* AppDotNetIncrementalStore.m */,
 				F8874E5B15AF92830048680F /* Models */,
 				F87CD18A15DAB2A700E4C166 /* Views */,
 				F8874E5915AF927D0048680F /* Controllers */,
 				F8AFAFBA15AB4F28003FE5BB /* Supporting Files */,
 			);
-			name = Twitter;
+			name = AppDotNet;
 			path = IncrementalStoreExample;
 			sourceTree = "<group>";
 		};
@@ -270,9 +270,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		F8AFAFAC15AB4F28003FE5BB /* Twitter */ = {
+		F8AFAFAC15AB4F28003FE5BB /* App.net */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = F8AFAFCA15AB4F28003FE5BB /* Build configuration list for PBXNativeTarget "Twitter" */;
+			buildConfigurationList = F8AFAFCA15AB4F28003FE5BB /* Build configuration list for PBXNativeTarget "App.net" */;
 			buildPhases = (
 				F8AFAFA915AB4F28003FE5BB /* Sources */,
 				F8AFAFAA15AB4F28003FE5BB /* Frameworks */,
@@ -282,9 +282,9 @@
 			);
 			dependencies = (
 			);
-			name = Twitter;
+			name = App.net;
 			productName = IncrementalStoreExample;
-			productReference = F8AFAFAD15AB4F28003FE5BB /* Twitter.app */;
+			productReference = F8AFAFAD15AB4F28003FE5BB /* App.net.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -296,7 +296,7 @@
 				CLASSPREFIX = AF;
 				LastUpgradeCheck = 0430;
 			};
-			buildConfigurationList = F8AFAFA715AB4F28003FE5BB /* Build configuration list for PBXProject "Twitter Example" */;
+			buildConfigurationList = F8AFAFA715AB4F28003FE5BB /* Build configuration list for PBXProject "Activity Stream Example" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -308,7 +308,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				F8AFAFAC15AB4F28003FE5BB /* Twitter */,
+				F8AFAFAC15AB4F28003FE5BB /* App.net */,
 			);
 		};
 /* End PBXProject section */
@@ -330,12 +330,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F8874F1615B08B770048680F /* PublicTimelineViewController.m in Sources */,
-				F8874F1915B08B770048680F /* TwitterAPIClient.m in Sources */,
-				F8874F1A15B08B770048680F /* TwitterIncrementalStore.m in Sources */,
+				F8478A69162729B80026615F /* AppDotNet.xcdatamodeld in Sources */,
+				F8874F1615B08B770048680F /* GlobalStreamViewController.m in Sources */,
+				F8874F1915B08B770048680F /* AppDotNetAPIClient.m in Sources */,
+				F8874F1A15B08B770048680F /* AppDotNetIncrementalStore.m in Sources */,
 				F8874F2015B08C4B0048680F /* AppDelegate.m in Sources */,
 				F8874F1F15B08C2A0048680F /* main.m in Sources */,
-				F8874F2315B08CA80048680F /* Twitter.xcdatamodeld in Sources */,
 				F8AD92D815D9A0B400402FE9 /* AFHTTPClient.m in Sources */,
 				F8AD92D915D9A0B400402FE9 /* AFHTTPRequestOperation.m in Sources */,
 				F8AD92DA15D9A0B400402FE9 /* AFImageRequestOperation.m in Sources */,
@@ -347,9 +347,9 @@
 				F8AD92E115D9A0B400402FE9 /* UIImageView+AFNetworking.m in Sources */,
 				F8AD92E715D9A0BB00402FE9 /* AFIncrementalStore.m in Sources */,
 				F8AD92E815D9A0BB00402FE9 /* AFRESTClient.m in Sources */,
-				F8AD92F815D9A2DB00402FE9 /* Tweet.m in Sources */,
+				F8AD92F815D9A2DB00402FE9 /* Post.m in Sources */,
 				F8AD92FB15D9A2E500402FE9 /* User.m in Sources */,
-				F87CD18E15DAB2B200E4C166 /* TweetTableViewCell.m in Sources */,
+				F87CD18E15DAB2B200E4C166 /* PostTableViewCell.m in Sources */,
 				F8B77D8E161E3F5400A88B7F /* ISO8601DateFormatter.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -427,7 +427,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		F8AFAFA715AB4F28003FE5BB /* Build configuration list for PBXProject "Twitter Example" */ = {
+		F8AFAFA715AB4F28003FE5BB /* Build configuration list for PBXProject "Activity Stream Example" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				F8AFAFC815AB4F28003FE5BB /* Debug */,
@@ -436,7 +436,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		F8AFAFCA15AB4F28003FE5BB /* Build configuration list for PBXNativeTarget "Twitter" */ = {
+		F8AFAFCA15AB4F28003FE5BB /* Build configuration list for PBXNativeTarget "App.net" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				F8AFAFCB15AB4F28003FE5BB /* Debug */,
@@ -448,13 +448,13 @@
 /* End XCConfigurationList section */
 
 /* Begin XCVersionGroup section */
-		F8874F2115B08CA80048680F /* Twitter.xcdatamodeld */ = {
+		F8874F2115B08CA80048680F /* AppDotNet.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
-				F8874F2215B08CA80048680F /* Twitter.xcdatamodel */,
+				F8874F2215B08CA80048680F /* AppDotNet.xcdatamodel */,
 			);
-			currentVersion = F8874F2215B08CA80048680F /* Twitter.xcdatamodel */;
-			path = Twitter.xcdatamodeld;
+			currentVersion = F8874F2215B08CA80048680F /* AppDotNet.xcdatamodel */;
+			path = AppDotNet.xcdatamodeld;
 			sourceTree = SOURCE_ROOT;
 			versionGroupType = wrapper.xcdatamodel;
 		};

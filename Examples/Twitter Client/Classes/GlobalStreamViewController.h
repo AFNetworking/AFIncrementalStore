@@ -1,6 +1,6 @@
-// TweetTableViewCell.h
+// ArtistsListViewController.h
 //
-// Copyright (c) 2012 Mattt Thompson (http://mattt.me/)
+// Copyright (c) 2012 Mattt Thompson (http://mattt.me)
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -22,12 +22,5 @@
 
 #import <UIKit/UIKit.h>
 
-@class Tweet;
-
-@interface TweetTableViewCell : UITableViewCell
-
-@property (nonatomic, strong) Tweet *tweet;
-
-+ (CGFloat)heightForCellWithTweet:(Tweet *)tweet;
-
+@interface GlobalStreamViewController : UITableViewController
 @end

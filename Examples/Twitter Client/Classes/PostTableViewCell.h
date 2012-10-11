@@ -1,6 +1,6 @@
-// SongAPIClient.h
+// PostTableViewCell.h
 //
-// Copyright (c) 2012 Mattt Thompson (http://mattt.me)
+// Copyright (c) 2012 Mattt Thompson (http://mattt.me/)
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,11 +20,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "AFRESTClient.h"
-#import "AFIncrementalStore.h"
+#import <UIKit/UIKit.h>
 
-@interface TwitterAPIClient : AFRESTClient <AFIncrementalStoreHTTPClient>
+@class Post;
 
-+ (TwitterAPIClient *)sharedClient;
+@interface PostTableViewCell : UITableViewCell
+
+@property (nonatomic, strong) Post *post;
+
++ (CGFloat)heightForCellWithPost:(Post *)post;
 
 @end

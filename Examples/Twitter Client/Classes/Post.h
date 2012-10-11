@@ -1,4 +1,4 @@
-// User.m
+// Post.h
 //
 // Copyright (c) 2012 Mattt Thompson (http://mattt.me)
 //
@@ -20,14 +20,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "User.h"
+#import <CoreData/CoreData.h>
 
-@implementation User
+@class User;
 
-@dynamic userID;
-@dynamic username;
-@dynamic avatarImageURLString;
+@interface Post : NSManagedObject
 
-@dynamic posts;
+@property NSNumber *postID;
+@property NSString *text;
+@property NSDate *createdAt;
+
+@property User *user;
 
 @end

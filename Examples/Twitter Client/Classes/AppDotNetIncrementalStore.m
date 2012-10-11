@@ -20,10 +20,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "TwitterIncrementalStore.h"
-#import "TwitterAPIClient.h"
+#import "AppDotNetIncrementalStore.h"
+#import "AppDotNetAPIClient.h"
 
-@implementation TwitterIncrementalStore
+@implementation AppDotNetIncrementalStore
 
 + (void)initialize {
     [NSPersistentStoreCoordinator registerStoreClass:self forStoreType:[self type]];
@@ -34,11 +34,11 @@
 }
 
 + (NSManagedObjectModel *)model {
-    return [[NSManagedObjectModel alloc] initWithContentsOfURL:[[NSBundle mainBundle] URLForResource:@"Twitter" withExtension:@"xcdatamodeld"]];
+    return [[NSManagedObjectModel alloc] initWithContentsOfURL:[[NSBundle mainBundle] URLForResource:@"AppDotNet" withExtension:@"xcdatamodeld"]];
 }
 
 - (id<AFIncrementalStoreHTTPClient>)HTTPClient {
-    return [TwitterAPIClient sharedClient];
+    return [AppDotNetAPIClient sharedClient];
 }
 
 @end

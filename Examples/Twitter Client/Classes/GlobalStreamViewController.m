@@ -21,16 +21,16 @@
 // THE SOFTWARE.
 
 #import <CoreData/CoreData.h>
-#import "PublicTimelineViewController.h"
+#import "GlobalStreamViewController.h"
 
-#import "Tweet.h"
+#import "Post.h"
 #import "User.h"
 
-#import "TweetTableViewCell.h"
+#import "PostTableViewCell.h"
 
 #import "UIImageView+AFNetworking.h"
 
-@interface PublicTimelineViewController () <NSFetchedResultsControllerDelegate> {
+@interface GlobalStreamViewController () <NSFetchedResultsControllerDelegate> {
     NSFetchedResultsController *_fetchedResultsController;
 }
 
@@ -38,7 +38,7 @@
 
 @end
 
-@implementation PublicTimelineViewController
+@implementation GlobalStreamViewController
 
 - (void)refetchData {
     [_fetchedResultsController performSelectorOnMainThread:@selector(performFetch:) withObject:nil waitUntilDone:YES modes:@[ NSRunLoopCommonModes ]];
@@ -53,10 +53,10 @@
         
     self.tableView.rowHeight = 70.0f;
     
-    NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"Tweet"];
-    fetchRequest.sortDescriptors = [NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"tweetID" ascending:NO]];
+    NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"Post"];
+    fetchRequest.sortDescriptors = [NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"postID" ascending:NO]];
     fetchRequest.fetchLimit = 50;
-    _fetchedResultsController = [[NSFetchedResultsController alloc] initWithFetchRequest:fetchRequest managedObjectContext:[(id)[[UIApplication sharedApplication] delegate] managedObjectContext] sectionNameKeyPath:nil cacheName:@"PublicTimeline"];
+    _fetchedResultsController = [[NSFetchedResultsController alloc] initWithFetchRequest:fetchRequest managedObjectContext:[(id)[[UIApplication sharedApplication] delegate] managedObjectContext] sectionNameKeyPath:nil cacheName:@"GlobalStream"];
     _fetchedResultsController.delegate = self;
     [self refetchData];
     
@@ -76,9 +76,9 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     static NSString *CellIdentifier = @"Cell";
     
-    TweetTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    PostTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (!cell) {
-        cell = [[TweetTableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier];
+        cell = [[PostTableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier];
     }
     
     [self configureCell:cell atIndexPath:indexPath];
@@ -90,7 +90,7 @@
           atIndexPath:(NSIndexPath *)indexPath
 {
     @try {
-        [(TweetTableViewCell *)cell setTweet:(Tweet *)[_fetchedResultsController objectAtIndexPath:indexPath]];
+        [(PostTableViewCell *)cell setPost:(Post *)[_fetchedResultsController objectAtIndexPath:indexPath]];
     }
     @catch (NSException *exception) {
         NSLog(@"Exception: %@", exception);
@@ -100,7 +100,7 @@
 #pragma mark - UITableViewDelegate
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return [TweetTableViewCell heightForCellWithTweet:(Tweet *)[_fetchedResultsController objectAtIndexPath:indexPath]];
+    return [PostTableViewCell heightForCellWithPost:(Post *)[_fetchedResultsController objectAtIndexPath:indexPath]];
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {

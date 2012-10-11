@@ -21,8 +21,8 @@
 // THE SOFTWARE.
 
 #import "AppDelegate.h"
-#import "TwitterIncrementalStore.h"
-#import "PublicTimelineViewController.h"
+#import "AppDotNetIncrementalStore.h"
+#import "GlobalStreamViewController.h"
 
 @implementation AppDelegate
 @synthesize window = _window;
@@ -37,7 +37,7 @@
     
     [[AFNetworkActivityIndicatorManager sharedManager] setEnabled:YES];
     
-    PublicTimelineViewController *viewController = [[PublicTimelineViewController alloc] initWithStyle:UITableViewStylePlain];
+    GlobalStreamViewController *viewController = [[GlobalStreamViewController alloc] initWithStyle:UITableViewStylePlain];
     self.navigationController = [[UINavigationController alloc] initWithRootViewController:viewController];
     self.navigationController.navigationBar.tintColor = [UIColor darkGrayColor];
 
@@ -91,7 +91,7 @@
         return __managedObjectModel;
     }
     
-    NSURL *modelURL = [[NSBundle mainBundle] URLForResource:@"Twitter" withExtension:@"momd"];
+    NSURL *modelURL = [[NSBundle mainBundle] URLForResource:@"AppDotNet" withExtension:@"momd"];
     __managedObjectModel = [[NSManagedObjectModel alloc] initWithContentsOfURL:modelURL];
     
     return __managedObjectModel;
@@ -106,9 +106,9 @@
     
     __persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:[self managedObjectModel]];
     
-    AFIncrementalStore *incrementalStore = (AFIncrementalStore *)[__persistentStoreCoordinator addPersistentStoreWithType:[TwitterIncrementalStore type] configuration:nil URL:nil options:nil error:nil];
+    AFIncrementalStore *incrementalStore = (AFIncrementalStore *)[__persistentStoreCoordinator addPersistentStoreWithType:[AppDotNetIncrementalStore type] configuration:nil URL:nil options:nil error:nil];
     
-    NSURL *storeURL = [[self applicationDocumentsDirectory] URLByAppendingPathComponent:@"Twitter.sqlite"];
+    NSURL *storeURL = [[self applicationDocumentsDirectory] URLByAppendingPathComponent:@"AppDotNet.sqlite"];
     
     NSDictionary *options = @{
         NSInferMappingModelAutomaticallyOption : @(YES),
@@ -121,7 +121,7 @@
         abort();
     }
     
-    NSLog(@"SQLite URL: %@", [[self applicationDocumentsDirectory] URLByAppendingPathComponent:@"Twitter.sqlite"]);
+    NSLog(@"SQLite URL: %@", storeURL);
     
     return __persistentStoreCoordinator;
 }
