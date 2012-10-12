@@ -62,7 +62,17 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
 @dynamic af_resourceIdentifier;
 
 - (NSString *)af_resourceIdentifier {
-    return (NSString *)objc_getAssociatedObject(self, &kAFResourceIdentifierObjectKey);
+
+    NSString *identifier = (NSString *)objc_getAssociatedObject(self, &kAFResourceIdentifierObjectKey);
+    
+    if (!identifier) {
+        if ([self.objectID.persistentStore isKindOfClass:[AFIncrementalStore class]]) {
+            return [(AFIncrementalStore *)self.objectID.persistentStore referenceObjectForObjectID:self.objectID];
+        }
+    }
+    
+    return identifier;
+    
 }
 
 - (void)af_setResourceIdentifier:(NSString *)resourceIdentifier {
@@ -345,6 +355,7 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
             for (NSString *resourceIdentifier in [results valueForKeyPath:kAFIncrementalStoreResourceIdentifierAttributeName]) {
                 NSManagedObjectID *objectID = [self objectIDForEntity:fetchRequest.entity withResourceIdentifier:resourceIdentifier];
                 NSManagedObject *object = [context objectWithID:objectID];
+                object.af_resourceIdentifier = resourceIdentifier;
                 [mutableObjects addObject:object];
             }
             
