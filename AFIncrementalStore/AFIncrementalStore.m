@@ -195,10 +195,13 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
         return nil;
     }
     
-    NSManagedObjectID *objectID = [_registeredObjectIDsByResourceIdentifier objectForKey:resourceIdentifier];
+    NSManagedObjectID *objectID = _registeredObjectIDsByResourceIdentifier[entity.name][resourceIdentifier];
+    
     if (objectID == nil) {
         objectID = [self newObjectIDForEntity:entity referenceObject:resourceIdentifier];
     }
+    
+    NSCParameterAssert([objectID.entity.name isEqualToString:entity.name]);
     
     return objectID;
 }
@@ -621,14 +624,19 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
             continue;
         }
         
-        [_registeredObjectIDsByResourceIdentifier setObject:objectID forKey:key];
+        NSMutableDictionary *objectIDsByResourceIdentifier = _registeredObjectIDsByResourceIdentifier[objectID.entity.name];
+        if (!objectIDsByResourceIdentifier) {
+            objectIDsByResourceIdentifier = [NSMutableDictionary dictionary];
+            _registeredObjectIDsByResourceIdentifier[objectID.entity.name] = objectIDsByResourceIdentifier;
+        }
+        objectIDsByResourceIdentifier[key] = objectID;
     }
 }
 
 - (void)managedObjectContextDidUnregisterObjectsWithIDs:(NSArray *)objectIDs {
     [super managedObjectContextDidUnregisterObjectsWithIDs:objectIDs];
     for (NSManagedObjectID *objectID in objectIDs) {
-        [_registeredObjectIDsByResourceIdentifier removeObjectForKey:[self referenceObjectForObjectID:objectID]];
+        [_registeredObjectIDsByResourceIdentifier[objectID.entity.name] removeObjectForKey:[self referenceObjectForObjectID:objectID]];
     }
 }
 
