@@ -134,7 +134,7 @@ static NSString * AFPluralizedString(NSString *string) {
     NSMutableDictionary *mutableAttributes = [NSMutableDictionary dictionary];
     [entity.attributesByName enumerateKeysAndObjectsUsingBlock:^(NSString *attributeName, NSAttributeDescription *attribute, BOOL *stop) {
     
-        id value = [mutableAttributes objectForKey:attributeName];
+        id value = [representation objectForKey:attributeName];
         if (value) {
             if (![value isEqual:[NSNull null]]) {
                 [mutableAttributes setValue:[self valueForObject:value inAttribute:attribute] forKey:attributeName];
