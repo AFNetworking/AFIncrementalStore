@@ -249,11 +249,13 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
         NSDictionary *relationshipRepresentations = [self.HTTPClient representationsForRelationshipsFromRepresentation:representation ofEntity:entity fromResponse:response];
         for (NSString *relationshipName in relationshipRepresentations) {
             NSRelationshipDescription *relationship = [[entity relationshipsByName] valueForKey:relationshipName];
-            if (!relationship) {
+            id relationshipValue = [relationshipRepresentations objectForKey:relationshipName];
+            if (!relationship ||
+                (relationship.isOptional && (!relationshipValue || relationshipValue == [NSNull null]))) {
                 continue;
             }
             
-            [self insertOrUpdateObjectsFromRepresentations:[relationshipRepresentations objectForKey:relationshipName] ofEntity:relationship.destinationEntity fromResponse:response withContext:context error:error completionBlock:^(NSArray *managedObjects, NSArray *backingObjects) {
+            [self insertOrUpdateObjectsFromRepresentations:relationshipValue ofEntity:relationship.destinationEntity fromResponse:response withContext:context error:error completionBlock:^(NSArray *managedObjects, NSArray *backingObjects) {
                 if ([relationship isToMany]) {
                     if ([relationship isOrdered]) {
                         [managedObject setValue:[NSOrderedSet orderedSetWithArray:managedObjects] forKey:relationship.name];
