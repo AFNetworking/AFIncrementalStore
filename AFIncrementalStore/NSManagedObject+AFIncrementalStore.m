@@ -12,7 +12,10 @@ static char kAFResourceIdentifierObjectKey;
     
     if (!identifier) {
         if ([self.objectID.persistentStore isKindOfClass:[AFIncrementalStore class]]) {
-            return [(AFIncrementalStore *)self.objectID.persistentStore referenceObjectForObjectID:self.objectID];
+            id referenceObject = [(AFIncrementalStore *)self.objectID.persistentStore referenceObjectForObjectID:self.objectID];
+            if ([referenceObject isKindOfClass:[NSString class]]) {
+                return referenceObject;
+            }
         }
     }
     
