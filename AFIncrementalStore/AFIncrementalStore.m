@@ -211,6 +211,13 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     } else if ([representationOrArrayOfRepresentations isKindOfClass:[NSDictionary class]]) {
         representations = [NSArray arrayWithObject:representationOrArrayOfRepresentations];
     }
+    
+    if (![representations count]) {
+        if (completionBlock) {
+            completionBlock(nil, nil);
+        }
+        return;
+    }
 
     NSUInteger numberOfRepresentations = [representations count];
     NSMutableArray *mutableManagedObjects = [NSMutableArray arrayWithCapacity:numberOfRepresentations];
@@ -242,7 +249,7 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
             
             id relationshipRepresentation = [relationshipRepresentations objectForKey:relationshipName];
             
-            if (!relationshipRepresentation || [relationshipRepresentation isEqual:[NSNull null]]) {
+            if (!relationshipRepresentation || [relationshipRepresentation isEqual:[NSNull null]] || ![relationshipRepresentation count]) {
                 [managedObject setValue:nil forKey:relationshipName];
                 [backingObject setValue:nil forKey:relationshipName];
                 continue;
