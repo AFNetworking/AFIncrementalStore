@@ -253,6 +253,13 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
         @throw [NSException exceptionWithName:AFIncrementalStoreRelationshipCardinalityException reason:@"Can not understand the representations." userInfo:nil];
     
     }
+    
+    if (![representations count]) {
+        if (completionBlock) {
+            completionBlock(nil, nil);
+        }
+        return;
+    }
 
     NSUInteger numberOfRepresentations = [representations count];
     NSMutableArray *mutableManagedObjects = [NSMutableArray arrayWithCapacity:numberOfRepresentations];
@@ -284,7 +291,7 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
             
             id relationshipRepresentation = [relationshipRepresentations objectForKey:relationshipName];
             
-            if (!relationshipRepresentation || [relationshipRepresentation isEqual:[NSNull null]]) {
+            if (!relationshipRepresentation || [relationshipRepresentation isEqual:[NSNull null]] || ![relationshipRepresentation count]) {
                 [managedObject setValue:nil forKey:relationshipName];
                 [backingObject setValue:nil forKey:relationshipName];
                 continue;
@@ -349,9 +356,13 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                         
             [childContext performBlock:^{
                 [self insertOrUpdateObjectsFromRepresentations:representationOrArrayOfRepresentations ofEntity:fetchRequest.entity fromResponse:operation.response withContext:childContext error:error completionBlock:^(NSArray *managedObjects, NSArray *backingObjects) {
+                
                     if (![[self backingManagedObjectContext] save:error] || ![childContext save:error]) {
-                        NSLog(@"Error: %@", *error);
+                        @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:@"Saving failed." userInfo:@{
+                            NSUnderlyingErrorKey: *error
+                        }];
                     }
+                    
                 }];
                 
                 [self notifyManagedObjectContext:context aboutRequestOperation:operation forFetchRequest:fetchRequest];
