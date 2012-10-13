@@ -349,9 +349,13 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                         
             [childContext performBlock:^{
                 [self insertOrUpdateObjectsFromRepresentations:representationOrArrayOfRepresentations ofEntity:fetchRequest.entity fromResponse:operation.response withContext:childContext error:error completionBlock:^(NSArray *managedObjects, NSArray *backingObjects) {
+                
                     if (![[self backingManagedObjectContext] save:error] || ![childContext save:error]) {
-                        NSLog(@"Error: %@", *error);
+                        @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:@"Saving failed." userInfo:@{
+                            NSUnderlyingErrorKey: *error
+                        }];
                     }
+                    
                 }];
                 
                 [self notifyManagedObjectContext:context aboutRequestOperation:operation forFetchRequest:fetchRequest];
