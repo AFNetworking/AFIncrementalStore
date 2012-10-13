@@ -23,13 +23,23 @@
 	
 	} else if ([value isKindOfClass:[NSString class]]) {
 	
-		static dispatch_once_t onceToken;
-		static ISO8601DateFormatter *dateFormatter;
-		dispatch_once(&onceToken, ^{
-			dateFormatter = [ISO8601DateFormatter new];
-		});
+		//	Can not dispatch_once
+		//	This method gets called from multiple threads
+		//	and the date formatter has internal state
+		//	that gets mingled
 		
-		return [dateFormatter dateFromString:(NSString *)value];
+		NSString * const dateFormatterKey = NSStringFromSelector(_cmd);
+		NSMutableDictionary *threadDictionary = [[NSThread currentThread] threadDictionary];
+		ISO8601DateFormatter *dateFormatter = [threadDictionary objectForKey:dateFormatterKey];
+		if (!dateFormatter) {
+			dateFormatter = [ISO8601DateFormatter new];
+			dateFormatter.includeTime = YES;
+			[threadDictionary setObject:dateFormatter forKey:dateFormatterKey];
+		}
+		
+		id transformedValue = [dateFormatter dateFromString:(NSString *)value];
+		NSCParameterAssert([transformedValue isKindOfClass:[[self class] transformedValueClass]]);
+		return transformedValue;
 	
 	}
 	
