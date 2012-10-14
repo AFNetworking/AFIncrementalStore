@@ -416,12 +416,16 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                         }];
                     }
                     
-                    for (NSManagedObject *childObject in childObjects) {
-                        NSManagedObject *rootObject = [context objectWithID:childObject.objectID];
-                        [rootObject willChangeValueForKey:nil];
-                        [rootObject.managedObjectContext refreshObject:rootObject mergeChanges:NO];
-                        [rootObject didChangeValueForKey:nil];
-                    }
+                    [context performBlock:^{
+                        
+                        for (NSManagedObject *childObject in childObjects) {
+                            NSManagedObject *rootObject = [context objectWithID:childObject.objectID];
+                            [rootObject willChangeValueForKey:@"self"];
+                            [context refreshObject:rootObject mergeChanges:NO];
+                            [rootObject didChangeValueForKey:@"self"];
+                        }
+                    
+                    }];
                     
                 }];
                 
