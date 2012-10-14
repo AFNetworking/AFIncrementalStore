@@ -577,7 +577,11 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     fetchRequest.propertiesToFetch = [[[NSEntityDescription entityForName:fetchRequest.entityName inManagedObjectContext:context] attributesByName] allKeys];
     fetchRequest.predicate = [NSPredicate predicateWithFormat:@"%K = %@", kAFIncrementalStoreResourceIdentifierAttributeName, [self referenceObjectForObjectID:objectID]];
     
-    NSArray *results = [[self backingManagedObjectContext] executeFetchRequest:fetchRequest error:error];
+    __block NSArray *results;
+    NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
+    [backingContext performBlockAndWait:^{
+        results = [backingContext executeFetchRequest:fetchRequest error:error];
+    }];
     NSDictionary *attributeValues = [results lastObject] ?: [NSDictionary dictionary];
 
     NSIncrementalStoreNode *node = [[NSIncrementalStoreNode alloc] initWithObjectID:objectID withValues:attributeValues version:1];
