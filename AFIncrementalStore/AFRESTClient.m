@@ -21,6 +21,7 @@
 // THE SOFTWARE.
 
 #import "AFRESTClient.h"
+#import "AFRESTClient+ValueTransforming.h"
 #import "ISO8601DateFormatter.h"
 
 static NSString * AFPluralizedString(NSString *string) {
@@ -110,7 +111,13 @@ static NSString * AFPluralizedString(NSString *string) {
     if (key) {
         id value = [representation valueForKey:key];
         if (value) {
-            return [value description];
+            if ([value isKindOfClass:[NSString class]]) {
+                return (NSString *)value;
+            } else if ([value isKindOfClass:[NSNumber class]]) {
+                return [(NSNumber *)value stringValue];
+            } else {
+                return [value description];
+            }
         }
     }
     
@@ -121,35 +128,21 @@ static NSString * AFPluralizedString(NSString *string) {
                                      ofEntity:(NSEntityDescription *)entity
                                  fromResponse:(NSHTTPURLResponse *)response
 {
-    static ISO8601DateFormatter *_iso8601DateFormatter = nil;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        _iso8601DateFormatter = [[ISO8601DateFormatter alloc] init];
-    });
-    
-    if ([representation isEqual:[NSNull null]]) {
+    if (!representation || [representation isEqual:[NSNull null]])
         return nil;
-    }
     
-    NSMutableDictionary *mutableAttributes = [representation mutableCopy];
-    @autoreleasepool {
-        NSMutableSet *mutableKeys = [NSMutableSet setWithArray:[representation allKeys]];
-        [mutableKeys minusSet:[NSSet setWithArray:[[entity propertiesByName] allKeys]]];
-        [mutableAttributes removeObjectsForKeys:[mutableKeys allObjects]];
-    }
+    NSMutableDictionary *mutableAttributes = [NSMutableDictionary dictionary];
+    [entity.attributesByName enumerateKeysAndObjectsUsingBlock:^(NSString *attributeName, NSAttributeDescription *attribute, BOOL *stop) {
     
-    NSSet *keysWithNestedValues = [mutableAttributes keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop) {
-        return [obj isKindOfClass:[NSArray class]] || [obj isKindOfClass:[NSDictionary class]];
-    }];
-    [mutableAttributes removeObjectsForKeys:[keysWithNestedValues allObjects]];
-    
-    [[entity attributesByName] enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
-        if ([(NSAttributeDescription *)obj attributeType] == NSDateAttributeType) {
-            id value = [mutableAttributes valueForKey:key];
-            if (value && ![value isEqual:[NSNull null]]) {
-                [mutableAttributes setValue:[_iso8601DateFormatter dateFromString:value] forKey:key];
+        id value = [representation objectForKey:attributeName];
+        if (value) {
+            if (![value isEqual:[NSNull null]]) {
+                [mutableAttributes setValue:[self valueForObject:value inAttribute:attribute] forKey:attributeName];
+            } else {
+                [mutableAttributes setValue:value forKey:attributeName];
             }
         }
+        
     }];
     
     return mutableAttributes;
