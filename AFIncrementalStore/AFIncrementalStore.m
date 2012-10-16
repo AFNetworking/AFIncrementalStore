@@ -698,6 +698,12 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
 {
 
     if ([self shouldFetchRemoteValuesForRelationship:relationship forObjectWithID:objectID withContext:context]) {
+    
+        [self fetchNewValueForRelationship:relationship forObjectWithID:objectID withContext:context usingBlock:^(id representationOrRepresentations, NSURLResponse *response, NSError *error) {
+            
+            //  ?
+            
+        }];
         
     }
     
@@ -763,8 +769,10 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
             representations = [NSArray arrayWithObject:representationOrArrayOfRepresentations];
         }
         
-        if (![representations count])
-        return;
+        if (![representations count]) {
+            block(responseObject, operation.response, nil);
+            return;
+        }
         
         NSManagedObjectContext *childContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
         childContext.parentContext = context;
@@ -774,16 +782,19 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
             
             [self insertOrUpdateObjectsFromRepresentations:representationOrArrayOfRepresentations ofEntity:relationship.destinationEntity fromResponse:operation.response withContext:childContext error:nil completionBlock:^(NSArray *managedObjects, NSArray *backingObjects) {
             
-                        NSManagedObject *managedObject = [childContext objectWithID:objectID];
-                        NSManagedObject *backingObject = [[self backingManagedObjectContext] existingObjectWithID:objectID error:nil];
+                NSManagedObject *managedObject = [childContext objectWithID:objectID];
+                NSString *referenceObject = [self referenceObjectForObjectID:objectID];
+                NSManagedObjectID *backingObjectID = [self backingObjectIDForEntity:objectID.entity resourceIdentifier:referenceObject inContext:self.backingManagedObjectContext error:nil];
+                
+                        NSManagedObject *backingObject = [[self backingManagedObjectContext] existingObjectWithID:backingObjectID error:nil];
                         
                         if ([relationship isToMany]) {
                             if ([relationship isOrdered]) {
                                 [managedObject setValue:[NSOrderedSet orderedSetWithArray:managedObjects] forKey:relationship.name];
-                                [backingObject setValue:[NSOrderedSet orderedSetWithArray:managedObjects] forKey:relationship.name];
+                                [backingObject setValue:[NSOrderedSet orderedSetWithArray:backingObjects] forKey:relationship.name];
                             } else {
                                 [managedObject setValue:[NSSet setWithArray:managedObjects] forKey:relationship.name];
-                                [backingObject setValue:[NSSet setWithArray:managedObjects] forKey:relationship.name];
+                                [backingObject setValue:[NSSet setWithArray:backingObjects] forKey:relationship.name];
                             }
                         } else {
                             [managedObject setValue:[managedObjects lastObject] forKey:relationship.name];
@@ -812,7 +823,9 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                         if (!childContextDidSave) {
                             NSLog(@"%s: %@", __PRETTY_FUNCTION__, childContextSavingError);
                         }
-                        
+                
+                        block(responseObject, operation.response, nil);
+                
                         [[NSNotificationCenter defaultCenter] removeObserver:observer];
                         
                     }];
