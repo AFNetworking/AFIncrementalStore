@@ -18,4 +18,5 @@ Pod::Spec.new do |s|
   s.requires_arc = true
   
   s.dependency 'AFNetworking', '>= 0.9.0'
+  s.dependency 'ISO8601DateFormatter'
 end
