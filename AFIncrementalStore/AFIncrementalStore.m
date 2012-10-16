@@ -584,6 +584,10 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     fetchRequest.fetchLimit = 1;
     fetchRequest.includesSubentities = NO;
     fetchRequest.propertiesToFetch = [[[NSEntityDescription entityForName:fetchRequest.entityName inManagedObjectContext:context] attributesByName] allKeys];
+    
+    //  Attempting to fetch an empty entity would cause issues
+    NSCParameterAssert([fetchRequest.propertiesToFetch count]);
+    
     fetchRequest.predicate = [NSPredicate predicateWithFormat:@"%K = %@", kAFIncrementalStoreResourceIdentifierAttributeName, [self referenceObjectForObjectID:objectID]];
     
     __block NSArray *results;
