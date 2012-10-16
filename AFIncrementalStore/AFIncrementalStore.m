@@ -304,7 +304,8 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     NSURLRequest *request = [self.HTTPClient requestForFetchRequest:fetchRequest withContext:context];
     if ([request URL]) {
         AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, id responseObject) {
-            id representationOrArrayOfRepresentations = [self.HTTPClient representationOrArrayOfRepresentationsFromResponseObject:responseObject];
+            id representationOrArrayOfRepresentations = [self.HTTPClient representationOrArrayOfRepresentationsFromResponseObject:responseObject
+                                                                                                                        operation:operation];
     
             NSManagedObjectContext *childContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
             childContext.parentContext = context;
@@ -530,7 +531,8 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
             }];
             
             AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, id responseObject) {
-                id representationOrArrayOfRepresentations = [self.HTTPClient representationOrArrayOfRepresentationsFromResponseObject:responseObject];
+                id representationOrArrayOfRepresentations = [self.HTTPClient representationOrArrayOfRepresentationsFromResponseObject:responseObject
+                                                                                                                            operation:operation];
                 
                 NSArray *representations = nil;
                 if ([representationOrArrayOfRepresentations isKindOfClass:[NSArray class]]) {

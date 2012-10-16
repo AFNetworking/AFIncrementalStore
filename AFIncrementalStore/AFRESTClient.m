@@ -52,7 +52,8 @@ static NSString * AFPluralizedString(NSString *string) {
 
 #pragma mark Read Methods
 
-- (id)representationOrArrayOfRepresentationsFromResponseObject:(id)responseObject {
+- (id)representationOrArrayOfRepresentationsFromResponseObject:(id)responseObject
+                                                     operation:(AFHTTPRequestOperation *)operation {
     if ([responseObject isKindOfClass:[NSArray class]]) {
         return responseObject;
     } else if ([responseObject isKindOfClass:[NSDictionary class]]) {
