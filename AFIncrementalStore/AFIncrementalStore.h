@@ -122,10 +122,12 @@
  @discussion For example, if `GET /users` returned an `NSDictionary` with an array of users keyed on `"users"`, this method would return the keyed array. Conversely, if `GET /users/123` returned a dictionary with all of the atributes of the requested user, this method would simply return that dictionary.
 
  @param responseObject The response object returned from the server.
+ @param operation The request operation used for the HTTP request.
  
  @return An `NSDictionary` or an `NSArray` of `NSDictionaries` containing the resource representations.
  */
-- (id)representationOrArrayOfRepresentationsFromResponseObject:(id)responseObject;
+- (id)representationOrArrayOfRepresentationsFromResponseObject:(id)responseObject
+                                                     operation:(AFHTTPRequestOperation *)operation;
 
 /**
  Returns an `NSDictionary` containing the representations of associated objects found within the representation of a response object, keyed by their relationship name.
