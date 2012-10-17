@@ -422,16 +422,11 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
             
             NSManagedObject *rootObject = [parentContext objectWithID:registeredManagedObject.objectID];
             
-            NSLog(@"rootObject was %@", rootObject);
-
             [rootObject willChangeValueForKey:@"self"];
             [parentContext refreshObject:rootObject mergeChanges:NO];
             [rootObject didChangeValueForKey:@"self"];
             
-            NSLog(@"%s %@: %@", __PRETTY_FUNCTION__, rootObject, [rootObject changedValues]);
             NSCParameterAssert(![[rootObject changedValues] count]);
-            
-            NSLog(@"rootObject is %@", rootObject);
             
         }
 
@@ -441,17 +436,10 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
         
         for (NSManagedObject *registeredManagedObject in registeredManagedObjects) {
             
-            NSLog(@"registeredManagedObject was %@", registeredManagedObject);
-            
             [registeredManagedObject willChangeValueForKey:@"self"];
             [managedContext refreshObject:registeredManagedObject mergeChanges:NO];
             [registeredManagedObject didChangeValueForKey:@"self"];
             NSCParameterAssert(![[registeredManagedObject changedValues] count]);
-            
-            NSLog(@"%s %@: %@", __PRETTY_FUNCTION__, registeredManagedObject, [registeredManagedObject changedValues]);
-            NSCParameterAssert(![[registeredManagedObject changedValues] count]);
-            
-            NSLog(@"registeredManagedObject is %@", registeredManagedObject);
             
         }
         
