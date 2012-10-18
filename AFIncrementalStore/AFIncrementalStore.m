@@ -376,24 +376,39 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     }
 }
 
-- (id)executeRequest:(NSPersistentStoreRequest *)persistentStoreRequest
-         withContext:(NSManagedObjectContext *)context
-               error:(NSError *__autoreleasing *)error
-{
-    if (persistentStoreRequest.requestType == NSFetchRequestType) {
-        return [self executeFetchRequest:(NSFetchRequest *)persistentStoreRequest withContext:context error:error];
-    } else if (persistentStoreRequest.requestType == NSSaveRequestType) {
-        return [self executeSaveChangesRequest:(NSSaveChangesRequest *)persistentStoreRequest withContext:context error:error];
+- (id) executeRequest:(NSPersistentStoreRequest *)persistentStoreRequest withContext:(NSManagedObjectContext *)context error:(NSError *__autoreleasing *)error {
+    
+    NSPersistentStoreRequestType type = persistentStoreRequest.requestType;
+    
+    if (type == NSFetchRequestType) {
+        
+        NSFetchRequest *fetchRequest = (NSFetchRequest *)persistentStoreRequest;
+        NSCParameterAssert([fetchRequest isKindOfClass:[NSFetchRequest class]]);
+        
+        return [self executeFetchRequest:fetchRequest withContext:context error:error];
+        
+    } else if (type == NSSaveRequestType) {
+        
+        NSSaveChangesRequest *saveChangesRequest = (NSSaveChangesRequest *)persistentStoreRequest;
+        NSCParameterAssert([saveChangesRequest isKindOfClass:[NSSaveChangesRequest class]]);
+        
+        return [self executeSaveChangesRequest:saveChangesRequest withContext:context error:error];
+        
     } else {
-        NSMutableDictionary *mutableUserInfo = [NSMutableDictionary dictionary];
-        [mutableUserInfo setValue:[NSString stringWithFormat:NSLocalizedString(@"Unsupported NSFetchRequestResultType, %d", nil), persistentStoreRequest.requestType] forKey:NSLocalizedDescriptionKey];
+    
         if (error) {
-            *error = [[NSError alloc] initWithDomain:AFNetworkingErrorDomain code:0 userInfo:mutableUserInfo];
+            *error = [NSError errorWithDomain:AFNetworkingErrorDomain code:0 userInfo:@{
+                NSLocalizedDescriptionKey: [NSString stringWithFormat:@"Unsupported NSFetchRequestResultType %d", persistentStoreRequest.requestType]
+            }];
         }
         
         return nil;
+        
     }
+    
 }
+
+
 
 - (void) saveBackingManagedObjects:(NSArray *)backingObjects inContext:(NSManagedObjectContext *)backingContext refreshingManagedObjects:(NSArray *)managedObjects inContext:(NSManagedObjectContext *)managedContext {
 
@@ -419,15 +434,11 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     [parentContext performBlockAndWait:^{
         
         for (NSManagedObject *registeredManagedObject in registeredManagedObjects) {
-            
             NSManagedObject *rootObject = [parentContext objectWithID:registeredManagedObject.objectID];
-            
             [rootObject willChangeValueForKey:@"self"];
             [parentContext refreshObject:rootObject mergeChanges:NO];
             [rootObject didChangeValueForKey:@"self"];
-            
             NSCParameterAssert(![[rootObject changedValues] count]);
-            
         }
 
     }];
@@ -435,12 +446,10 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     [managedContext performBlockAndWait:^{
         
         for (NSManagedObject *registeredManagedObject in registeredManagedObjects) {
-            
             [registeredManagedObject willChangeValueForKey:@"self"];
             [managedContext refreshObject:registeredManagedObject mergeChanges:NO];
             [registeredManagedObject didChangeValueForKey:@"self"];
             NSCParameterAssert(![[registeredManagedObject changedValues] count]);
-            
         }
         
     }];
@@ -958,8 +967,6 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     return [self.HTTPClient requestWithMethod:@"GET" pathForRelationship:relationship forObjectWithID:objectID withContext:context];
 
 }
-
-//  - (void) enqueueUpdateWithRepresentations:(id)representation
 
 #pragma mark - NSIncrementalStore
 
