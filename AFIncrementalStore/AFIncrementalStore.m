@@ -578,6 +578,9 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                 [[insertedObject.entity relationshipsByName] enumerateKeysAndObjectsUsingBlock:^(NSString *name, NSRelationshipDescription *relationship, BOOL *stop) {
                    
                     id requestedRelationship = [insertedObject valueForKey:name];
+                    if (!requestedRelationship)
+                        return;
+                    
                     id providedRelationship = nil;
                     
                     NSManagedObject * (^backingObjectForManagedObject)(NSManagedObject *) = ^ (NSManagedObject *incomingObject) {
