@@ -398,10 +398,10 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
 - (void) saveBackingManagedObjects:(NSArray *)backingObjects inContext:(NSManagedObjectContext *)backingContext refreshingManagedObjects:(NSArray *)managedObjects inContext:(NSManagedObjectContext *)managedContext {
 
     for (NSManagedObject *backingObject in backingObjects)
-        NSCParameterAssert(backingObject.objectID && ![backingObject.objectID isTemporaryID]);
+        NSCParameterAssert([backingObject af_isPermanent]);
     
     for (NSManagedObject *managedObject in managedObjects)
-        NSCParameterAssert(managedObject.objectID && ![managedObject.objectID isTemporaryID]);
+        NSCParameterAssert([managedObject af_isPermanent]);
     
     NSSet *registeredManagedObjects = [[managedContext registeredObjects] objectsPassingTest:^(NSManagedObject *managedObject, BOOL *stop) {
         return (BOOL)(![managedObject.objectID isTemporaryID]);

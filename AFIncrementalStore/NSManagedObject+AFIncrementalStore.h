@@ -4,4 +4,6 @@
 
 @property (readwrite, nonatomic, copy, setter = af_setResourceIdentifier:) NSString *af_resourceIdentifier;
 
+- (BOOL) af_isPermanent;
+
 @end

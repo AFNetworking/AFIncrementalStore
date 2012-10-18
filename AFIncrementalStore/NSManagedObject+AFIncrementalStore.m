@@ -29,4 +29,11 @@ static char kAFResourceIdentifierObjectKey;
 		
 }
 
+- (BOOL) af_isPermanent {
+
+	NSManagedObjectID *objectID = self.objectID;
+	return objectID && ![objectID isTemporaryID];
+
+}
+
 @end
