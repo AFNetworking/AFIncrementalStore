@@ -31,4 +31,42 @@
 
 }
 
+- (void) af_performBlock:(void(^)())block {
+
+	switch (self.concurrencyType) {
+	
+		case NSMainQueueConcurrencyType:
+		case NSPrivateQueueConcurrencyType: {
+			[self performBlock:block];
+			break;
+		}
+		
+		case NSConfinementConcurrencyType: {
+			block();
+			break;
+		}
+	
+	}
+	
+}
+
+- (void) af_performBlockAndWait:(void(^)())block {
+
+	switch (self.concurrencyType) {
+	
+		case NSMainQueueConcurrencyType:
+		case NSPrivateQueueConcurrencyType: {
+			[self performBlockAndWait:block];
+			break;
+		}
+		
+		case NSConfinementConcurrencyType: {
+			block();
+			break;
+		}
+	
+	}
+
+}
+
 @end
