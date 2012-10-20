@@ -434,15 +434,10 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     
 }
 
-- (void) saveBackingManagedObjects:(NSArray *)backingObjects inContext:(NSManagedObjectContext *)backingContext refreshingManagedObjects:(NSArray *)managedObjects inContext:(NSManagedObjectContext *)managedContext {
+- (void) saveBackingObjects:(NSArray *)backingObjects inContext:(NSManagedObjectContext *)backingContext {
 
     for (NSManagedObject *backingObject in backingObjects)
         NSCParameterAssert([backingObject af_isPermanent]);
-    
-    for (NSManagedObject *managedObject in managedObjects)
-        NSCParameterAssert([managedObject af_isPermanent]);
-    
-    NSSet *refreshedManagedObjects = [NSSet setWithArray:managedObjects];
     
     NSError *backingContextSavingError;
     if (![backingContext save:&backingContextSavingError]) {
@@ -450,6 +445,18 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
             NSUnderlyingErrorKey: backingContextSavingError
         }];
     }
+    
+    for (NSManagedObject *backingObject in backingObjects)
+        NSCParameterAssert(![[backingObject changedValues] count]);
+
+}
+
+- (void) refreshManagedObjects:(NSArray *)managedObjects inContext:(NSManagedObjectContext *)managedContext {
+
+    for (NSManagedObject *managedObject in managedObjects)
+        NSCParameterAssert([managedObject af_isPermanent]);
+    
+    NSSet *refreshedManagedObjects = [NSSet setWithArray:managedObjects];
     
     NSManagedObjectContext *parentContext = managedContext.parentContext;
 
@@ -492,9 +499,13 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     
     for (NSManagedObject *managedObject in managedObjects)
         NSCParameterAssert(![[managedObject changedValues] count]);
-    
-    for (NSManagedObject *backingObject in backingObjects)
-        NSCParameterAssert(![[backingObject changedValues] count]);
+
+}
+
+- (void) saveBackingManagedObjects:(NSArray *)backingObjects inContext:(NSManagedObjectContext *)backingContext refreshingManagedObjects:(NSArray *)managedObjects inContext:(NSManagedObjectContext *)managedContext {
+
+    [self saveBackingObjects:backingObjects inContext:backingContext];
+    [self refreshManagedObjects:managedObjects inContext:managedContext];
 
 }
 
