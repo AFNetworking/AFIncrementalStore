@@ -24,8 +24,11 @@
 #import "ISO8601DateFormatter.h"
 
 static NSString * AFPluralizedString(NSString *string) {
+    NSCharacterSet *vowels = [NSCharacterSet characterSetWithCharactersInString:@"aeiou"];
     if ([string hasSuffix:@"ss"] || [string hasSuffix:@"se"] || [string hasSuffix:@"sh"] || [string hasSuffix:@"ch"]) {
         return [[string stringByAppendingString:@"es"] lowercaseString];
+    } else if ([string hasSuffix:@"y"] && ![vowels characterIsMember:[string characterAtIndex:([string length] - 2)]]) {
+        return [[[string substringWithRange:NSMakeRange(0, [string length] - 1)] stringByAppendingString:@"ies"] lowercaseString];
     } else {
         return [[string stringByAppendingString:@"s"] lowercaseString];
     }
