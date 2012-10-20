@@ -1,5 +1,7 @@
 #import "NSManagedObjectContext+AFIncrementalStore.h"
 
+const void * kIgnoringCount = &kIgnoringCount;
+
 @implementation NSManagedObjectContext (AFIncrementalStore)
 
 - (BOOL) af_isDescendantOfContext:(NSManagedObjectContext *)context {
@@ -66,6 +68,35 @@
 		}
 	
 	}
+
+}
+
+- (NSUInteger) af_ignoringCount {
+
+	return [objc_getAssociatedObject(self, &kIgnoringCount) unsignedIntegerValue];
+
+}
+
+- (void) af_setIgnoringCount:(NSUInteger)count {
+
+	objc_setAssociatedObject(self, &kIgnoringCount, [NSNumber numberWithUnsignedInteger:count], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+	
+}
+
+- (void) af_incrementIgnoringCount {
+
+	NSUInteger count = [self af_ignoringCount];
+	
+	[self af_setIgnoringCount:(count + 1)];
+
+}
+
+- (void) af_decrementIgnoringCount {
+
+	NSUInteger count = [self af_ignoringCount];
+	NSCParameterAssert(count);
+	
+	[self af_setIgnoringCount:(count - 1)];
 
 }
 

@@ -60,6 +60,9 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
 @interface AFIncrementalStore ()
 @property (nonatomic, readonly, strong) NSOperationQueue *operationQueue;
 @property (nonatomic, readonly, strong) dispatch_queue_t dispatchQueue;
+- (void) beginIgnoringRemoteFetchRequestsInContext:(NSManagedObjectContext *)context;
+- (void) endIgnoringRemoteFetchRequestsInContext:(NSManagedObjectContext *)context;
+- (BOOL) isIgnoringRemoteFetchRequestsInContext:(NSManagedObjectContext *)context;
 @end
 
 @implementation AFIncrementalStore {
@@ -451,7 +454,7 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     NSManagedObjectContext *parentContext = managedContext.parentContext;
 
     [parentContext af_performBlockAndWait:^{
-        
+    
         for (NSManagedObject *registeredManagedObject in refreshedManagedObjects) {
             
             NSManagedObject *rootObject = [parentContext objectWithID:registeredManagedObject.objectID];
@@ -463,20 +466,27 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
             NSCParameterAssert(![[rootObject changedValues] count]);
             
         }
+        
+        [self beginIgnoringRemoteFetchRequestsInContext:parentContext];
+        [parentContext processPendingChanges];
+        [self endIgnoringRemoteFetchRequestsInContext:parentContext];
 
     }];
     
     [managedContext af_performBlockAndWait:^{
         
         for (NSManagedObject *registeredManagedObject in refreshedManagedObjects) {
-
+            
             [registeredManagedObject willChangeValueForKey:@"self"];
             [managedContext refreshObject:registeredManagedObject mergeChanges:NO];
             [registeredManagedObject didChangeValueForKey:@"self"];
-
-            NSCParameterAssert(![[registeredManagedObject changedValues] count]);
             
+            NSCParameterAssert(![[registeredManagedObject changedValues] count]);
         }
+        
+        [self beginIgnoringRemoteFetchRequestsInContext:managedContext];
+        [managedContext processPendingChanges];
+        [self endIgnoringRemoteFetchRequestsInContext:managedContext];
         
     }];
     
@@ -757,6 +767,26 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
 
 #pragma mark -
 
+- (BOOL) shouldFetchRemoteAttributeValuesForObjectWithID:(NSManagedObjectID *)objectID withContext:(NSManagedObjectContext *)context {
+
+    if ([self isIgnoringRemoteFetchRequestsInContext:context])
+        return NO;
+
+    NSString *resourceIdentifier = [self referenceObjectForObjectID:objectID];
+    if (!resourceIdentifier || (resourceIdentifier && ![resourceIdentifier isKindOfClass:[NSString class]]))
+        return NO;
+    
+    AFHTTPClient<AFIncrementalStoreHTTPClient> *HTTPClient = self.HTTPClient;
+    if (!HTTPClient)
+        return NO;
+    
+    if (![HTTPClient respondsToSelector:@selector(shouldFetchRemoteAttributeValuesForObjectWithID:inManagedObjectContext:)])
+        return NO;
+    
+    return [HTTPClient shouldFetchRemoteAttributeValuesForObjectWithID:objectID inManagedObjectContext:context];
+
+}
+
 - (NSIncrementalStoreNode *)newValuesForObjectWithID:(NSManagedObjectID *)objectID
                                          withContext:(NSManagedObjectContext *)context
                                                error:(NSError *__autoreleasing *)error
@@ -837,6 +867,9 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
 
 - (BOOL) shouldFetchRemoteValuesForRelationship:(NSRelationshipDescription *)relationship forObjectWithID:(NSManagedObjectID *)objectID withContext:(NSManagedObjectContext *)context {
 
+    if ([self isIgnoringRemoteFetchRequestsInContext:context])
+        return NO;
+
     NSString *resourceIdentifier = [self referenceObjectForObjectID:objectID];
     if (!resourceIdentifier || (resourceIdentifier && ![resourceIdentifier isKindOfClass:[NSString class]]))
         return NO;
@@ -852,19 +885,6 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
 
 }
 
-//    const void * kIgnoredContexts = &kIgnoredContexts;
-//
-//    - (NSMutableSet *) ignoredContexts {
-//
-//        NSMutableSet *set = objc_getAssociatedObject(self, &kIgnoredContexts);
-//        if (!set) {
-//            set = [NSMutableSet set];
-//            objc_setAssociatedObject(self, &kIgnoredContexts, set, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-//        }
-//        return set;
-//
-//    }
-
 - (id)newValueForRelationship:(NSRelationshipDescription *)relationship
               forObjectWithID:(NSManagedObjectID *)objectID
                   withContext:(NSManagedObjectContext *)context
@@ -873,11 +893,9 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
 
     if ([self shouldFetchRemoteValuesForRelationship:relationship forObjectWithID:objectID withContext:context]) {
     
-        NSLog(@"%s %@ %@ %@ %@ %p", __PRETTY_FUNCTION__, relationship.name, objectID.entity.name, [[objectID URIRepresentation] lastPathComponent], context, error);
         [self fetchNewValueForRelationship:relationship forObjectWithID:objectID withContext:context usingBlock:^(id representationOrRepresentations, NSURLResponse *response, NSError *error) {
             
             //  ?
-            NSLog(@"fetched %@", representationOrRepresentations);
             
         }];
         
@@ -909,6 +927,24 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
             return [NSNull null];
         }
     }
+}
+
+- (void) beginIgnoringRemoteFetchRequestsInContext:(NSManagedObjectContext *)context {
+
+    [context af_incrementIgnoringCount];
+
+}
+
+- (void) endIgnoringRemoteFetchRequestsInContext:(NSManagedObjectContext *)context {
+
+    [context af_decrementIgnoringCount];
+
+}
+
+- (BOOL) isIgnoringRemoteFetchRequestsInContext:(NSManagedObjectContext *)context {
+    
+    return !![context af_ignoringCount];
+    
 }
 
 - (void) performUpdatesWithParentContext:(NSManagedObjectContext *)context usingBlock:(void(^)(NSManagedObjectContext *childContext))block {
