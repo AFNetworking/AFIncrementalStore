@@ -63,19 +63,23 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
 - (void) beginIgnoringRemoteFetchRequestsInContext:(NSManagedObjectContext *)context;
 - (void) endIgnoringRemoteFetchRequestsInContext:(NSManagedObjectContext *)context;
 - (BOOL) isIgnoringRemoteFetchRequestsInContext:(NSManagedObjectContext *)context;
+
+@property (nonatomic, readonly, strong) NSManagedObjectModel *backingManagedObjectModel;
+@property (nonatomic, readonly, strong) NSManagedObjectContext *backingManagedObjectContext;
+
 @end
 
 @implementation AFIncrementalStore {
 @private
     NSCache *_backingObjectIDByObjectID;
     NSMutableDictionary *_registeredObjectIDsByResourceIdentifier;
-    NSPersistentStoreCoordinator *_backingPersistentStoreCoordinator;
-    NSManagedObjectContext *_backingManagedObjectContext;
 }
 @synthesize HTTPClient = _HTTPClient;
 @synthesize backingPersistentStoreCoordinator = _backingPersistentStoreCoordinator;
 @synthesize operationQueue = _operationQueue;
 @synthesize dispatchQueue = _dispatchQueue;
+@synthesize backingManagedObjectModel = _backingManagedObjectModel;
+@synthesize backingManagedObjectContext = _backingManagedObjectContext;
 
 - (NSArray *)obtainPermanentIDsForObjects:(NSArray *)array error:(NSError **)error {
     NSMutableArray *mutablePermanentIDs = [NSMutableArray arrayWithCapacity:[array count]];
@@ -156,18 +160,38 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     [[NSNotificationCenter defaultCenter] postNotificationName:notificationName object:context userInfo:userInfo];
 }
 
-- (BOOL)loadMetadata:(NSError *__autoreleasing *)error {
+- (BOOL) loadMetadata:(NSError *__autoreleasing *)error {
+    
     if (!_backingObjectIDByObjectID) {
-        NSMutableDictionary *mutableMetadata = [NSMutableDictionary dictionary];
-        [mutableMetadata setValue:[[NSProcessInfo processInfo] globallyUniqueString] forKey:NSStoreUUIDKey];
-        [mutableMetadata setValue:NSStringFromClass([self class]) forKey:NSStoreTypeKey];
-        [self setMetadata:mutableMetadata];
+        
+        [self setMetadata:@{
+            NSStoreTypeKey: [[self class] type],
+            NSStoreUUIDKey: [[NSProcessInfo processInfo] globallyUniqueString]
+        }];
         
         _backingObjectIDByObjectID = [[NSCache alloc] init];
         _registeredObjectIDsByResourceIdentifier = [[NSMutableDictionary alloc] init];
         
+        return YES;
+        
+    } else {
+        
+        return NO;
+        
+    }
+    
+}
+
+# pragma mark Backing
+
+- (NSManagedObjectModel *) backingManagedObjectModel {
+
+    if (!_backingManagedObjectModel) {
+    
         NSManagedObjectModel *model = [self.persistentStoreCoordinator.managedObjectModel copy];
+        
         for (NSEntityDescription *entity in model.entities) {
+        
             // Don't add properties for sub-entities, as they already exist in the super-entity 
             if ([entity superentity]) {
                 continue;
@@ -184,24 +208,42 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
             [lastModifiedProperty setIndexed:NO];
             
             [entity setProperties:[entity.properties arrayByAddingObjectsFromArray:[NSArray arrayWithObjects:resourceIdentifierProperty, lastModifiedProperty, nil]]];
+            
         }
         
-        _backingPersistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:model];
-        
-        return YES;
-    } else {
-        return NO;
+        _backingManagedObjectModel = model;
+    
     }
+    
+    return _backingManagedObjectModel;
+
 }
 
-- (NSManagedObjectContext *)backingManagedObjectContext {
+- (NSPersistentStoreCoordinator *) backingPersistentStoreCoordinator {
+
+    if (!_backingPersistentStoreCoordinator) {
+    
+        _backingPersistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:self.backingManagedObjectModel];
+    
+    }
+    
+    return _backingPersistentStoreCoordinator;
+
+}
+
+- (NSManagedObjectContext *) backingManagedObjectContext {
+    
     if (!_backingManagedObjectContext) {
+        
         _backingManagedObjectContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
+        
         _backingManagedObjectContext.persistentStoreCoordinator = _backingPersistentStoreCoordinator;
         _backingManagedObjectContext.retainsRegisteredObjects = YES;
+        
     }
     
     return _backingManagedObjectContext;
+    
 }
 
 - (NSManagedObjectID *)objectIDForEntity:(NSEntityDescription *)entity
