@@ -424,14 +424,19 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
 
 - (NSManagedObject *) backingObjectInContext:(NSManagedObjectContext *)backingContext forManagedObject:(NSManagedObject *)managedObject {
 
-    NSEntityDescription *entity = managedObject.entity;
-    NSString *resourceID = managedObject.af_resourceIdentifier;
+    NSEntityDescription *backingEntity = [NSEntityDescription entityForName:managedObject.entity.name inManagedObjectContext:backingContext];
+    NSString *resourceIdentifier = managedObject.af_resourceIdentifier;
+    
+    if (!backingEntity || !resourceIdentifier)
+        return (NSManagedObject *)nil;
+    
+    NSManagedObjectID *objectID = [self backingObjectIDForEntity:backingEntity resourceIdentifier:resourceIdentifier inContext:backingContext error:nil];
+    
+    if (!objectID)
+        return (NSManagedObject *)nil;
+    
+    return [backingContext existingObjectWithID:objectID error:nil];;
 
-    NSManagedObjectID *backingObjectID = [self backingObjectIDForEntity:entity resourceIdentifier:resourceID inContext:backingContext error:nil];
-    NSManagedObject *backingObject = [backingContext existingObjectWithID:backingObjectID error:nil];
-    
-    return backingObject;
-    
 }
 
 - (void) saveBackingObjects:(NSArray *)backingObjects inContext:(NSManagedObjectContext *)backingContext {
@@ -640,18 +645,7 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                     
                     NSManagedObject * (^backingObjectForManagedObject)(NSManagedObject *) = ^ (NSManagedObject *incomingObject) {
                     
-                        NSEntityDescription *backingEntity = [NSEntityDescription entityForName:incomingObject.entity.name inManagedObjectContext:backingContext];
-                        NSString *resourceIdentifier = incomingObject.af_resourceIdentifier;                        
-                        
-                        if (!backingEntity || !resourceIdentifier)
-                            return (NSManagedObject *)nil;
-                        
-                        NSManagedObjectID *objectID = [self backingObjectIDForEntity:backingEntity resourceIdentifier:resourceIdentifier inContext:backingContext error:nil];
-                        
-                        if (!objectID)
-                            return (NSManagedObject *)nil;
-                        
-                        return [backingContext existingObjectWithID:objectID error:nil];;
+                        return [self backingObjectInContext:backingContext forManagedObject:incomingObject];
                     
                     };
                     
