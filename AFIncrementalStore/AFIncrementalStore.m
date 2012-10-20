@@ -59,6 +59,10 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
 
 @interface AFIncrementalStore ()
 @property (nonatomic, readonly, strong) NSOperationQueue *operationQueue;
+@property (nonatomic, readonly, strong) dispatch_queue_t dispatchQueue;
+- (void) beginIgnoringRemoteFetchRequestsInContext:(NSManagedObjectContext *)context;
+- (void) endIgnoringRemoteFetchRequestsInContext:(NSManagedObjectContext *)context;
+- (BOOL) isIgnoringRemoteFetchRequestsInContext:(NSManagedObjectContext *)context;
 @end
 
 @implementation AFIncrementalStore {
@@ -71,6 +75,7 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
 @synthesize HTTPClient = _HTTPClient;
 @synthesize backingPersistentStoreCoordinator = _backingPersistentStoreCoordinator;
 @synthesize operationQueue = _operationQueue;
+@synthesize dispatchQueue = _dispatchQueue;
 
 - (NSArray *)obtainPermanentIDsForObjects:(NSArray *)array error:(NSError **)error {
     NSMutableArray *mutablePermanentIDs = [NSMutableArray arrayWithCapacity:[array count]];
@@ -105,6 +110,18 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     }
     
     return _operationQueue;
+
+}
+
+- (dispatch_queue_t) dispatchQueue {
+
+    if (!_dispatchQueue) {
+        
+        _dispatchQueue = dispatch_queue_create([NSStringFromClass([self class]) UTF8String], DISPATCH_QUEUE_SERIAL);
+    
+    }
+    
+    return _dispatchQueue;
 
 }
 
@@ -265,13 +282,8 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
 
 }
 
-- (void)insertOrUpdateObjectsFromRepresentations:(id)representationOrArrayOfRepresentations
-                                        ofEntity:(NSEntityDescription *)entity
-                                    fromResponse:(NSHTTPURLResponse *)response
-                                     withContext:(NSManagedObjectContext *)context
-                                           error:(NSError *__autoreleasing *)error
-                                 completionBlock:(void (^)(NSArray *managedObjects, NSArray *backingObjects))completionBlock
-{
+- (void)insertOrUpdateObjectsFromRepresentations:(id)representationOrArrayOfRepresentations ofEntity:(NSEntityDescription *)entity fromResponse:(NSHTTPURLResponse *)response withContext:(NSManagedObjectContext *)context error:(NSError *__autoreleasing *)error completionBlock:(void (^)(NSArray *managedObjects, NSArray *backingObjects))completionBlock {
+    
     NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
     NSDate *lastModified = AFLastModifiedDateFromHTTPHeaders([response allHeaderFields]);
     
@@ -302,9 +314,10 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
         NSDictionary *attributes = [self.HTTPClient attributesForRepresentation:representation ofEntity:entity fromResponse:response];
         
         __block NSManagedObject *managedObject;
-        [context performBlockAndWait:^{
+        [context af_performBlockAndWait:^{
             managedObject = [context existingObjectWithID:[self objectIDForEntity:entity withResourceIdentifier:resourceIdentifier] error:nil];
         }];
+
         [managedObject setValuesForKeysWithDictionary:attributes];
         
         NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:entity withResourceIdentifier:resourceIdentifier];
@@ -374,38 +387,62 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     if (completionBlock) {
         completionBlock(mutableManagedObjects, mutableBackingObjects);
     }
+    
 }
 
-- (id)executeRequest:(NSPersistentStoreRequest *)persistentStoreRequest
-         withContext:(NSManagedObjectContext *)context
-               error:(NSError *__autoreleasing *)error
-{
-    if (persistentStoreRequest.requestType == NSFetchRequestType) {
-        return [self executeFetchRequest:(NSFetchRequest *)persistentStoreRequest withContext:context error:error];
-    } else if (persistentStoreRequest.requestType == NSSaveRequestType) {
-        return [self executeSaveChangesRequest:(NSSaveChangesRequest *)persistentStoreRequest withContext:context error:error];
+- (id) executeRequest:(NSPersistentStoreRequest *)persistentStoreRequest withContext:(NSManagedObjectContext *)context error:(NSError *__autoreleasing *)error {
+    
+    NSPersistentStoreRequestType type = persistentStoreRequest.requestType;
+    
+    if (type == NSFetchRequestType) {
+        
+        NSFetchRequest *fetchRequest = (NSFetchRequest *)persistentStoreRequest;
+        NSCParameterAssert([fetchRequest isKindOfClass:[NSFetchRequest class]]);
+        
+        return [self executeFetchRequest:fetchRequest withContext:context error:error];
+        
+    } else if (type == NSSaveRequestType) {
+        
+        NSSaveChangesRequest *saveChangesRequest = (NSSaveChangesRequest *)persistentStoreRequest;
+        NSCParameterAssert([saveChangesRequest isKindOfClass:[NSSaveChangesRequest class]]);
+        
+        return [self executeSaveChangesRequest:saveChangesRequest withContext:context error:error];
+        
     } else {
-        NSMutableDictionary *mutableUserInfo = [NSMutableDictionary dictionary];
-        [mutableUserInfo setValue:[NSString stringWithFormat:NSLocalizedString(@"Unsupported NSFetchRequestResultType, %d", nil), persistentStoreRequest.requestType] forKey:NSLocalizedDescriptionKey];
+    
         if (error) {
-            *error = [[NSError alloc] initWithDomain:AFNetworkingErrorDomain code:0 userInfo:mutableUserInfo];
+            *error = [NSError errorWithDomain:AFNetworkingErrorDomain code:0 userInfo:@{
+                NSLocalizedDescriptionKey: [NSString stringWithFormat:@"Unsupported NSFetchRequestResultType %d", persistentStoreRequest.requestType]
+            }];
         }
         
         return nil;
+        
     }
+    
+}
+
+- (NSManagedObject *) backingObjectInContext:(NSManagedObjectContext *)backingContext forManagedObject:(NSManagedObject *)managedObject {
+
+    NSEntityDescription *entity = managedObject.entity;
+    NSString *resourceID = managedObject.af_resourceIdentifier;
+
+    NSManagedObjectID *backingObjectID = [self backingObjectIDForEntity:entity resourceIdentifier:resourceID inContext:backingContext error:nil];
+    NSManagedObject *backingObject = [backingContext existingObjectWithID:backingObjectID error:nil];
+    
+    return backingObject;
+    
 }
 
 - (void) saveBackingManagedObjects:(NSArray *)backingObjects inContext:(NSManagedObjectContext *)backingContext refreshingManagedObjects:(NSArray *)managedObjects inContext:(NSManagedObjectContext *)managedContext {
 
     for (NSManagedObject *backingObject in backingObjects)
-        NSCParameterAssert(backingObject.objectID && ![backingObject.objectID isTemporaryID]);
+        NSCParameterAssert([backingObject af_isPermanent]);
     
     for (NSManagedObject *managedObject in managedObjects)
-        NSCParameterAssert(managedObject.objectID && ![managedObject.objectID isTemporaryID]);
+        NSCParameterAssert([managedObject af_isPermanent]);
     
-    NSSet *registeredManagedObjects = [[managedContext registeredObjects] objectsPassingTest:^(NSManagedObject *managedObject, BOOL *stop) {
-        return (BOOL)(![managedObject.objectID isTemporaryID]);
-    }];
+    NSSet *refreshedManagedObjects = [NSSet setWithArray:managedObjects];
     
     NSError *backingContextSavingError;
     if (![backingContext save:&backingContextSavingError]) {
@@ -415,10 +452,10 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     }
     
     NSManagedObjectContext *parentContext = managedContext.parentContext;
+
+    [parentContext af_performBlockAndWait:^{
     
-    [parentContext performBlockAndWait:^{
-        
-        for (NSManagedObject *registeredManagedObject in registeredManagedObjects) {
+        for (NSManagedObject *registeredManagedObject in refreshedManagedObjects) {
             
             NSManagedObject *rootObject = [parentContext objectWithID:registeredManagedObject.objectID];
             
@@ -429,19 +466,27 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
             NSCParameterAssert(![[rootObject changedValues] count]);
             
         }
+        
+        [self beginIgnoringRemoteFetchRequestsInContext:parentContext];
+        [parentContext processPendingChanges];
+        [self endIgnoringRemoteFetchRequestsInContext:parentContext];
 
     }];
     
-    [managedContext performBlockAndWait:^{
+    [managedContext af_performBlockAndWait:^{
         
-        for (NSManagedObject *registeredManagedObject in registeredManagedObjects) {
+        for (NSManagedObject *registeredManagedObject in refreshedManagedObjects) {
             
             [registeredManagedObject willChangeValueForKey:@"self"];
             [managedContext refreshObject:registeredManagedObject mergeChanges:NO];
             [registeredManagedObject didChangeValueForKey:@"self"];
-            NSCParameterAssert(![[registeredManagedObject changedValues] count]);
             
+            NSCParameterAssert(![[registeredManagedObject changedValues] count]);
         }
+        
+        [self beginIgnoringRemoteFetchRequestsInContext:managedContext];
+        [managedContext processPendingChanges];
+        [self endIgnoringRemoteFetchRequestsInContext:managedContext];
         
     }];
     
@@ -460,13 +505,10 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     NSURLRequest *request = [self.HTTPClient requestForFetchRequest:fetchRequest withContext:context];
     if ([request URL]) {
         AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, id responseObject) {
+            
             id representationOrArrayOfRepresentations = [self.HTTPClient representationOrArrayOfRepresentationsFromResponseObject:responseObject];
             
-            NSManagedObjectContext *childContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
-            childContext.parentContext = context;
-            childContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy;
-                        
-            [childContext performBlock:^{
+            [self performUpdatesWithParentContext:context usingBlock:^(NSManagedObjectContext *childContext) {
                 
                 [self insertOrUpdateObjectsFromRepresentations:representationOrArrayOfRepresentations ofEntity:fetchRequest.entity fromResponse:operation.response withContext:childContext error:error completionBlock:^(NSArray *managedObjects, NSArray *backingObjects) {
                 
@@ -475,7 +517,9 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                 }];
                 
                 [self notifyManagedObjectContext:context aboutRequestOperation:operation forFetchRequest:fetchRequest];
+
             }];
+            
         } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
             NSLog(@"Error: %@", error);
             [self notifyManagedObjectContext:context aboutRequestOperation:operation forFetchRequest:fetchRequest];
@@ -723,6 +767,26 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
 
 #pragma mark -
 
+- (BOOL) shouldFetchRemoteAttributeValuesForObjectWithID:(NSManagedObjectID *)objectID withContext:(NSManagedObjectContext *)context {
+
+    if ([self isIgnoringRemoteFetchRequestsInContext:context])
+        return NO;
+
+    NSString *resourceIdentifier = [self referenceObjectForObjectID:objectID];
+    if (!resourceIdentifier || (resourceIdentifier && ![resourceIdentifier isKindOfClass:[NSString class]]))
+        return NO;
+    
+    AFHTTPClient<AFIncrementalStoreHTTPClient> *HTTPClient = self.HTTPClient;
+    if (!HTTPClient)
+        return NO;
+    
+    if (![HTTPClient respondsToSelector:@selector(shouldFetchRemoteAttributeValuesForObjectWithID:inManagedObjectContext:)])
+        return NO;
+    
+    return [HTTPClient shouldFetchRemoteAttributeValuesForObjectWithID:objectID inManagedObjectContext:context];
+
+}
+
 - (NSIncrementalStoreNode *)newValuesForObjectWithID:(NSManagedObjectID *)objectID
                                          withContext:(NSManagedObjectContext *)context
                                                error:(NSError *__autoreleasing *)error
@@ -803,6 +867,9 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
 
 - (BOOL) shouldFetchRemoteValuesForRelationship:(NSRelationshipDescription *)relationship forObjectWithID:(NSManagedObjectID *)objectID withContext:(NSManagedObjectContext *)context {
 
+    if ([self isIgnoringRemoteFetchRequestsInContext:context])
+        return NO;
+
     NSString *resourceIdentifier = [self referenceObjectForObjectID:objectID];
     if (!resourceIdentifier || (resourceIdentifier && ![resourceIdentifier isKindOfClass:[NSString class]]))
         return NO;
@@ -845,7 +912,7 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                 NSManagedObjectID *objectID = [self objectIDForEntity:relationship.destinationEntity withResourceIdentifier:resourceIdentifier];
                 [mutableObjects addObject:objectID];
             }
-                        
+                            
             return mutableObjects;            
         } else {
             NSString *resourceIdentifier = [backingRelationshipObject valueForKeyPath:kAFIncrementalStoreResourceIdentifierAttributeName];
@@ -860,6 +927,59 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
             return [NSNull null];
         }
     }
+}
+
+- (void) beginIgnoringRemoteFetchRequestsInContext:(NSManagedObjectContext *)context {
+
+    [context af_incrementIgnoringCount];
+
+}
+
+- (void) endIgnoringRemoteFetchRequestsInContext:(NSManagedObjectContext *)context {
+
+    [context af_decrementIgnoringCount];
+
+}
+
+- (BOOL) isIgnoringRemoteFetchRequestsInContext:(NSManagedObjectContext *)context {
+    
+    return !![context af_ignoringCount];
+    
+}
+
+- (void) performUpdatesWithParentContext:(NSManagedObjectContext *)context usingBlock:(void(^)(NSManagedObjectContext *childContext))block {
+    
+    __weak typeof(context) wContext = context;
+    
+    [self.operationQueue addOperation:[RAAsyncOperation operationWithWorker:^(RAAsyncOperationCallback callback) {
+    
+        if (!wContext) {
+            callback((id)kCFBooleanFalse);
+            return;
+        }
+        
+        NSManagedObjectContext *childContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSConfinementConcurrencyType];
+        childContext.parentContext = wContext;
+        childContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy;
+        
+        block(childContext);
+        callback((id)kCFBooleanTrue);
+
+    } trampoline:^(IRAsyncOperationInvoker callback) {
+        
+        dispatch_async(self.dispatchQueue, callback);
+        
+    } callback:^(id results) {
+        
+        //  ?
+        
+    } trampoline:^(IRAsyncOperationInvoker callback) {
+        
+        dispatch_async(self.dispatchQueue, callback);            
+        
+    }]];
+
+    
 }
 
 - (void) fetchNewValueForRelationship:(NSRelationshipDescription *)relationship forObjectWithID:(NSManagedObjectID *)objectID withContext:(NSManagedObjectContext *)context usingBlock:(void(^)(id representationOrRepresentations, NSURLResponse *response, NSError *error))block {
@@ -901,14 +1021,10 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
             return;
         }
         
-        NSManagedObjectContext *childContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
-        childContext.parentContext = context;
-        childContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy;
-        
-        [childContext performBlock:^{
+        [self performUpdatesWithParentContext:context usingBlock:^(NSManagedObjectContext *childContext) {
             
             [self insertOrUpdateObjectsFromRepresentations:representationOrArrayOfRepresentations ofEntity:relationship.destinationEntity fromResponse:operation.response withContext:childContext error:nil completionBlock:^(NSArray *managedObjects, NSArray *backingObjects) {
-            
+
                 NSManagedObject *managedObject = [childContext objectWithID:objectID];
                 NSString *referenceObject = [self referenceObjectForObjectID:objectID];
                 NSManagedObjectID *backingObjectID = [self backingObjectIDForEntity:objectID.entity resourceIdentifier:referenceObject inContext:self.backingManagedObjectContext error:nil];
@@ -936,18 +1052,18 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                 
                 block(responseObject, operation.response, nil);
                 
-            }];
+            }];           
             
         }];
-    
+        
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         
         NSLog(@"Error: %@, %@", operation, error);
         
     }];
     
-    operation.successCallbackQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
-    operation.failureCallbackQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
+    operation.successCallbackQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
+    operation.failureCallbackQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
 
     [self.HTTPClient enqueueHTTPRequestOperation:operation];
 
@@ -958,8 +1074,6 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     return [self.HTTPClient requestWithMethod:@"GET" pathForRelationship:relationship forObjectWithID:objectID withContext:context];
 
 }
-
-//  - (void) enqueueUpdateWithRepresentations:(id)representation
 
 #pragma mark - NSIncrementalStore
 
