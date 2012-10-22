@@ -16,7 +16,7 @@ const void * kIgnoringCount = &kIgnoringCount;
 
 }
 
-- (void) af_executeFetchRequest:(NSFetchRequest *)fetchRequest usingBlock:(void(^)(NSArray *results, NSError *error))block {
+- (void) af_executeFetchRequest:(NSFetchRequest *)fetchRequest usingBlock:(void(^)(id results, NSError *error))block {
 
 	NSCParameterAssert(fetchRequest);
 	NSCParameterAssert(block);
@@ -24,7 +24,7 @@ const void * kIgnoringCount = &kIgnoringCount;
 	[self performBlock:^{
 	
 		NSError *error = nil;
-		NSArray *results = [self executeFetchRequest:fetchRequest error:&error];
+		id results = [self executeFetchRequest:fetchRequest error:&error];
 		
 		if (block)
 			block(results, error);
