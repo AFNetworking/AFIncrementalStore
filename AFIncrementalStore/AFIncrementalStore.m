@@ -296,7 +296,7 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     NSFetchRequest *fetchRequest = [self fetchRequestForObjectIDWithEntity:entity resourceIdentifier:resourceIdentifier];
     
     __block NSArray *results = nil;
-    [context performBlockAndWait:^{
+    [context af_performBlockAndWait:^{
        results = [context executeFetchRequest:fetchRequest error:outError];
     }];
     
@@ -365,7 +365,7 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
         NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:entity withResourceIdentifier:resourceIdentifier];
         
         __block NSManagedObject *backingObject;
-        [backingContext performBlockAndWait:^{
+        [backingContext af_performBlockAndWait:^{
             if (backingObjectID) {
                 backingObject = [backingContext existingObjectWithID:backingObjectID error:nil];
             } else {
@@ -507,8 +507,10 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     
     NSManagedObjectContext *parentContext = managedContext.parentContext;
 
-    [parentContext af_performBlockAndWait:^{
+    [parentContext af_performBlock:^{
     
+        [self beginIgnoringRemoteFetchRequestsInContext:parentContext];
+        
         for (NSManagedObject *registeredManagedObject in refreshedManagedObjects) {
             
             NSManagedObject *rootObject = [parentContext objectWithID:registeredManagedObject.objectID];
@@ -521,31 +523,33 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
             
         }
         
-        [self beginIgnoringRemoteFetchRequestsInContext:parentContext];
         [parentContext processPendingChanges];
+        
         [self endIgnoringRemoteFetchRequestsInContext:parentContext];
 
-    }];
+        [managedContext af_performBlock:^{
     
-    [managedContext af_performBlockAndWait:^{
-        
-        for (NSManagedObject *registeredManagedObject in refreshedManagedObjects) {
+            [self beginIgnoringRemoteFetchRequestsInContext:managedContext];
             
-            [registeredManagedObject willChangeValueForKey:@"self"];
-            [managedContext refreshObject:registeredManagedObject mergeChanges:NO];
-            [registeredManagedObject didChangeValueForKey:@"self"];
+            for (NSManagedObject *registeredManagedObject in refreshedManagedObjects) {
+                
+                [registeredManagedObject willChangeValueForKey:@"self"];
+                [managedContext refreshObject:registeredManagedObject mergeChanges:NO];
+                [registeredManagedObject didChangeValueForKey:@"self"];
+                
+                NSCParameterAssert(![[registeredManagedObject changedValues] count]);
+            }
             
-            NSCParameterAssert(![[registeredManagedObject changedValues] count]);
-        }
-        
-        [self beginIgnoringRemoteFetchRequestsInContext:managedContext];
-        [managedContext processPendingChanges];
-        [self endIgnoringRemoteFetchRequestsInContext:managedContext];
-        
+            [managedContext processPendingChanges];
+            
+            [self endIgnoringRemoteFetchRequestsInContext:managedContext];
+            
+            for (NSManagedObject *managedObject in managedObjects)
+                NSCParameterAssert(![[managedObject changedValues] count]);
+
+        }];
+
     }];
-    
-    for (NSManagedObject *managedObject in managedObjects)
-        NSCParameterAssert(![[managedObject changedValues] count]);
 
 }
 
@@ -570,8 +574,12 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                 
                 [self insertOrUpdateObjectsFromRepresentations:representations ofEntity:fetchRequest.entity fromResponse:operation.response withContext:childContext error:error completionBlock:^(NSArray *managedObjects, NSArray *backingObjects) {
                 
-                    [self saveBackingManagedObjects:backingObjects inContext:[self backingManagedObjectContext] refreshingManagedObjects:managedObjects inContext:childContext];
+                    [self ra_performBlock:^{
+                        
+                        [self saveBackingManagedObjects:backingObjects inContext:[self backingManagedObjectContext] refreshingManagedObjects:managedObjects inContext:childContext];
                                     
+                    }];
+                
                 }];
                 
                 [self notifyManagedObjectContext:context aboutRequestOperation:operation forFetchRequest:fetchRequest];
@@ -600,7 +608,7 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
             fetchRequest.entity = [NSEntityDescription entityForName:fetchRequest.entityName inManagedObjectContext:backingContext];
             fetchRequest.resultType = NSDictionaryResultType;
             fetchRequest.propertiesToFetch = @[ kAFIncrementalStoreResourceIdentifierAttributeName ];
-            [backingContext performBlockAndWait:^{
+            [backingContext af_performBlockAndWait:^{
                 results = [backingContext executeFetchRequest:fetchRequest error:error];                
             }];
             
@@ -957,13 +965,15 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     
     fetchRequest.predicate = [NSPredicate predicateWithFormat:@"%K = %@", kAFIncrementalStoreResourceIdentifierAttributeName, [self referenceObjectForObjectID:objectID]];
     
+    [self.backingPersistentStoreCoordinator lock];
     __block NSArray *results;
     NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
-    [backingContext performBlockAndWait:^{
+    [backingContext af_performBlockAndWait:^{
         results = [backingContext executeFetchRequest:fetchRequest error:error];
     }];
+    [self.backingPersistentStoreCoordinator unlock];
+    
     NSDictionary *attributeValues = [results lastObject] ?: [NSDictionary dictionary];
-
     NSIncrementalStoreNode *node = [[NSIncrementalStoreNode alloc] initWithObjectID:objectID withValues:attributeValues version:1];
     
     if ([self.HTTPClient respondsToSelector:@selector(shouldFetchRemoteAttributeValuesForObjectWithID:inManagedObjectContext:)] && [self.HTTPClient shouldFetchRemoteAttributeValuesForObjectWithID:objectID inManagedObjectContext:context]) {
