@@ -536,10 +536,6 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
             NSManagedObjectContext *childContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
             childContext.parentContext = context;
             childContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy;
-                        
-            [[NSNotificationCenter defaultCenter] addObserverForName:NSManagedObjectContextDidSaveNotification object:childContext queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
-                [context mergeChangesFromContextDidSaveNotification:note];
-            }];
             
             AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, id responseObject) {
                 id representationOrArrayOfRepresentations = [self.HTTPClient representationOrArrayOfRepresentationsFromResponseObject:responseObject];
@@ -562,7 +558,7 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                             [backingObject setValue:[backingObjects lastObject] forKey:relationship.name];
                         }
                         
-                        if (![[self backingManagedObjectContext] save:error] || ![childContext save:error]) {
+                        if (![[self backingManagedObjectContext] save:error] || ![childContext save:error] || ![context save:error]) {
                             NSLog(@"Error: %@", *error);
                         }
                     }];
