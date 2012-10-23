@@ -295,10 +295,12 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     
     NSFetchRequest *fetchRequest = [self fetchRequestForObjectIDWithEntity:entity resourceIdentifier:resourceIdentifier];
     
+    [self.backingPersistentStoreCoordinator lock];
     __block NSArray *results = nil;
     [context af_performBlockAndWait:^{
        results = [context executeFetchRequest:fetchRequest error:outError];
     }];
+    [self.backingPersistentStoreCoordinator unlock];
     
     return [results lastObject];
 
