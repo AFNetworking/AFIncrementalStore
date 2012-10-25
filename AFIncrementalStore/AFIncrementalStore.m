@@ -329,20 +329,20 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
         AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, id responseObject) {
             id representationOrArrayOfRepresentations = [self.HTTPClient representationOrArrayOfRepresentationsFromResponseObject:responseObject];
     
-            NSManagedObjectContext *childContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
+            NSManagedObjectContext *childContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
             childContext.parentContext = context;
             childContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy;
                         
             [childContext performBlock:^{
                 [self insertOrUpdateObjectsFromRepresentations:representationOrArrayOfRepresentations ofEntity:fetchRequest.entity fromResponse:operation.response withContext:childContext error:error completionBlock:^(NSArray *managedObjects, NSArray *backingObjects) {
-                    __block BOOL saveSuccess = NO;
+                    __block BOOL saveError = NO;
                     [self.backingManagedObjectContext performBlockAndWait:^{
                         NSError *backingError = nil;
-                        if ((saveSuccess = ![[self backingManagedObjectContext] save:&backingError])) {
+                        if ((saveError = ![[self backingManagedObjectContext] save:&backingError])) {
                             NSLog(@"Error: %@", backingError);
                         }
                     }];
-                    if (saveSuccess) {
+                    if (!saveError) {
                         if (![childContext save:error]) {
                             NSLog(@"Error: %@", *error);
                         }
@@ -470,17 +470,32 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     if ([self.HTTPClient respondsToSelector:@selector(requestForDeletedObject:)]) {
         for (NSManagedObject *deletedObject in [saveChangesRequest deletedObjects]) {
             NSURLRequest *request = [self.HTTPClient requestForDeletedObject:deletedObject];
-            AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, id responseObject) {
-                [backingContext performBlockAndWait:^{
-                    NSManagedObject *backingObject = [backingContext existingObjectWithID:deletedObject.objectID error:nil];
-                    [backingContext deleteObject:backingObject];
-                    [backingContext save:nil];
+            if (request) {
+                AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, id responseObject) {
+                    [backingContext performBlockAndWait:^{
+                        NSString *resourceIdentifier = [self.HTTPClient resourceIdentifierForRepresentation:responseObject ofEntity:[deletedObject entity] fromResponse:operation.response];
+                        NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:deletedObject.entity withResourceIdentifier:resourceIdentifier];
+                        NSManagedObject *backingObject = [backingContext existingObjectWithID:backingObjectID error:nil];
+                        [backingContext deleteObject:backingObject];
+                        [backingContext save:nil];
+                    }];
+                } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+                    NSLog(@"Delete Error: %@", error);
                 }];
-            } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-                NSLog(@"Delete Error: %@", error);
-            }];
-            
-            [mutableOperations addObject:operation];
+                
+                [mutableOperations addObject:operation];
+            } else {
+                [backingContext performBlockAndWait:^{
+                    NSString *resourceIdentifier = [self referenceObjectForObjectID:deletedObject.objectID];
+                    NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:deletedObject.entity withResourceIdentifier:resourceIdentifier];
+                    NSManagedObject *backingObject = [backingContext existingObjectWithID:backingObjectID error:nil];
+                    [backingContext deleteObject:backingObject];
+                    NSError *error = nil;
+                    if (![backingContext save:&error]) {
+                        NSLog(@"Delete in backing error: %@", error);
+                    }
+                }];
+            }
         }
     }
     
@@ -536,7 +551,7 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                         [managedObject setValuesForKeysWithDictionary:mutableAttributeValues];
                         
                         NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:[objectID entity] withResourceIdentifier:[self referenceObjectForObjectID:objectID]];
-                        [[self backingManagedObjectContext] performBlock:^{
+                        [[self backingManagedObjectContext] performBlockAndWait:^{
                             NSManagedObject *backingObject = [[self backingManagedObjectContext] existingObjectWithID:backingObjectID error:nil];
                             [backingObject setValuesForKeysWithDictionary:mutableAttributeValues];
                             NSError *backingError = nil;
@@ -579,10 +594,6 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
             NSManagedObjectContext *childContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
             childContext.parentContext = context;
             childContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy;
-                        
-            [[NSNotificationCenter defaultCenter] addObserverForName:NSManagedObjectContextDidSaveNotification object:childContext queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
-                [context mergeChangesFromContextDidSaveNotification:note];
-            }];
             
             AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, id responseObject) {
                 id representationOrArrayOfRepresentations = [self.HTTPClient representationOrArrayOfRepresentationsFromResponseObject:responseObject];
