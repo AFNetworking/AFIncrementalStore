@@ -22,7 +22,6 @@
 
 #import "AFIncrementalStore.h"
 #import "AFHTTPClient.h"
-#import "ISO8601DateFormatter.h"
 #import <objc/runtime.h>
 
 NSString * const AFIncrementalStoreUnimplementedMethodException = @"com.alamofire.incremental-store.exceptions.unimplemented-method";
@@ -40,17 +39,23 @@ static NSString * const kAFIncrementalStoreLastModifiedAttributeName = @"__af_la
 
 static char kAFResourceIdentifierObjectKey;
 
+static NSDateFormatter *AFDateFormatter()
+{
+    static NSDateFormatter *dateFormatter;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        dateFormatter = [[NSDateFormatter alloc] init];
+        // Date formatter works with HTTP 1.1 (RFC 1123)
+        [dateFormatter setDateFormat:@"EE, d LLLL yyyy HH:mm:ss Z"];
+        [dateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+    });
+    return dateFormatter;
+}
+
 static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     if ([headers valueForKey:@"Last-Modified"]) {
-        static ISO8601DateFormatter * _iso8601DateFormatter = nil;
-        static dispatch_once_t onceToken;
-        dispatch_once(&onceToken, ^{
-            _iso8601DateFormatter = [[ISO8601DateFormatter alloc] init];
-        });
-        
-        return [_iso8601DateFormatter dateFromString:[headers valueForKey:@"last-modified"]];
+        return [AFDateFormatter() dateFromString:[headers valueForKey:@"last-modified"]];
     }
-    
     return nil;
 }
 
@@ -477,7 +482,8 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
             
             if ([request URL]) {
                 if ([attributeValues valueForKey:kAFIncrementalStoreLastModifiedAttributeName]) {
-                    [request setValue:[[attributeValues valueForKey:kAFIncrementalStoreLastModifiedAttributeName] description] forHTTPHeaderField:@"If-Modified-Since"];
+                    NSString *dateString = [AFDateFormatter() stringFromDate:[attributeValues valueForKey:kAFIncrementalStoreLastModifiedAttributeName]];
+                    [request setValue:dateString forHTTPHeaderField:@"If-Modified-Since"];                    
                 }
                 
                 AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, NSDictionary *representation) {
