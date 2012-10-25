@@ -321,10 +321,18 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                         NSLog(@"Error: %@", *error);
                     }
                     
+                    NSMutableArray *fetchedObjects = [[NSMutableArray alloc] initWithCapacity:managedObjects.count];
+                    for (NSManagedObject *managedObject in managedObjects) {
+                        NSManagedObject *fetchedObject = [context existingObjectWithID:managedObject.objectID error:NULL];
+                        if (fetchedObject) {
+                            [fetchedObjects addObject:fetchedObject];
+                        }
+                    }
+                    
                     [self notifyManagedObjectContext:context
                                aboutRequestOperation:operation
                                      forFetchRequest:fetchRequest
-                                      fetchedObjects:managedObjects];
+                                      fetchedObjects:fetchedObjects];
                 }];
             }];
         } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
