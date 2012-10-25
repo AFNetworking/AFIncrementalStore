@@ -457,7 +457,9 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     fetchRequest.resultType = NSDictionaryResultType;
     fetchRequest.fetchLimit = 1;
     fetchRequest.includesSubentities = NO;
-    fetchRequest.propertiesToFetch = [[[NSEntityDescription entityForName:fetchRequest.entityName inManagedObjectContext:context] attributesByName] allKeys];
+    NSMutableArray *propertiesToFetch = [NSMutableArray arrayWithArray:[[[NSEntityDescription entityForName:fetchRequest.entityName inManagedObjectContext:context] attributesByName] allKeys]];
+    [propertiesToFetch addObject:kAFIncrementalStoreLastModifiedAttributeName];
+    fetchRequest.propertiesToFetch = propertiesToFetch;
     fetchRequest.predicate = [NSPredicate predicateWithFormat:@"%K = %@", kAFIncrementalStoreResourceIdentifierAttributeName, [self referenceObjectForObjectID:objectID]];
     
     NSArray *results = [[self backingManagedObjectContext] executeFetchRequest:fetchRequest error:error];
@@ -483,6 +485,7 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                     
                     NSMutableDictionary *mutableAttributeValues = [attributeValues mutableCopy];
                     [mutableAttributeValues addEntriesFromDictionary:[self.HTTPClient attributesForRepresentation:representation ofEntity:managedObject.entity fromResponse:operation.response]];
+                    [mutableAttributeValues removeObjectForKey:kAFIncrementalStoreLastModifiedAttributeName];                    
                     [managedObject setValuesForKeysWithDictionary:mutableAttributeValues];
                     
                     NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:[objectID entity] withResourceIdentifier:[self referenceObjectForObjectID:objectID]];
