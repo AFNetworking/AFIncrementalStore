@@ -497,6 +497,8 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                     NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:[objectID entity] withResourceIdentifier:[self referenceObjectForObjectID:objectID]];
                     NSManagedObject *backingObject = [[self backingManagedObjectContext] existingObjectWithID:backingObjectID error:nil];
                     [backingObject setValuesForKeysWithDictionary:mutableAttributeValues];
+                    NSDate *lastModified = AFLastModifiedDateFromHTTPHeaders([operation.response allHeaderFields]);
+                    [backingObject setValue:lastModified forKey:kAFIncrementalStoreLastModifiedAttributeName];
                     
                     [childContext performBlock:^{
                         if (![[self backingManagedObjectContext] save:error] || ![childContext save:error]) {
