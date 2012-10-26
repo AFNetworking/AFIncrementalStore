@@ -50,6 +50,17 @@ static NSString * const kAFAppDotNetAPIBaseURLString = @"https://alpha-api.app.n
 
 #pragma mark - AFIncrementalStore
 
+- (id)representationOrArrayOfRepresentationsFromResponseObject:(id)responseObject
+{
+    id responseData = nil;
+    if ([responseObject isKindOfClass:[NSDictionary class]]) {
+        responseData = [responseObject objectForKey:@"data"];
+    } else {
+        responseData = responseObject;
+    }
+    return [super representationOrArrayOfRepresentationsFromResponseObject:responseData];
+}
+
 - (NSURLRequest *)requestForFetchRequest:(NSFetchRequest *)fetchRequest
                              withContext:(NSManagedObjectContext *)context
 {
