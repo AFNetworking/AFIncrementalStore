@@ -328,6 +328,7 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                             [fetchedObjects addObject:fetchedObject];
                         }
                     }
+                    [fetchedObjects sortUsingDescriptors:fetchRequest.sortDescriptors];
                     
                     [self notifyManagedObjectContext:context
                                aboutRequestOperation:operation
