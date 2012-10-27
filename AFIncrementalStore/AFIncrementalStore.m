@@ -416,7 +416,9 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                         NSString *resourceIdentifier = [self referenceObjectForObjectID:updatedObject.objectID];
                         NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:updatedObject.entity withResourceIdentifier:resourceIdentifier];
                         NSManagedObject *backingObject = [backingContext existingObjectWithID:backingObjectID error:nil];
-                        [backingObject setValuesForKeysWithDictionary:[updatedObject dictionaryWithValuesForKeys:nil]];
+                        NSArray *attributeKeys = updatedObject.entity.attributesByName.allKeys;
+                        // Update only the attribute, the relationship will update with other request.
+                        [backingObject setValuesForKeysWithDictionary:[updatedObject dictionaryWithValuesForKeys:attributeKeys]];
                         [backingContext save:nil];
                     }];
                 } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
@@ -429,7 +431,9 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                     NSString *resourceIdentifier = [self referenceObjectForObjectID:updatedObject.objectID];
                     NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:updatedObject.entity withResourceIdentifier:resourceIdentifier];
                     NSManagedObject *backingObject = [backingContext existingObjectWithID:backingObjectID error:nil];
-                    [backingObject setValuesForKeysWithDictionary:[updatedObject dictionaryWithValuesForKeys:nil]];
+                    NSArray *attributeKeys = updatedObject.entity.attributesByName.allKeys;
+                    // Update only the attribute, the relationship will update with other request.
+                    [backingObject setValuesForKeysWithDictionary:[updatedObject dictionaryWithValuesForKeys:attributeKeys]];
                     [backingContext save:nil];
                 }];
             }
