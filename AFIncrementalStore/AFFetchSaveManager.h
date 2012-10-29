@@ -14,7 +14,7 @@ typedef void (^AFIncrementalStoreSaveCompletionBlock)(NSSaveChangesRequest *save
 @interface AFFetchSaveManager : NSObject
 
 /**
- `AFFetchSaveManager` is a singleton designed to manage executing NSFetchRequests with completion blocks and NSManagedObjectContext saves with completion blocks.
+ `AFFetchSaveManager` is a class designed to manage executing NSFetchRequests with completion blocks and NSManagedObjectContext saves with completion blocks. There is no need to create an instance of this class; the class itself is the observer for notifications and the only public methods are class methods.
  
  ## Description
  

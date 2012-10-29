@@ -37,6 +37,8 @@ static NSMutableDictionary *_saveRequestBlockDictionary = nil;
 					  error:(NSError *__autoreleasing*)error
 				 completion:(AFIncrementalStoreFetchCompletionBlock)completionBlock
 {
+	NSParameterAssert(context);
+	
 	[[self class] setupObserver];
 	
 	if (completionBlock) {
@@ -54,6 +56,8 @@ static NSMutableDictionary *_saveRequestBlockDictionary = nil;
 			  error:(NSError *__autoreleasing*)error
 		 completion:(AFIncrementalStoreSaveCompletionBlock)completionBlock
 {
+	NSParameterAssert(context);
+	
 	[[self class] setupObserver];
 	
 	if (completionBlock) {
