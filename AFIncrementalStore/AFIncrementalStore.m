@@ -36,9 +36,9 @@ NSString * const AFIncrementalStoreContextDidFetchRemoteValues = @"AFIncremental
 NSString * const AFIncrementalStoreContextDidSaveRemoteValues = @"AFIncrementalStoreContextDidSaveRemoteValues";
 NSString * const AFIncrementalStoreRequestOperationKey = @"AFIncrementalStoreRequestOperation";
 NSString * const AFIncrementalStorePersistentStoreRequestKey = @"AFIncrementalStorePersistentStoreRequest";
-NSString * const AFIncrementalStoreFetchedObjectIDsKey = @"AFIncrementalStoreFetchedObjectsKey";
-NSString * const AFIncrementalStoreInsertedObjectIDsKey = @"AFIncrementalStoreInsertedObjectIDsKey";
-NSString * const AFIncrementalStoreUpdatedObjectIDsKey = @"AFIncrementalStoreUpdatedObjectIDsKey";
+NSString * const AFIncrementalStoreFetchedObjectsKey = @"AFIncrementalStoreFetchedObjectsKey";
+NSString * const AFIncrementalStoreInsertedObjectsKey = @"AFIncrementalStoreInsertedObjectIDsKey";
+NSString * const AFIncrementalStoreUpdatedObjectsKey = @"AFIncrementalStoreUpdatedObjectIDsKey";
 NSString * const AFIncrementalStoreDeletedObjectIDsKey = @"AFIncrementalStoreDeletedObjectIDsKey";
 
 static NSString * const kAFIncrementalStoreResourceIdentifierAttributeName = @"__af_resourceIdentifier";
@@ -114,15 +114,15 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
 - (void)notifyManagedObjectContext:(NSManagedObjectContext *)context
              aboutRequestOperation:(AFHTTPRequestOperation *)operation
                    forFetchRequest:(NSFetchRequest *)fetchRequest
-			  withFetchedObjectIDs:(NSArray *)fetchedObjectIDs
+			  withFetchedObjects:(NSArray *)fetchedObjects
 {
     NSString *notificationName = [operation isFinished] ? AFIncrementalStoreContextDidFetchRemoteValues : AFIncrementalStoreContextWillFetchRemoteValues;
     
     NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
     [userInfo setObject:operation forKey:AFIncrementalStoreRequestOperationKey];
     [userInfo setObject:fetchRequest forKey:AFIncrementalStorePersistentStoreRequestKey];
-	if ([operation isFinished] && fetchedObjectIDs)
-		[userInfo setObject:fetchedObjectIDs forKey:AFIncrementalStoreFetchedObjectIDsKey];
+	if ([operation isFinished] && fetchedObjects)
+		[userInfo setObject:fetchedObjects forKey:AFIncrementalStoreFetchedObjectsKey];
     
     [[NSNotificationCenter defaultCenter] postNotificationName:notificationName object:context userInfo:userInfo];
 }
@@ -130,8 +130,8 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
 - (void)notifyManagedObjectContext:(NSManagedObjectContext *)context
             aboutRequestOperations:(NSArray *)operations
              forSaveChangesRequest:(NSSaveChangesRequest *)saveChangesRequest
-			 withInsertedObjectIDs:(NSArray *)insertedObjectIDs
-			  withUpdatedObjectIDs:(NSArray *)updatedObjectIDs
+			 withInsertedObjects:(NSArray *)insertedObjects
+			  withUpdatedObjects:(NSArray *)updatedObjects
 			  withDeletedObjectIDs:(NSArray *)deletedObjectIDs
 {
     NSString *notificationName = [[operations lastObject] isFinished] ? AFIncrementalStoreContextDidSaveRemoteValues : AFIncrementalStoreContextWillSaveRemoteValues;
@@ -139,10 +139,10 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
     [userInfo setObject:operations forKey:AFIncrementalStoreRequestOperationKey];
     [userInfo setObject:saveChangesRequest forKey:AFIncrementalStorePersistentStoreRequestKey];
-	if (insertedObjectIDs)
-		[userInfo setObject:insertedObjectIDs forKey:AFIncrementalStoreInsertedObjectIDsKey];
-	if (updatedObjectIDs)
-		[userInfo setObject:updatedObjectIDs forKey:AFIncrementalStoreUpdatedObjectIDsKey];
+	if (insertedObjects)
+		[userInfo setObject:insertedObjects forKey:AFIncrementalStoreInsertedObjectsKey];
+	if (updatedObjects)
+		[userInfo setObject:updatedObjects forKey:AFIncrementalStoreUpdatedObjectsKey];
 	if (deletedObjectIDs)
 		[userInfo setObject:deletedObjectIDs forKey:AFIncrementalStoreDeletedObjectIDsKey];
 
@@ -341,21 +341,26 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                         NSLog(@"Error: %@", *error);
                     }
 					
-					NSMutableArray *tmpObjectIDs = [NSMutableArray array];
-					for (NSManagedObject *object in managedObjects)
-						[tmpObjectIDs addObject:object.objectID];
+					NSMutableArray *fetchedObjects = [NSMutableArray array];
+					[context performBlockAndWait:^{
+						for (NSManagedObject *obj in managedObjects)
+						{
+							NSManagedObject *contextObj = [context existingObjectWithID:obj.objectID error:NULL];
+							[fetchedObjects addObject:contextObj];
+						}
+					}];
 					
-					[self notifyManagedObjectContext:context aboutRequestOperation:operation forFetchRequest:fetchRequest withFetchedObjectIDs:tmpObjectIDs];
+					[self notifyManagedObjectContext:context aboutRequestOperation:operation forFetchRequest:fetchRequest withFetchedObjects:fetchedObjects];
                 }];
             }];
         } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
             NSLog(@"Error: %@", error);
-            [self notifyManagedObjectContext:context aboutRequestOperation:operation forFetchRequest:fetchRequest withFetchedObjectIDs:nil];
+            [self notifyManagedObjectContext:context aboutRequestOperation:operation forFetchRequest:fetchRequest withFetchedObjects:nil];
         }];
         
         operation.successCallbackQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
         
-        [self notifyManagedObjectContext:context aboutRequestOperation:operation forFetchRequest:fetchRequest withFetchedObjectIDs:nil];
+        [self notifyManagedObjectContext:context aboutRequestOperation:operation forFetchRequest:fetchRequest withFetchedObjects:nil];
         [self.HTTPClient enqueueHTTPRequestOperation:operation];
     }
     
@@ -406,9 +411,9 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     NSMutableArray *mutableOperations = [NSMutableArray array];
     NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
 
-	__block NSMutableArray *insertedObjectIDs;
+	__block NSMutableArray *insertedObjects;
     if ([self.HTTPClient respondsToSelector:@selector(requestForInsertedObject:)]) {
-		insertedObjectIDs = [[NSMutableArray alloc] initWithCapacity:[[saveChangesRequest insertedObjects] count]];
+		insertedObjects = [[NSMutableArray alloc] initWithCapacity:[[saveChangesRequest insertedObjects] count]];
         for (NSManagedObject *insertedObject in [saveChangesRequest insertedObjects]) {
             NSURLRequest *request = [self.HTTPClient requestForInsertedObject:insertedObject];
             AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, id responseObject) {
@@ -425,7 +430,12 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                 }];
                 
                 [context obtainPermanentIDsForObjects:[NSArray arrayWithObject:insertedObject] error:nil];
-				[insertedObjectIDs addObject:[insertedObject objectID]];
+				
+				[context performBlockAndWait:^{
+					NSManagedObject *contextInsertedObj = [context existingObjectWithID:insertedObject.objectID error:NULL];
+					[insertedObjects addObject:contextInsertedObj];
+				}];
+
             } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
                 NSLog(@"Insert Error: %@", error);
             }];
@@ -434,9 +444,9 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
         }
     }
     
-	__block NSMutableArray *updatedObjectIDs;
+	__block NSMutableArray *updatedObjects;
     if ([self.HTTPClient respondsToSelector:@selector(requestForUpdatedObject:)]) {
-		updatedObjectIDs = [[NSMutableArray alloc] initWithCapacity:[[saveChangesRequest updatedObjects] count]];
+		updatedObjects = [[NSMutableArray alloc] initWithCapacity:[[saveChangesRequest updatedObjects] count]];
         for (NSManagedObject *updatedObject in [saveChangesRequest updatedObjects]) {
             NSURLRequest *request = [self.HTTPClient requestForUpdatedObject:updatedObject];
             AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, id responseObject) {
@@ -447,6 +457,11 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                     [backingObject setValuesForKeysWithDictionary:[updatedObject dictionaryWithValuesForKeys:nil]];
                     [backingContext save:nil];
                 }];
+				
+				[context performBlockAndWait:^{
+					NSManagedObject *contextUpdatedObj = [context existingObjectWithID:updatedObject.objectID error:NULL];
+					[insertedObjects addObject:contextUpdatedObj];
+				}];
             } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
                 NSLog(@"Update Error: %@", error);
             }];
@@ -477,16 +492,16 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     }
     
     [self notifyManagedObjectContext:context aboutRequestOperations:mutableOperations forSaveChangesRequest:saveChangesRequest
-			   withInsertedObjectIDs:nil
-				withUpdatedObjectIDs:nil
+			   withInsertedObjects:nil
+				withUpdatedObjects:nil
 				withDeletedObjectIDs:nil];
 
     [self.HTTPClient enqueueBatchOfHTTPRequestOperations:mutableOperations progressBlock:nil completionBlock:^(NSArray *operations) {
         [self notifyManagedObjectContext:context
 				  aboutRequestOperations:operations
 				   forSaveChangesRequest:saveChangesRequest
-				   withInsertedObjectIDs:insertedObjectIDs
-					withUpdatedObjectIDs:updatedObjectIDs
+				   withInsertedObjects:insertedObjects
+					withUpdatedObjects:updatedObjects
 					withDeletedObjectIDs:deletedObjectIDs];
     }];
     

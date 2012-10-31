@@ -133,7 +133,7 @@ static NSMutableDictionary *_saveRequestBlockDictionary = nil;
 				couldNotFindValidCompletionBlock = YES;
 			else
 			{
-				NSArray *tmpFetchedObjects = [inNotification.userInfo objectForKey:AFIncrementalStoreFetchedObjectIDsKey];
+				NSArray *tmpFetchedObjects = [inNotification.userInfo objectForKey:AFIncrementalStoreFetchedObjectsKey];
 				if (tmpFetchCompletionBlock)
 					tmpFetchCompletionBlock((NSFetchRequest *)tmpPersistentStoreRequest, tmpOperation, tmpFetchedObjects);
 			}
@@ -145,8 +145,8 @@ static NSMutableDictionary *_saveRequestBlockDictionary = nil;
 				couldNotFindValidCompletionBlock = YES;
 			else
 			{
-				NSArray *tmpInsertedObjects =  [inNotification.userInfo objectForKey:AFIncrementalStoreInsertedObjectIDsKey];
-				NSArray *tmpUpdatedObjects = [inNotification.userInfo objectForKey:AFIncrementalStoreUpdatedObjectIDsKey];
+				NSArray *tmpInsertedObjects =  [inNotification.userInfo objectForKey:AFIncrementalStoreInsertedObjectsKey];
+				NSArray *tmpUpdatedObjects = [inNotification.userInfo objectForKey:AFIncrementalStoreUpdatedObjectsKey];
 				NSArray *tmpDeletedObjects = [inNotification.userInfo objectForKey:AFIncrementalStoreDeletedObjectIDsKey];
 				if (tmpSaveCompletionBlock)
 					tmpSaveCompletionBlock((NSSaveChangesRequest *)tmpPersistentStoreRequest, tmpOperation, tmpInsertedObjects, tmpUpdatedObjects, tmpDeletedObjects);

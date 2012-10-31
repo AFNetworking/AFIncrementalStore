@@ -349,28 +349,28 @@ extern NSString * const AFIncrementalStoreRequestOperationKey;
 extern NSString * const AFIncrementalStorePersistentStoreRequestKey;
 
 /**
- A key in the `userInfo` dictionary in a `AFIncrementalStoreContextWillFetchRemoteValues` or `AFIncrementalStoreContextDidFetchRemoteValues` notification.
- The corresponding value is a NSArray containing the permament object ID's associated with the fetched objects from the originating managed object context. The object ID's are included in the NSNotification because unlike the NSManagedObjects themselves, the IDs are thread-safe.
+ A key in the `userInfo` dictionary in a `AFIncrementalStoreContextDidFetchRemoteValues` notification.
+ The corresponding value is an `NSArray` object containing the fetched objects, in the context in which they were requested.
  */
 
-extern NSString * const AFIncrementalStoreFetchedObjectIDsKey;
+extern NSString * const AFIncrementalStoreFetchedObjectsKey;
 
 /**
- A key in the `userInfo` dictionary in a `AFIncrementalStoreContextWillFetchRemoteValues` or `AFIncrementalStoreContextDidFetchRemoteValues` notification.
- The corresponding value is a NSArray containing the permament object ID's associated with the inserted objects from the originating managed object context. The object ID's are included in the NSNotification because unlike the NSManagedObjects themselves, the IDs are thread-safe.
+ A key in the `userInfo` dictionary in a `AFIncrementalStoreContextDidSaveRemoteValues` notification.
+ The corresponding value is an `NSArray` object containing the inserted objects, in the context in which they were requested.
  */
 
-extern NSString * const AFIncrementalStoreInsertedObjectIDsKey;
+extern NSString * const AFIncrementalStoreInsertedObjectsKey;
 
 /**
- A key in the `userInfo` dictionary in a `AFIncrementalStoreContextWillFetchRemoteValues` or `AFIncrementalStoreContextDidFetchRemoteValues` notification.
- The corresponding value is a NSArray containing the permament object ID's associated with the updated objects from the originating managed object context. The object ID's are included in the NSNotification because unlike the NSManagedObjects themselves, the IDs are thread-safe.
+ A key in the `userInfo` dictionary in a `AFIncrementalStoreContextDidSaveRemoteValues` notification.
+ The corresponding value is an `NSArray` object containing the updated objects, in the context in which they were requested. 
  */
 
-extern NSString * const AFIncrementalStoreUpdatedObjectIDsKey;
+extern NSString * const AFIncrementalStoreUpdatedObjectsKey;
 
 /**
- A key in the `userInfo` dictionary in a `AFIncrementalStoreContextWillFetchRemoteValues` or `AFIncrementalStoreContextDidFetchRemoteValues` notification.
+ A key in the `userInfo` dictionary in a `AFIncrementalStoreContextWillSaveRemoteValues` or `AFIncrementalStoreContextDidFetchRemoteValues` notification.
  The corresponding value is a NSArray containing the permament object ID's associated with the deleted objects from the originating managed object context. The object ID's are included in the NSNotification because unlike the NSManagedObjects themselves, the IDs are thread-safe.
  */
 
