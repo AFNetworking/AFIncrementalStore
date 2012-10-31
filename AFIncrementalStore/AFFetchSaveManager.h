@@ -8,8 +8,8 @@
 
 @class AFHTTPRequestOperation;
 
-typedef void (^AFIncrementalStoreFetchCompletionBlock)(NSFetchRequest *fetchRequest, AFHTTPRequestOperation *operation, NSArray *fetchedObjectIDs);
-typedef void (^AFIncrementalStoreSaveCompletionBlock)(NSSaveChangesRequest *saveChangesRequest, AFHTTPRequestOperation *operation, NSArray *insertedObjectIDs, NSArray *updatedObjectIDs, NSArray *deletedObjectIDs);
+typedef void (^AFIncrementalStoreFetchCompletionBlock)(NSFetchRequest *fetchRequest, AFHTTPRequestOperation *operation, NSArray *fetchedObjects);
+typedef void (^AFIncrementalStoreSaveCompletionBlock)(NSSaveChangesRequest *saveChangesRequest, AFHTTPRequestOperation *operation, NSArray *insertedObjects, NSArray *updatedObjects, NSArray *deletedObjectIDs);
 
 @interface AFFetchSaveManager : NSObject
 

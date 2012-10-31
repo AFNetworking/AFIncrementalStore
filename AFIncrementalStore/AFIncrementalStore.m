@@ -460,7 +460,7 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
 				
 				[context performBlockAndWait:^{
 					NSManagedObject *contextUpdatedObj = [context existingObjectWithID:updatedObject.objectID error:NULL];
-					[insertedObjects addObject:contextUpdatedObj];
+					[updatedObjects addObject:contextUpdatedObj];
 				}];
             } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
                 NSLog(@"Update Error: %@", error);
