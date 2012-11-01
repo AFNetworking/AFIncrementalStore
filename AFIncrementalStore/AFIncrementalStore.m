@@ -33,6 +33,7 @@ NSString * const AFIncrementalStoreContextDidFetchRemoteValues = @"AFIncremental
 NSString * const AFIncrementalStoreContextDidSaveRemoteValues = @"AFIncrementalStoreContextDidSaveRemoteValues";
 NSString * const AFIncrementalStoreRequestOperationKey = @"AFIncrementalStoreRequestOperation";
 NSString * const AFIncrementalStorePersistentStoreRequestKey = @"AFIncrementalStorePersistentStoreRequest";
+NSString * const AFIncrementalStoreFetchedObjectsKey = @"AFIncrementalStoreFetchedObjectsKey";
 
 static NSString * const kAFIncrementalStoreResourceIdentifierAttributeName = @"__af_resourceIdentifier";
 static NSString * const kAFIncrementalStoreLastModifiedAttributeName = @"__af_lastModified";
@@ -104,12 +105,16 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
 - (void)notifyManagedObjectContext:(NSManagedObjectContext *)context
              aboutRequestOperation:(AFHTTPRequestOperation *)operation
                    forFetchRequest:(NSFetchRequest *)fetchRequest
+                    fetchedObjects:(NSArray *)fetchedObjects
 {
     NSString *notificationName = [operation isFinished] ? AFIncrementalStoreContextDidFetchRemoteValues : AFIncrementalStoreContextWillFetchRemoteValues;
     
     NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
     [userInfo setObject:operation forKey:AFIncrementalStoreRequestOperationKey];
     [userInfo setObject:fetchRequest forKey:AFIncrementalStorePersistentStoreRequestKey];
+    if ([operation isFinished] && fetchedObjects) {
+        [userInfo setObject:fetchedObjects forKey:AFIncrementalStoreFetchedObjectsKey];
+    }
     
     dispatch_async(dispatch_get_main_queue(), ^{
         [[NSNotificationCenter defaultCenter] postNotificationName:notificationName object:context userInfo:userInfo];
@@ -318,7 +323,7 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                         [parentObject.managedObjectContext refreshObject:parentObject mergeChanges:NO];
                     }
 
-                    [context performBlock:^{
+                    [context performBlockAndWait:^{
                         for (NSManagedObject *childObject in childObjects) {
                             NSManagedObject *parentObject = [context objectWithID:childObject.objectID];
                             [parentObject willChangeValueForKey:@"self"];
@@ -326,16 +331,25 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                             [parentObject didChangeValueForKey:@"self"];
                         }
                     }];
+
+                    NSMutableArray *fetchedObjects = [[NSMutableArray alloc] initWithCapacity:[managedObjects count]];
+                    for (NSManagedObject *managedObject in managedObjects) {
+                        NSManagedObject *fetchedObject = [context existingObjectWithID:managedObject.objectID error:NULL];
+                        if (fetchedObject) {
+                            [fetchedObjects addObject:fetchedObject];
+                        }
+                    }
+                    [fetchedObjects sortUsingDescriptors:fetchRequest.sortDescriptors];
+                    
+                    [self notifyManagedObjectContext:context aboutRequestOperation:operation forFetchRequest:fetchRequest fetchedObjects:fetchedObjects];
                 }];
-                
-                [self notifyManagedObjectContext:context aboutRequestOperation:operation forFetchRequest:fetchRequest];
             }];
         } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
             NSLog(@"Error: %@", error);
-            [self notifyManagedObjectContext:context aboutRequestOperation:operation forFetchRequest:fetchRequest];
+            [self notifyManagedObjectContext:context aboutRequestOperation:operation forFetchRequest:fetchRequest fetchedObjects:nil];
         }];
 
-        [self notifyManagedObjectContext:context aboutRequestOperation:operation forFetchRequest:fetchRequest];
+        [self notifyManagedObjectContext:context aboutRequestOperation:operation forFetchRequest:fetchRequest fetchedObjects:nil];
         [self.HTTPClient enqueueHTTPRequestOperation:operation];
     }
     
