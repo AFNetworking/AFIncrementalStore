@@ -250,7 +250,7 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
             
             id relationshipRepresentation = [relationshipRepresentations objectForKey:relationshipName];
             
-            if (!relationshipRepresentation || [relationshipRepresentation isEqual:[NSNull null]] || ![relationshipRepresentation count]) {
+            if (!relationshipRepresentation || [relationshipRepresentation isEqual:[NSNull null]] || [relationshipRepresentation count] == 0) {
                 [managedObject setValue:nil forKey:relationshipName];
                 [backingObject setValue:nil forKey:relationshipName];
                 continue;
