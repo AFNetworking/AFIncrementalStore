@@ -237,19 +237,12 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     NSDate *lastModified = AFLastModifiedDateFromHTTPHeaders([response allHeaderFields]);
     
     NSArray *representations = nil;
-    
     if ([representationOrArrayOfRepresentations isKindOfClass:[NSArray class]]) {
-        
         representations = representationOrArrayOfRepresentations;
-        
     } else if ([representationOrArrayOfRepresentations isKindOfClass:[NSDictionary class]]) {
-        
-        representations = @[ representationOrArrayOfRepresentations ];
-    
+        representations = [NSArray arrayWithObject:representationOrArrayOfRepresentations];
     } else {
-    
         @throw [NSException exceptionWithName:AFIncrementalStoreRelationshipCardinalityException reason:@"Can not understand the representations." userInfo:nil];
-    
     }
 
     NSUInteger numberOfRepresentations = [representations count];
