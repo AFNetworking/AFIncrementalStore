@@ -90,20 +90,6 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
 @synthesize HTTPClient = _HTTPClient;
 @synthesize backingPersistentStoreCoordinator = _backingPersistentStoreCoordinator;
 
-- (NSArray *)obtainPermanentIDsForObjects:(NSArray *)array error:(NSError **)error {
-    NSMutableArray *mutablePermanentIDs = [NSMutableArray arrayWithCapacity:[array count]];
-    for (NSManagedObject *managedObject in array) {
-        if (managedObject.af_resourceIdentifier) {
-            NSManagedObjectID *objectID = [self objectIDForEntity:managedObject.entity withResourceIdentifier:managedObject.af_resourceIdentifier];
-            [mutablePermanentIDs addObject:objectID];
-        } else {
-            [mutablePermanentIDs addObject:[managedObject objectID]];
-        }
-    }
-    
-    return mutablePermanentIDs;
-}
-
 + (NSString *)type {
     @throw([NSException exceptionWithName:AFIncrementalStoreUnimplementedMethodException reason:NSLocalizedString(@"Unimplemented method: +type. Must be overridden in a subclass", nil) userInfo:nil]);
 }
@@ -472,6 +458,21 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     } else {
         return NO;
     }
+}
+
+- (NSArray *)obtainPermanentIDsForObjects:(NSArray *)array error:(NSError **)error {
+    NSMutableArray *mutablePermanentIDs = [NSMutableArray arrayWithCapacity:[array count]];
+    for (NSManagedObject *managedObject in array) {
+        NSManagedObjectID *managedObjectID = managedObject.objectID;
+        if ([managedObjectID isTemporaryID] && managedObject.af_resourceIdentifier) {
+            NSManagedObjectID *objectID = [self objectIDForEntity:managedObject.entity withResourceIdentifier:managedObject.af_resourceIdentifier];
+            [mutablePermanentIDs addObject:objectID];
+        } else {
+            [mutablePermanentIDs addObject:managedObjectID];
+        }
+    }
+    
+    return mutablePermanentIDs;
 }
 
 - (id)executeRequest:(NSPersistentStoreRequest *)persistentStoreRequest
