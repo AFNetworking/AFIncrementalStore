@@ -84,7 +84,7 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
 @implementation AFIncrementalStore {
 @private
     NSCache *_backingObjectIDByObjectID;
-    NSMutableDictionary *_registeredObjectIDsByResourceIdentifier;
+    NSMutableDictionary *_registeredObjectIDsByEntityNameAndNestedResourceIdentifier;
     NSPersistentStoreCoordinator *_backingPersistentStoreCoordinator;
     NSManagedObjectContext *_backingManagedObjectContext;
 }
@@ -139,44 +139,6 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     [[NSNotificationCenter defaultCenter] postNotificationName:notificationName object:context userInfo:userInfo];
 }
 
-- (BOOL)loadMetadata:(NSError *__autoreleasing *)error {
-    if (!_backingObjectIDByObjectID) {
-        NSMutableDictionary *mutableMetadata = [NSMutableDictionary dictionary];
-        [mutableMetadata setValue:[[NSProcessInfo processInfo] globallyUniqueString] forKey:NSStoreUUIDKey];
-        [mutableMetadata setValue:NSStringFromClass([self class]) forKey:NSStoreTypeKey];
-        [self setMetadata:mutableMetadata];
-        
-        _backingObjectIDByObjectID = [[NSCache alloc] init];
-        _registeredObjectIDsByResourceIdentifier = [[NSMutableDictionary alloc] init];
-        
-        NSManagedObjectModel *model = [self.persistentStoreCoordinator.managedObjectModel copy];
-        for (NSEntityDescription *entity in model.entities) {
-            // Don't add properties for sub-entities, as they already exist in the super-entity 
-            if ([entity superentity]) {
-                continue;
-            }
-            
-            NSAttributeDescription *resourceIdentifierProperty = [[NSAttributeDescription alloc] init];
-            [resourceIdentifierProperty setName:kAFIncrementalStoreResourceIdentifierAttributeName];
-            [resourceIdentifierProperty setAttributeType:NSStringAttributeType];
-            [resourceIdentifierProperty setIndexed:YES];
-            
-            NSAttributeDescription *lastModifiedProperty = [[NSAttributeDescription alloc] init];
-            [lastModifiedProperty setName:kAFIncrementalStoreLastModifiedAttributeName];
-            [lastModifiedProperty setAttributeType:NSDateAttributeType];
-            [lastModifiedProperty setIndexed:NO];
-            
-            [entity setProperties:[entity.properties arrayByAddingObjectsFromArray:[NSArray arrayWithObjects:resourceIdentifierProperty, lastModifiedProperty, nil]]];
-        }
-        
-        _backingPersistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:model];
-        
-        return YES;
-    } else {
-        return NO;
-    }
-}
-
 - (NSManagedObjectContext *)backingManagedObjectContext {
     if (!_backingManagedObjectContext) {
         _backingManagedObjectContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
@@ -193,13 +155,17 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
         return nil;
     }
     
-    NSManagedObjectID *objectID = _registeredObjectIDsByResourceIdentifier[entity.name][resourceIdentifier];
-    
+    NSManagedObjectID *objectID = nil;
+    NSMutableDictionary *objectIDsByResourceIdentifier = [_registeredObjectIDsByEntityNameAndNestedResourceIdentifier objectForKey:objectID.entity.name];
+    if (objectIDsByResourceIdentifier) {
+        objectID = [objectIDsByResourceIdentifier objectForKey:resourceIdentifier];
+    }
+        
     if (objectID == nil) {
         objectID = [self newObjectIDForEntity:entity referenceObject:resourceIdentifier];
     }
     
-    NSCParameterAssert([objectID.entity.name isEqualToString:entity.name]);
+    NSParameterAssert([objectID.entity.name isEqualToString:entity.name]);
     
     return objectID;
 }
@@ -225,6 +191,8 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     
     return [results lastObject];
 }
+
+#pragma mark -
 
 - (void)insertOrUpdateObjectsFromRepresentations:(id)representationOrArrayOfRepresentations
                                         ofEntity:(NSEntityDescription *)entity
@@ -460,6 +428,44 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
 
 #pragma mark - NSIncrementalStore
 
+- (BOOL)loadMetadata:(NSError *__autoreleasing *)error {
+    if (!_backingObjectIDByObjectID) {
+        NSMutableDictionary *mutableMetadata = [NSMutableDictionary dictionary];
+        [mutableMetadata setValue:[[NSProcessInfo processInfo] globallyUniqueString] forKey:NSStoreUUIDKey];
+        [mutableMetadata setValue:NSStringFromClass([self class]) forKey:NSStoreTypeKey];
+        [self setMetadata:mutableMetadata];
+        
+        _backingObjectIDByObjectID = [[NSCache alloc] init];
+        _registeredObjectIDsByEntityNameAndNestedResourceIdentifier = [[NSMutableDictionary alloc] init];
+        
+        NSManagedObjectModel *model = [self.persistentStoreCoordinator.managedObjectModel copy];
+        for (NSEntityDescription *entity in model.entities) {
+            // Don't add properties for sub-entities, as they already exist in the super-entity
+            if ([entity superentity]) {
+                continue;
+            }
+            
+            NSAttributeDescription *resourceIdentifierProperty = [[NSAttributeDescription alloc] init];
+            [resourceIdentifierProperty setName:kAFIncrementalStoreResourceIdentifierAttributeName];
+            [resourceIdentifierProperty setAttributeType:NSStringAttributeType];
+            [resourceIdentifierProperty setIndexed:YES];
+            
+            NSAttributeDescription *lastModifiedProperty = [[NSAttributeDescription alloc] init];
+            [lastModifiedProperty setName:kAFIncrementalStoreLastModifiedAttributeName];
+            [lastModifiedProperty setAttributeType:NSDateAttributeType];
+            [lastModifiedProperty setIndexed:NO];
+            
+            [entity setProperties:[entity.properties arrayByAddingObjectsFromArray:[NSArray arrayWithObjects:resourceIdentifierProperty, lastModifiedProperty, nil]]];
+        }
+        
+        _backingPersistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:model];
+        
+        return YES;
+    } else {
+        return NO;
+    }
+}
+
 - (id)executeRequest:(NSPersistentStoreRequest *)persistentStoreRequest
          withContext:(NSManagedObjectContext *)context
                error:(NSError *__autoreleasing *)error
@@ -626,25 +632,25 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
 
 - (void)managedObjectContextDidRegisterObjectsWithIDs:(NSArray *)objectIDs {
     [super managedObjectContextDidRegisterObjectsWithIDs:objectIDs];
+    
     for (NSManagedObjectID *objectID in objectIDs) {
         id key = [self referenceObjectForObjectID:objectID];
         if (!key) {
             continue;
         }
         
-        NSMutableDictionary *objectIDsByResourceIdentifier = _registeredObjectIDsByResourceIdentifier[objectID.entity.name];
-        if (!objectIDsByResourceIdentifier) {
-            objectIDsByResourceIdentifier = [NSMutableDictionary dictionary];
-            _registeredObjectIDsByResourceIdentifier[objectID.entity.name] = objectIDsByResourceIdentifier;
-        }
+        NSMutableDictionary *objectIDsByResourceIdentifier = [_registeredObjectIDsByEntityNameAndNestedResourceIdentifier objectForKey:objectID.entity.name] ?: [NSMutableDictionary dictionary];
         objectIDsByResourceIdentifier[key] = objectID;
+        
+        [_registeredObjectIDsByEntityNameAndNestedResourceIdentifier setObject:objectIDsByResourceIdentifier forKey:objectID.entity.name];
     }
 }
 
 - (void)managedObjectContextDidUnregisterObjectsWithIDs:(NSArray *)objectIDs {
     [super managedObjectContextDidUnregisterObjectsWithIDs:objectIDs];
+    
     for (NSManagedObjectID *objectID in objectIDs) {
-        [_registeredObjectIDsByResourceIdentifier[objectID.entity.name] removeObjectForKey:[self referenceObjectForObjectID:objectID]];
+        [[_registeredObjectIDsByEntityNameAndNestedResourceIdentifier objectForKey:objectID.entity.name] removeObjectForKey:[self referenceObjectForObjectID:objectID]];
     }
 }
 
