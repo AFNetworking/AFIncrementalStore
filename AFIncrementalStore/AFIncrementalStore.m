@@ -528,8 +528,8 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     [backingContext performBlockAndWait:^{
         results = [backingContext executeFetchRequest:fetchRequest error:error];
     }];
+    
     NSDictionary *attributeValues = [results lastObject] ?: [NSDictionary dictionary];
-
     NSIncrementalStoreNode *node = [[NSIncrementalStoreNode alloc] initWithObjectID:objectID withValues:attributeValues version:1];
     
     if ([self.HTTPClient respondsToSelector:@selector(shouldFetchRemoteAttributeValuesForObjectWithID:inManagedObjectContext:)] && [self.HTTPClient shouldFetchRemoteAttributeValuesForObjectWithID:objectID inManagedObjectContext:context]) {
