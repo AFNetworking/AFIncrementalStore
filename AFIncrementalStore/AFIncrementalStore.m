@@ -62,7 +62,6 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
 @dynamic af_resourceIdentifier;
 
 - (NSString *)af_resourceIdentifier {
-
     NSString *identifier = (NSString *)objc_getAssociatedObject(self, &kAFResourceIdentifierObjectKey);
     
     if (!identifier) {
@@ -72,7 +71,6 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     }
     
     return identifier;
-    
 }
 
 - (void)af_setResourceIdentifier:(NSString *)resourceIdentifier {
@@ -315,25 +313,6 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     }
 }
 
-- (id)executeRequest:(NSPersistentStoreRequest *)persistentStoreRequest
-         withContext:(NSManagedObjectContext *)context
-               error:(NSError *__autoreleasing *)error
-{
-    if (persistentStoreRequest.requestType == NSFetchRequestType) {
-        return [self executeFetchRequest:(NSFetchRequest *)persistentStoreRequest withContext:context error:error];
-    } else if (persistentStoreRequest.requestType == NSSaveRequestType) {
-        return [self executeSaveChangesRequest:(NSSaveChangesRequest *)persistentStoreRequest withContext:context error:error];
-    } else {
-        NSMutableDictionary *mutableUserInfo = [NSMutableDictionary dictionary];
-        [mutableUserInfo setValue:[NSString stringWithFormat:NSLocalizedString(@"Unsupported NSFetchRequestResultType, %d", nil), persistentStoreRequest.requestType] forKey:NSLocalizedDescriptionKey];
-        if (error) {
-            *error = [[NSError alloc] initWithDomain:AFNetworkingErrorDomain code:0 userInfo:mutableUserInfo];
-        }
-        
-        return nil;
-    }
-}
-
 - (id)executeFetchRequest:(NSFetchRequest *)fetchRequest
               withContext:(NSManagedObjectContext *)context
                     error:(NSError *__autoreleasing *)error
@@ -486,7 +465,26 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     return [NSArray array];
 }
 
-#pragma mark -
+#pragma mark - NSIncrementalStore
+
+- (id)executeRequest:(NSPersistentStoreRequest *)persistentStoreRequest
+         withContext:(NSManagedObjectContext *)context
+               error:(NSError *__autoreleasing *)error
+{
+    if (persistentStoreRequest.requestType == NSFetchRequestType) {
+        return [self executeFetchRequest:(NSFetchRequest *)persistentStoreRequest withContext:context error:error];
+    } else if (persistentStoreRequest.requestType == NSSaveRequestType) {
+        return [self executeSaveChangesRequest:(NSSaveChangesRequest *)persistentStoreRequest withContext:context error:error];
+    } else {
+        NSMutableDictionary *mutableUserInfo = [NSMutableDictionary dictionary];
+        [mutableUserInfo setValue:[NSString stringWithFormat:NSLocalizedString(@"Unsupported NSFetchRequestResultType, %d", nil), persistentStoreRequest.requestType] forKey:NSLocalizedDescriptionKey];
+        if (error) {
+            *error = [[NSError alloc] initWithDomain:AFNetworkingErrorDomain code:0 userInfo:mutableUserInfo];
+        }
+        
+        return nil;
+    }
+}
 
 - (NSIncrementalStoreNode *)newValuesForObjectWithID:(NSManagedObjectID *)objectID
                                          withContext:(NSManagedObjectContext *)context
@@ -632,8 +630,6 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
         }
     }
 }
-
-#pragma mark - NSIncrementalStore
 
 - (void)managedObjectContextDidRegisterObjectsWithIDs:(NSArray *)objectIDs {
     [super managedObjectContextDidRegisterObjectsWithIDs:objectIDs];
