@@ -26,7 +26,6 @@
 #import <objc/runtime.h>
 
 NSString * const AFIncrementalStoreUnimplementedMethodException = @"com.alamofire.incremental-store.exceptions.unimplemented-method";
-NSString * const AFIncrementalStoreRelationshipCardinalityException = @"com.alamofire.incremental-store.exceptions.relationship-cardinality";
 
 NSString * const AFIncrementalStoreContextWillFetchRemoteValues = @"AFIncrementalStoreContextWillFetchRemoteValues";
 NSString * const AFIncrementalStoreContextWillSaveRemoteValues = @"AFIncrementalStoreContextWillSaveRemoteValues";
@@ -201,16 +200,16 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                                            error:(NSError *__autoreleasing *)error
                                  completionBlock:(void (^)(NSArray *managedObjects, NSArray *backingObjects))completionBlock
 {
+    NSParameterAssert([representationOrArrayOfRepresentations isKindOfClass:[NSArray class]] || [representationOrArrayOfRepresentations isKindOfClass:[NSDictionary class]]);
+    
     NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
     NSDate *lastModified = AFLastModifiedDateFromHTTPHeaders([response allHeaderFields]);
-    
+
     NSArray *representations = nil;
     if ([representationOrArrayOfRepresentations isKindOfClass:[NSArray class]]) {
         representations = representationOrArrayOfRepresentations;
     } else if ([representationOrArrayOfRepresentations isKindOfClass:[NSDictionary class]]) {
         representations = [NSArray arrayWithObject:representationOrArrayOfRepresentations];
-    } else {
-        @throw [NSException exceptionWithName:AFIncrementalStoreRelationshipCardinalityException reason:@"Can not understand the representations." userInfo:nil];
     }
 
     NSUInteger numberOfRepresentations = [representations count];
