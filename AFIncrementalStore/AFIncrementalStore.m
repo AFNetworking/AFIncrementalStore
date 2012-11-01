@@ -604,7 +604,7 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
             AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, id responseObject) {
                 id representationOrArrayOfRepresentations = [self.HTTPClient representationOrArrayOfRepresentationsFromResponseObject:responseObject];
                 
-                [childContext performBlock:^{
+                [childContext performBlockAndWait:^{
                     [self insertOrUpdateObjectsFromRepresentations:representationOrArrayOfRepresentations ofEntity:relationship.destinationEntity fromResponse:operation.response withContext:childContext error:error completionBlock:^(NSArray *managedObjects, NSArray *backingObjects) {
                         NSManagedObject *managedObject = [childContext objectWithID:objectID];
                         NSManagedObject *backingObject = [[self backingManagedObjectContext] existingObjectWithID:objectID error:nil];
@@ -636,10 +636,7 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
             } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
                 NSLog(@"Error: %@, %@", operation, error);
             }];
-            
-            operation.successCallbackQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
-            operation.failureCallbackQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
-            
+
             [self.HTTPClient enqueueHTTPRequestOperation:operation];
         }
     }
