@@ -255,12 +255,11 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
         NSDictionary *relationshipRepresentations = [self.HTTPClient representationsForRelationshipsFromRepresentation:representation ofEntity:entity fromResponse:response];
         for (NSString *relationshipName in relationshipRepresentations) {
             NSRelationshipDescription *relationship = [[entity relationshipsByName] valueForKey:relationshipName];
-            if (!relationship) {
+            id relationshipRepresentation = [relationshipRepresentations objectForKey:relationshipName];
+            if (!relationship || (relationship.isOptional && (!relationshipRepresentation || [relationshipRepresentation isEqual:[NSNull null]]))) {
                 continue;
             }
-            
-            id relationshipRepresentation = [relationshipRepresentations objectForKey:relationshipName];
-            
+                        
             if (!relationshipRepresentation || [relationshipRepresentation isEqual:[NSNull null]] || [relationshipRepresentation count] == 0) {
                 [managedObject setValue:nil forKey:relationshipName];
                 [backingObject setValue:nil forKey:relationshipName];
