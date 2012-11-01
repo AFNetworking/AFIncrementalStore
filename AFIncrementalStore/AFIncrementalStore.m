@@ -112,11 +112,8 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     [userInfo setObject:fetchRequest forKey:AFIncrementalStorePersistentStoreRequestKey];
     
     dispatch_async(dispatch_get_main_queue(), ^{
-        
         [[NSNotificationCenter defaultCenter] postNotificationName:notificationName object:context userInfo:userInfo];
-        
     });
-
 }
 
 - (void)notifyManagedObjectContext:(NSManagedObjectContext *)context
