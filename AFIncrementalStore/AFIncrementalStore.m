@@ -290,11 +290,8 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                 [self insertOrUpdateObjectsFromRepresentations:representationOrArrayOfRepresentations ofEntity:fetchRequest.entity fromResponse:operation.response withContext:childContext error:error completionBlock:^(NSArray *managedObjects, NSArray *backingObjects) {
                 
                     if (![[self backingManagedObjectContext] save:error] || ![childContext save:error]) {
-                        @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:@"Saving failed." userInfo:@{
-                            NSUnderlyingErrorKey: *error
-                        }];
+                        @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[*error localizedFailureReason] userInfo:[NSDictionary dictionaryWithObject:*error forKey:NSUnderlyingErrorKey]];
                     }
-                    
                 }];
                 
                 [self notifyManagedObjectContext:context aboutRequestOperation:operation forFetchRequest:fetchRequest];
@@ -594,7 +591,6 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                         }
                         
                         [[NSNotificationCenter defaultCenter] removeObserver:observer];
-                        
                     }];
                 }];
             } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
