@@ -603,17 +603,17 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                     NSManagedObject *backingObject = [[self backingManagedObjectContext] existingObjectWithID:backingObjectID error:nil];
                     [backingObject setValuesForKeysWithDictionary:mutableAttributeValues];
                     
-                    [childContext performBlock:^{
+                    id observer = [[NSNotificationCenter defaultCenter] addObserverForName:NSManagedObjectContextDidSaveNotification object:childContext queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
+                        [context mergeChangesFromContextDidSaveNotification:note];
+                    }];
+                    
+                    [childContext performBlockAndWait:^{
                         if (![[self backingManagedObjectContext] save:error] || ![childContext save:error]) {
                             @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[*error localizedFailureReason] userInfo:[NSDictionary dictionaryWithObject:*error forKey:NSUnderlyingErrorKey]];
                         }
-                        
-                        [context performBlock:^{
-                            if (![context save:error]) {
-                                @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[*error localizedFailureReason] userInfo:[NSDictionary dictionaryWithObject:*error forKey:NSUnderlyingErrorKey]];
-                            }
-                        }];
                     }];
+                    
+                    [[NSNotificationCenter defaultCenter] removeObserver:observer];
                 } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
                     NSLog(@"Error: %@, %@", operation, error);
                 }];
