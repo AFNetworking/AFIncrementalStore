@@ -305,6 +305,15 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                         NSManagedObject *parentObject = [context objectWithID:childObject.objectID];
                         [parentObject.managedObjectContext refreshObject:parentObject mergeChanges:NO];
                     }
+
+                    [context performBlock:^{
+                        for (NSManagedObject *childObject in childObjects) {
+                            NSManagedObject *parentObject = [context objectWithID:childObject.objectID];
+                            [parentObject willChangeValueForKey:@"self"];
+                            [context refreshObject:parentObject mergeChanges:NO];
+                            [parentObject didChangeValueForKey:@"self"];
+                        }
+                    }];
                 }];
                 
                 [self notifyManagedObjectContext:context aboutRequestOperation:operation forFetchRequest:fetchRequest];
