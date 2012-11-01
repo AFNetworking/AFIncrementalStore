@@ -62,11 +62,16 @@ static NSString * const kAFIncrementalStoreExampleAPIBaseURLString = @"http://af
     return mutablePropertyValues;
 }
 
-- (BOOL)shouldFetchRemoteAttributeValuesForObjectWithID:(NSManagedObjectID *)objectID inManagedObjectContext:(NSManagedObjectContext *)context {
+- (BOOL)shouldFetchRemoteAttributeValuesForObjectWithID:(NSManagedObjectID *)objectID
+                                 inManagedObjectContext:(NSManagedObjectContext *)context
+{
     return [[[objectID entity] name] isEqualToString:@"Artist"];
 }
 
-- (BOOL)shouldFetchRemoteValuesForRelationship:(NSRelationshipDescription *)relationship forObjectWithID:(NSManagedObjectID *)objectID inManagedObjectContext:(NSManagedObjectContext *)context {
+- (BOOL)shouldFetchRemoteValuesForRelationship:(NSRelationshipDescription *)relationship
+                               forObjectWithID:(NSManagedObjectID *)objectID
+                        inManagedObjectContext:(NSManagedObjectContext *)context
+{
     return [[[objectID entity] name] isEqualToString:@"Artist"];
 }
 
