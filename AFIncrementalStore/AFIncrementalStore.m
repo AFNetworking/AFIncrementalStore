@@ -290,8 +290,15 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
             [childContext performBlock:^{
                 [self insertOrUpdateObjectsFromRepresentations:representationOrArrayOfRepresentations ofEntity:fetchRequest.entity fromResponse:operation.response withContext:childContext error:error completionBlock:^(NSArray *managedObjects, NSArray *backingObjects) {
                 
+                    NSSet *childObjects = [childContext registeredObjects];
+                    
                     if (![[self backingManagedObjectContext] save:error] || ![childContext save:error]) {
                         @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[*error localizedFailureReason] userInfo:[NSDictionary dictionaryWithObject:*error forKey:NSUnderlyingErrorKey]];
+                    }
+                    
+                    for (NSManagedObject *childObject in childObjects) {
+                        NSManagedObject *parentObject = [context objectWithID:childObject.objectID];
+                        [parentObject.managedObjectContext refreshObject:parentObject mergeChanges:NO];
                     }
                 }];
                 
