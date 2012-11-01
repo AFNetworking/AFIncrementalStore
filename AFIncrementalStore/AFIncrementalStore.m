@@ -527,13 +527,13 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                     
                     [childContext performBlock:^{
                         if (![[self backingManagedObjectContext] save:error] || ![childContext save:error]) {
-                            NSLog(@"Error: %@", *error);
+                            @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[*error localizedFailureReason] userInfo:[NSDictionary dictionaryWithObject:*error forKey:NSUnderlyingErrorKey]];
                         }
                         
                         [context performBlock:^{
                             if (![context save:error]) {
-                                NSLog(@"Error: %@", *error);
-                            }                            
+                                @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[*error localizedFailureReason] userInfo:[NSDictionary dictionaryWithObject:*error forKey:NSUnderlyingErrorKey]];
+                            }
                         }];
                     }];
                 } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
@@ -587,7 +587,7 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                         }];
                         
                         if (![[self backingManagedObjectContext] save:error] || ![childContext save:error]) {
-                            NSLog(@"Error: %@", *error);
+                            @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[*error localizedFailureReason] userInfo:[NSDictionary dictionaryWithObject:*error forKey:NSUnderlyingErrorKey]];
                         }
                         
                         [[NSNotificationCenter defaultCenter] removeObserver:observer];
