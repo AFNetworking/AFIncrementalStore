@@ -172,8 +172,16 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     fetchRequest.fetchLimit = 1;
     fetchRequest.predicate = [NSPredicate predicateWithFormat:@"%K = %@", kAFIncrementalStoreResourceIdentifierAttributeName, resourceIdentifier];
     
-    NSError *error = nil;
-    NSArray *results = [[self backingManagedObjectContext] executeFetchRequest:fetchRequest error:&error];
+    __block NSArray *results = nil;
+    __block NSError *error = nil;
+    
+    [self.backingPersistentStoreCoordinator lock];
+    NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
+    [backingContext performBlockAndWait:^{
+        results = [backingContext executeFetchRequest:fetchRequest error:&error];
+    }];
+    [self.backingPersistentStoreCoordinator unlock];
+    
     if (error) {
         NSLog(@"Error: %@", error);
         return nil;
