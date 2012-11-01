@@ -62,7 +62,17 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
 @dynamic af_resourceIdentifier;
 
 - (NSString *)af_resourceIdentifier {
-    return (NSString *)objc_getAssociatedObject(self, &kAFResourceIdentifierObjectKey);
+
+    NSString *identifier = (NSString *)objc_getAssociatedObject(self, &kAFResourceIdentifierObjectKey);
+    
+    if (!identifier) {
+        if ([self.objectID.persistentStore isKindOfClass:[AFIncrementalStore class]]) {
+            return [(AFIncrementalStore *)self.objectID.persistentStore referenceObjectForObjectID:self.objectID];
+        }
+    }
+    
+    return identifier;
+    
 }
 
 - (void)af_setResourceIdentifier:(NSString *)resourceIdentifier {
@@ -185,10 +195,13 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
         return nil;
     }
     
-    NSManagedObjectID *objectID = [_registeredObjectIDsByResourceIdentifier objectForKey:resourceIdentifier];
+    NSManagedObjectID *objectID = _registeredObjectIDsByResourceIdentifier[entity.name][resourceIdentifier];
+    
     if (objectID == nil) {
         objectID = [self newObjectIDForEntity:entity referenceObject:resourceIdentifier];
     }
+    
+    NSCParameterAssert([objectID.entity.name isEqualToString:entity.name]);
     
     return objectID;
 }
@@ -225,10 +238,26 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
     NSDate *lastModified = AFLastModifiedDateFromHTTPHeaders([response allHeaderFields]);
     
-    NSMutableArray *mutableManagedObjects = [NSMutableArray arrayWithCapacity:[representationOrArrayOfRepresentations count]];
-    NSMutableArray *mutableBackingObjects = [NSMutableArray arrayWithCapacity:[representationOrArrayOfRepresentations count]];
+    NSArray *representations = nil;
+    
+    if ([representationOrArrayOfRepresentations isKindOfClass:[NSArray class]]) {
+        
+        representations = representationOrArrayOfRepresentations;
+        
+    } else if ([representationOrArrayOfRepresentations isKindOfClass:[NSDictionary class]]) {
+        
+        representations = @[ representationOrArrayOfRepresentations ];
+    
+    } else {
+    
+        @throw [NSException exceptionWithName:AFIncrementalStoreRelationshipCardinalityException reason:@"Can not understand the representations." userInfo:nil];
+    
+    }
 
-    NSArray *representations = [representationOrArrayOfRepresentations isKindOfClass:[NSArray class]] ? representationOrArrayOfRepresentations : [NSArray arrayWithObject:representationOrArrayOfRepresentations];
+    NSUInteger numberOfRepresentations = [representations count];
+    NSMutableArray *mutableManagedObjects = [NSMutableArray arrayWithCapacity:numberOfRepresentations];
+    NSMutableArray *mutableBackingObjects = [NSMutableArray arrayWithCapacity:numberOfRepresentations];
+    
     for (NSDictionary *representation in representations) {
         NSString *resourceIdentifier = [self.HTTPClient resourceIdentifierForRepresentation:representation ofEntity:entity fromResponse:response];
         NSDictionary *attributes = [self.HTTPClient attributesForRepresentation:representation ofEntity:entity fromResponse:response];
@@ -253,7 +282,15 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                 continue;
             }
             
-            [self insertOrUpdateObjectsFromRepresentations:[relationshipRepresentations objectForKey:relationshipName] ofEntity:relationship.destinationEntity fromResponse:response withContext:context error:error completionBlock:^(NSArray *managedObjects, NSArray *backingObjects) {
+            id relationshipRepresentation = [relationshipRepresentations objectForKey:relationshipName];
+            
+            if (!relationshipRepresentation || [relationshipRepresentation isEqual:[NSNull null]]) {
+                [managedObject setValue:nil forKey:relationshipName];
+                [backingObject setValue:nil forKey:relationshipName];
+                continue;
+            }
+            
+            [self insertOrUpdateObjectsFromRepresentations:relationshipRepresentation ofEntity:relationship.destinationEntity fromResponse:response withContext:context error:error completionBlock:^(NSArray *managedObjects, NSArray *backingObjects) {
                 if ([relationship isToMany]) {
                     if ([relationship isOrdered]) {
                         [managedObject setValue:[NSOrderedSet orderedSetWithArray:managedObjects] forKey:relationship.name];
@@ -325,6 +362,7 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
         }];
         
         operation.successCallbackQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
+        operation.failureCallbackQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
         
         [self notifyManagedObjectContext:context aboutRequestOperation:operation forFetchRequest:fetchRequest];
         [self.HTTPClient enqueueHTTPRequestOperation:operation];
@@ -345,6 +383,7 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
             for (NSString *resourceIdentifier in [results valueForKeyPath:kAFIncrementalStoreResourceIdentifierAttributeName]) {
                 NSManagedObjectID *objectID = [self objectIDForEntity:fetchRequest.entity withResourceIdentifier:resourceIdentifier];
                 NSManagedObject *object = [context objectWithID:objectID];
+                object.af_resourceIdentifier = resourceIdentifier;
                 [mutableObjects addObject:object];
             }
             
@@ -560,6 +599,7 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
             }];
             
             operation.successCallbackQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
+            operation.failureCallbackQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
             
             [self.HTTPClient enqueueHTTPRequestOperation:operation];
         }
@@ -603,14 +643,19 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
             continue;
         }
         
-        [_registeredObjectIDsByResourceIdentifier setObject:objectID forKey:key];
+        NSMutableDictionary *objectIDsByResourceIdentifier = _registeredObjectIDsByResourceIdentifier[objectID.entity.name];
+        if (!objectIDsByResourceIdentifier) {
+            objectIDsByResourceIdentifier = [NSMutableDictionary dictionary];
+            _registeredObjectIDsByResourceIdentifier[objectID.entity.name] = objectIDsByResourceIdentifier;
+        }
+        objectIDsByResourceIdentifier[key] = objectID;
     }
 }
 
 - (void)managedObjectContextDidUnregisterObjectsWithIDs:(NSArray *)objectIDs {
     [super managedObjectContextDidUnregisterObjectsWithIDs:objectIDs];
     for (NSManagedObjectID *objectID in objectIDs) {
-        [_registeredObjectIDsByResourceIdentifier removeObjectForKey:[self referenceObjectForObjectID:objectID]];
+        [_registeredObjectIDsByResourceIdentifier[objectID.entity.name] removeObjectForKey:[self referenceObjectForObjectID:objectID]];
     }
 }
 
