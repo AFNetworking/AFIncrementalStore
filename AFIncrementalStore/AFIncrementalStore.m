@@ -214,11 +214,18 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
         NSString *resourceIdentifier = [self.HTTPClient resourceIdentifierForRepresentation:representation ofEntity:entity fromResponse:response];
         NSDictionary *attributes = [self.HTTPClient attributesForRepresentation:representation ofEntity:entity fromResponse:response];
         
-        NSManagedObject *managedObject = [context existingObjectWithID:[self objectIDForEntity:entity withResourceIdentifier:resourceIdentifier] error:nil];
+        __block NSManagedObject *managedObject = nil;
+        [context performBlockAndWait:^{
+            managedObject = [context existingObjectWithID:[self objectIDForEntity:entity withResourceIdentifier:resourceIdentifier] error:nil];
+        }];
+        
         [managedObject setValuesForKeysWithDictionary:attributes];
         
         NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:entity withResourceIdentifier:resourceIdentifier];
-        NSManagedObject *backingObject = (backingObjectID != nil) ? [backingContext existingObjectWithID:backingObjectID error:nil] : [NSEntityDescription insertNewObjectForEntityForName:entity.name inManagedObjectContext:backingContext];
+        __block NSManagedObject *backingObject = nil;
+        [backingContext performBlockAndWait:^{
+            backingObject = (backingObjectID != nil) ? [backingContext existingObjectWithID:backingObjectID error:nil] : [NSEntityDescription insertNewObjectForEntityForName:entity.name inManagedObjectContext:backingContext];
+        }];
         [backingObject setValue:resourceIdentifier forKey:kAFIncrementalStoreResourceIdentifierAttributeName];
         [backingObject setValue:lastModified forKey:kAFIncrementalStoreLastModifiedAttributeName];
         [backingObject setValuesForKeysWithDictionary:attributes];
