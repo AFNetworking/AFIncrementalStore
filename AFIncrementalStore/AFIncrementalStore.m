@@ -202,6 +202,14 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
 {
     NSParameterAssert([representationOrArrayOfRepresentations isKindOfClass:[NSArray class]] || [representationOrArrayOfRepresentations isKindOfClass:[NSDictionary class]]);
     
+    if ([representationOrArrayOfRepresentations count] == 0) {
+        if (completionBlock) {
+            completionBlock([NSArray array], [NSArray array]);
+        }
+        
+        return;
+    }
+    
     NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
     NSDate *lastModified = AFLastModifiedDateFromHTTPHeaders([response allHeaderFields]);
 
@@ -210,13 +218,6 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
         representations = representationOrArrayOfRepresentations;
     } else if ([representationOrArrayOfRepresentations isKindOfClass:[NSDictionary class]]) {
         representations = [NSArray arrayWithObject:representationOrArrayOfRepresentations];
-    }
-    
-    if (![representations count]) {
-        if (completionBlock) {
-            completionBlock(nil, nil);
-        }
-        return;
     }
 
     NSUInteger numberOfRepresentations = [representations count];
