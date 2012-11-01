@@ -380,7 +380,9 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                     [backingContext save:nil];
                 }];
                 
+                [insertedObject willChangeValueForKey:@"objectID"];
                 [context obtainPermanentIDsForObjects:[NSArray arrayWithObject:insertedObject] error:nil];
+                [insertedObject didChangeValueForKey:@"objectID"];
             } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
                 NSLog(@"Insert Error: %@", error);
             }];
