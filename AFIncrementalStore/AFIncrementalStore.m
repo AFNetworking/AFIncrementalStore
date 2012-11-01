@@ -437,11 +437,12 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                 continue;
             }
             
+            NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:[updatedObject entity] withResourceIdentifier:[self referenceObjectForObjectID:updatedObject.objectID]];
             AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, id responseObject) {
                 [updatedObject setValuesForKeysWithDictionary:[self.HTTPClient attributesForRepresentation:responseObject ofEntity:updatedObject.entity fromResponse:operation.response]];
                 
                 [backingContext performBlockAndWait:^{
-                    NSManagedObject *backingObject = [backingContext existingObjectWithID:updatedObject.objectID error:nil];
+                    NSManagedObject *backingObject = [backingContext existingObjectWithID:backingObjectID error:nil];
                     [backingObject setValuesForKeysWithDictionary:[updatedObject dictionaryWithValuesForKeys:nil]];
                     [backingContext save:nil];
                 }];
@@ -460,9 +461,10 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
                 continue;
             }
             
+            NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:[deletedObject entity] withResourceIdentifier:[self referenceObjectForObjectID:deletedObject.objectID]];
             AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, id responseObject) {
                 [backingContext performBlockAndWait:^{
-                    NSManagedObject *backingObject = [backingContext existingObjectWithID:deletedObject.objectID error:nil];
+                    NSManagedObject *backingObject = [backingContext existingObjectWithID:backingObjectID error:nil];
                     [backingContext deleteObject:backingObject];
                     [backingContext save:nil];
                 }];
