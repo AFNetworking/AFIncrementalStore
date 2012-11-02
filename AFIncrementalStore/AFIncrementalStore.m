@@ -87,7 +87,7 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
         if ([self.objectID.persistentStore isKindOfClass:[AFIncrementalStore class]]) {
             id referenceObject = [(AFIncrementalStore *)self.objectID.persistentStore referenceObjectForObjectID:self.objectID];
             if ([referenceObject isKindOfClass:[NSString class]]) {
-                return referenceObject;
+                return AFResourceIdentifierFromReferenceObject(referenceObject);
             }
         }
     }
@@ -180,7 +180,7 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
     }
         
     if (objectID == nil) {
-        objectID = [self newObjectIDForEntity:entity referenceObject:resourceIdentifier];
+        objectID = [self newObjectIDForEntity:entity referenceObject:AFReferenceObjectFromResourceIdentifier(resourceIdentifier)];
     }
     
     NSParameterAssert([objectID.entity.name isEqualToString:entity.name]);
@@ -252,7 +252,7 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
     NSMutableArray *mutableBackingObjects = [NSMutableArray arrayWithCapacity:numberOfRepresentations];
     
     for (NSDictionary *representation in representations) {
-        NSString *resourceIdentifier = AFReferenceObjectFromResourceIdentifier([self.HTTPClient resourceIdentifierForRepresentation:representation ofEntity:entity fromResponse:response]);
+        NSString *resourceIdentifier = [self.HTTPClient resourceIdentifierForRepresentation:representation ofEntity:entity fromResponse:response];
         NSDictionary *attributes = [self.HTTPClient attributesForRepresentation:representation ofEntity:entity fromResponse:response];
         
         __block NSManagedObject *managedObject = nil;
@@ -432,7 +432,7 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
             }
             
             AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, id responseObject) {
-                NSString *resourceIdentifier = AFReferenceObjectFromResourceIdentifier([self.HTTPClient resourceIdentifierForRepresentation:responseObject ofEntity:[insertedObject entity] fromResponse:operation.response]);
+                NSString *resourceIdentifier = [self.HTTPClient resourceIdentifierForRepresentation:responseObject ofEntity:[insertedObject entity] fromResponse:operation.response];
                 NSManagedObjectID *objectID = [self objectIDForEntity:[insertedObject entity] withResourceIdentifier:resourceIdentifier];
                 insertedObject.af_resourceIdentifier = resourceIdentifier;
                 [insertedObject setValuesForKeysWithDictionary:[self.HTTPClient attributesForRepresentation:responseObject ofEntity:insertedObject.entity fromResponse:operation.response]];
@@ -473,7 +473,7 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
                 continue;
             }
             
-            NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:[updatedObject entity] withResourceIdentifier:[self referenceObjectForObjectID:updatedObject.objectID]];
+            NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:[updatedObject entity] withResourceIdentifier:AFResourceIdentifierFromReferenceObject([self referenceObjectForObjectID:updatedObject.objectID])];
             AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, id responseObject) {
                 [updatedObject setValuesForKeysWithDictionary:[self.HTTPClient attributesForRepresentation:responseObject ofEntity:updatedObject.entity fromResponse:operation.response]];
                 
@@ -497,7 +497,7 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
                 continue;
             }
             
-            NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:[deletedObject entity] withResourceIdentifier:[self referenceObjectForObjectID:deletedObject.objectID]];
+            NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:[deletedObject entity] withResourceIdentifier:AFResourceIdentifierFromReferenceObject([self referenceObjectForObjectID:deletedObject.objectID])];
             AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, id responseObject) {
                 [backingContext performBlockAndWait:^{
                     NSManagedObject *backingObject = [backingContext existingObjectWithID:backingObjectID error:nil];
@@ -604,7 +604,7 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
     fetchRequest.fetchLimit = 1;
     fetchRequest.includesSubentities = NO;
     fetchRequest.propertiesToFetch = [[[NSEntityDescription entityForName:fetchRequest.entityName inManagedObjectContext:context] attributesByName] allKeys];
-    fetchRequest.predicate = [NSPredicate predicateWithFormat:@"%K = %@", kAFIncrementalStoreResourceIdentifierAttributeName, [self referenceObjectForObjectID:objectID]];
+    fetchRequest.predicate = [NSPredicate predicateWithFormat:@"%K = %@", kAFIncrementalStoreResourceIdentifierAttributeName, AFResourceIdentifierFromReferenceObject([self referenceObjectForObjectID:objectID])];
     
     __block NSArray *results;
     NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
@@ -635,7 +635,7 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
                     [mutableAttributeValues addEntriesFromDictionary:[self.HTTPClient attributesForRepresentation:representation ofEntity:managedObject.entity fromResponse:operation.response]];
                     [managedObject setValuesForKeysWithDictionary:mutableAttributeValues];
                     
-                    NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:[objectID entity] withResourceIdentifier:[self referenceObjectForObjectID:objectID]];
+                    NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:[objectID entity] withResourceIdentifier:AFResourceIdentifierFromReferenceObject([self referenceObjectForObjectID:objectID])];
                     NSManagedObject *backingObject = [[self backingManagedObjectContext] existingObjectWithID:backingObjectID error:nil];
                     [backingObject setValuesForKeysWithDictionary:mutableAttributeValues];
                     
@@ -715,7 +715,7 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
         }
     }
     
-    NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:[objectID entity] withResourceIdentifier:[self referenceObjectForObjectID:objectID]];
+    NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:[objectID entity] withResourceIdentifier:AFResourceIdentifierFromReferenceObject([self referenceObjectForObjectID:objectID])];
     NSManagedObject *backingObject = (backingObjectID == nil) ? nil : [[self backingManagedObjectContext] existingObjectWithID:backingObjectID error:nil];
     
     if (backingObject && ![backingObject hasChanges]) {
@@ -747,13 +747,13 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
     [super managedObjectContextDidRegisterObjectsWithIDs:objectIDs];
     
     for (NSManagedObjectID *objectID in objectIDs) {
-        id key = [self referenceObjectForObjectID:objectID];
-        if (!key) {
+        id referenceObject = [self referenceObjectForObjectID:objectID];
+        if (!referenceObject) {
             continue;
         }
         
         NSMutableDictionary *objectIDsByResourceIdentifier = [_registeredObjectIDsByEntityNameAndNestedResourceIdentifier objectForKey:objectID.entity.name] ?: [NSMutableDictionary dictionary];
-        objectIDsByResourceIdentifier[key] = objectID;
+        objectIDsByResourceIdentifier[AFResourceIdentifierFromReferenceObject(referenceObject)] = objectID;
         
         [_registeredObjectIDsByEntityNameAndNestedResourceIdentifier setObject:objectIDsByResourceIdentifier forKey:objectID.entity.name];
     }
@@ -763,7 +763,7 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
     [super managedObjectContextDidUnregisterObjectsWithIDs:objectIDs];
     
     for (NSManagedObjectID *objectID in objectIDs) {
-        [[_registeredObjectIDsByEntityNameAndNestedResourceIdentifier objectForKey:objectID.entity.name] removeObjectForKey:[self referenceObjectForObjectID:objectID]];
+        [[_registeredObjectIDsByEntityNameAndNestedResourceIdentifier objectForKey:objectID.entity.name] removeObjectForKey:AFResourceIdentifierFromReferenceObject([self referenceObjectForObjectID:objectID])];
     }
 }
 
