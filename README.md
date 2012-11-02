@@ -80,23 +80,12 @@ Here's an example podfile that installs AFIncrementalStore and its dependency, A
 ```ruby
 platform :ios, '5.0'
 
-pod 'AFIncrementalStore', '0.1.0'
+pod 'AFIncrementalStore', '0.3.0'
 ```
 
 Note the specification of iOS 5.0 as the platform; leaving out the 5.0 will cause CocoaPods to fail with the following message:
 
-> [!] AFIncrementalStore (0.1.0) is not compatible with iOS 4.3.
-
-## Next Steps
-
-This project is just getting started. Next up for `AFIncrementalStore` are the following:
-
-- Full Documentation
-- Additional example projects
-- POST to server when creating new managed objects
-- Automatic `If-Modified-Since` & `If-Match` headers based on last request of resources.
-- Default transformations for fetch request offset / limit to pagination parameters
-- Examples of other API adapters (e.g. RPC, SOAP, ad-hoc)
+> [!] AFIncrementalStore is not compatible with iOS 4.3.
 
 ## Credits
 
