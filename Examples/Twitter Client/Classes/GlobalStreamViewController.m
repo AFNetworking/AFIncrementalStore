@@ -104,6 +104,7 @@
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    NSLog(@"Post: %@", [_fetchedResultsController objectAtIndexPath:indexPath]);
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 
