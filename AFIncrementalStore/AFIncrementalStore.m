@@ -669,6 +669,11 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
                     NSManagedObject *backingObject = [[self backingManagedObjectContext] existingObjectWithID:backingObjectID error:nil];
                     [backingObject setValuesForKeysWithDictionary:mutableAttributeValues];
                     
+                    NSDate *lastModified = AFLastModifiedDateFromHTTPHeaders([operation.response allHeaderFields]);
+                    if (lastModified) {
+                        [backingObject setValue:lastModified forKey:kAFIncrementalStoreLastModifiedAttributeName];
+                    }
+
                     id observer = [[NSNotificationCenter defaultCenter] addObserverForName:NSManagedObjectContextDidSaveNotification object:childContext queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
                         [context mergeChangesFromContextDidSaveNotification:note];
                     }];
