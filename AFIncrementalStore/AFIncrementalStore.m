@@ -428,6 +428,21 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
         for (NSManagedObject *insertedObject in [saveChangesRequest insertedObjects]) {
             NSURLRequest *request = [self.HTTPClient requestForInsertedObject:insertedObject];
             if (!request) {
+                [backingContext performBlockAndWait:^{
+                    CFUUIDRef UUID = CFUUIDCreate(NULL);
+                    NSString *resourceIdentifier = (__bridge_transfer NSString *)CFUUIDCreateString(NULL, UUID);
+                    CFRelease(UUID);
+                    
+                    NSManagedObject *backingObject = [NSEntityDescription insertNewObjectForEntityForName:insertedObject.entity.name inManagedObjectContext:backingContext];
+                    [backingObject.managedObjectContext obtainPermanentIDsForObjects:[NSArray arrayWithObject:backingObject] error:nil];
+                    [backingObject setValue:resourceIdentifier forKey:kAFIncrementalStoreResourceIdentifierAttributeName];
+                    [backingObject setValuesForKeysWithDictionary:[insertedObject dictionaryWithValuesForKeys:nil]];
+                    [backingContext save:nil];
+                }];
+                
+                [insertedObject willChangeValueForKey:@"objectID"];
+                [context obtainPermanentIDsForObjects:[NSArray arrayWithObject:insertedObject] error:nil];
+                [insertedObject didChangeValueForKey:@"objectID"];
                 continue;
             }
             
@@ -468,12 +483,18 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
     
     if ([self.HTTPClient respondsToSelector:@selector(requestForUpdatedObject:)]) {
         for (NSManagedObject *updatedObject in [saveChangesRequest updatedObjects]) {
+            NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:[updatedObject entity] withResourceIdentifier:AFResourceIdentifierFromReferenceObject([self referenceObjectForObjectID:updatedObject.objectID])];
+
             NSURLRequest *request = [self.HTTPClient requestForUpdatedObject:updatedObject];
             if (!request) {
+                [backingContext performBlockAndWait:^{
+                    NSManagedObject *backingObject = [backingContext existingObjectWithID:backingObjectID error:nil];
+                    [backingObject setValuesForKeysWithDictionary:[updatedObject dictionaryWithValuesForKeys:nil]];
+                    [backingContext save:nil];
+                }];
                 continue;
             }
             
-            NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:[updatedObject entity] withResourceIdentifier:AFResourceIdentifierFromReferenceObject([self referenceObjectForObjectID:updatedObject.objectID])];
             AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, id responseObject) {
                 [updatedObject setValuesForKeysWithDictionary:[self.HTTPClient attributesForRepresentation:responseObject ofEntity:updatedObject.entity fromResponse:operation.response]];
                 
@@ -492,12 +513,18 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
     
     if ([self.HTTPClient respondsToSelector:@selector(requestForDeletedObject:)]) {
         for (NSManagedObject *deletedObject in [saveChangesRequest deletedObjects]) {
+            NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:[deletedObject entity] withResourceIdentifier:AFResourceIdentifierFromReferenceObject([self referenceObjectForObjectID:deletedObject.objectID])];
+
             NSURLRequest *request = [self.HTTPClient requestForDeletedObject:deletedObject];
             if (!request) {
+                [backingContext performBlockAndWait:^{
+                    NSManagedObject *backingObject = [backingContext existingObjectWithID:backingObjectID error:nil];
+                    [backingContext deleteObject:backingObject];
+                    [backingContext save:nil];
+                }];
                 continue;
             }
             
-            NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:[deletedObject entity] withResourceIdentifier:AFResourceIdentifierFromReferenceObject([self referenceObjectForObjectID:deletedObject.objectID])];
             AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, id responseObject) {
                 [backingContext performBlockAndWait:^{
                     NSManagedObject *backingObject = [backingContext existingObjectWithID:backingObjectID error:nil];
