@@ -41,37 +41,6 @@ static NSString * const kAFIncrementalStoreLastModifiedAttributeName = @"__af_la
 
 static NSString * const kAFReferenceObjectPrefix = @"__af_";
 
-static NSDateFormatter * AFRFC1123DateFormatter() {
-    static NSString * const _RFC1123Format = @"EEE',' dd MMM yyyy HH':'mm':'ss z";
-    static NSDateFormatter *_RFC1123DateFormatter = nil;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        _RFC1123DateFormatter = [[NSDateFormatter alloc] init];
-        _RFC1123DateFormatter.locale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
-        _RFC1123DateFormatter.timeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
-        _RFC1123DateFormatter.dateFormat = _RFC1123Format;
-    });
-    
-    return _RFC1123DateFormatter;
-}
-
-static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
-    NSString *lastModified = [headers valueForKey:@"Last-Modified"];
-    if (lastModified) {
-        return [AFRFC1123DateFormatter() dateFromString:lastModified];        
-    }
-    
-    return nil;
-}
-
-static NSString * AFRFC1123StringFromDate(NSDate *date) {
-    if (!date || ![date isKindOfClass:[NSDate class]]) {
-        return nil;
-    }
-    
-    return [AFRFC1123DateFormatter() stringFromDate:date];
-}
-
 inline NSString * AFReferenceObjectFromResourceIdentifier(NSString *resourceIdentifier) {
     if (!resourceIdentifier) {
         return nil;
@@ -254,7 +223,7 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
     }
     
     NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
-    NSDate *lastModified = AFLastModifiedDateFromHTTPHeaders([response allHeaderFields]);
+    NSString *lastModified = [[response allHeaderFields] valueForKey:@"Last-Modified"];
 
     NSArray *representations = nil;
     if ([representationOrArrayOfRepresentations isKindOfClass:[NSArray class]]) {
@@ -590,7 +559,7 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
             
             NSAttributeDescription *lastModifiedProperty = [[NSAttributeDescription alloc] init];
             [lastModifiedProperty setName:kAFIncrementalStoreLastModifiedAttributeName];
-            [lastModifiedProperty setAttributeType:NSDateAttributeType];
+            [lastModifiedProperty setAttributeType:NSStringAttributeType];
             [lastModifiedProperty setIndexed:NO];
             
             [entity setProperties:[entity.properties arrayByAddingObjectsFromArray:[NSArray arrayWithObjects:resourceIdentifierProperty, lastModifiedProperty, nil]]];
@@ -665,7 +634,7 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
             childContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy;
             
             NSMutableURLRequest *request = [self.HTTPClient requestWithMethod:@"GET" pathForObjectWithID:objectID withContext:context];
-            NSString *lastModified = AFRFC1123StringFromDate([attributeValues objectForKey:kAFIncrementalStoreLastModifiedAttributeName]);
+            NSString *lastModified = [attributeValues objectForKey:kAFIncrementalStoreLastModifiedAttributeName];
             if (lastModified) {
                 [request setValue:lastModified forHTTPHeaderField:@"Last-Modified"];
             }
@@ -687,7 +656,7 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
                     NSManagedObject *backingObject = [[self backingManagedObjectContext] existingObjectWithID:backingObjectID error:nil];
                     [backingObject setValuesForKeysWithDictionary:mutableAttributeValues];
                     
-                    NSDate *lastModified = AFLastModifiedDateFromHTTPHeaders([operation.response allHeaderFields]);
+                    NSString *lastModified = [[operation.response allHeaderFields] valueForKey:@"Last-Modified"];
                     if (lastModified) {
                         [backingObject setValue:lastModified forKey:kAFIncrementalStoreLastModifiedAttributeName];
                     }
