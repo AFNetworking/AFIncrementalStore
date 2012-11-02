@@ -38,7 +38,7 @@ static NSString * AFPluralizedString(NSString *string) {
 }
 
 - (NSString *)pathForObject:(NSManagedObject *)object {
-    NSString *resourceIdentifier = [(NSIncrementalStore *)object.objectID.persistentStore referenceObjectForObjectID:object.objectID];
+    NSString *resourceIdentifier = AFResourceIdentifierFromReferenceObject([(NSIncrementalStore *)object.objectID.persistentStore referenceObjectForObjectID:object.objectID]);
     return [[self pathForEntity:object.entity] stringByAppendingPathComponent:[resourceIdentifier lastPathComponent]];
 }
 

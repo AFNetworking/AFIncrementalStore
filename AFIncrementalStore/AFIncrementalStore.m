@@ -54,6 +54,25 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     return nil;
 }
 
+static NSString * const kAFReferenceObjectPrefix = @"__af_";
+
+inline NSString * AFReferenceObjectFromResourceIdentifier(NSString *resourceIdentifier) {
+    if (!resourceIdentifier) {
+        return nil;
+    }
+    
+    return [kAFReferenceObjectPrefix stringByAppendingString:resourceIdentifier];    
+}
+
+inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
+    if (!referenceObject) {
+        return nil;
+    }
+    
+    NSString *string = [referenceObject description];
+    return [string hasPrefix:kAFReferenceObjectPrefix] ? [string substringFromIndex:[kAFReferenceObjectPrefix length]] : string;
+}
+
 @interface NSManagedObject (_AFIncrementalStore)
 @property (readwrite, nonatomic, copy, setter = af_setResourceIdentifier:) NSString *af_resourceIdentifier;
 @end
@@ -102,6 +121,8 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     @throw([NSException exceptionWithName:AFIncrementalStoreUnimplementedMethodException reason:NSLocalizedString(@"Unimplemented method: +model. Must be overridden in a subclass", nil) userInfo:nil]);
 }
 
+#pragma mark -
+
 - (void)notifyManagedObjectContext:(NSManagedObjectContext *)context
              aboutRequestOperation:(AFHTTPRequestOperation *)operation
                    forFetchRequest:(NSFetchRequest *)fetchRequest
@@ -133,6 +154,8 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
 
     [[NSNotificationCenter defaultCenter] postNotificationName:notificationName object:context userInfo:userInfo];
 }
+
+#pragma mark -
 
 - (NSManagedObjectContext *)backingManagedObjectContext {
     if (!_backingManagedObjectContext) {
@@ -229,7 +252,7 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     NSMutableArray *mutableBackingObjects = [NSMutableArray arrayWithCapacity:numberOfRepresentations];
     
     for (NSDictionary *representation in representations) {
-        NSString *resourceIdentifier = [self.HTTPClient resourceIdentifierForRepresentation:representation ofEntity:entity fromResponse:response];
+        NSString *resourceIdentifier = AFReferenceObjectFromResourceIdentifier([self.HTTPClient resourceIdentifierForRepresentation:representation ofEntity:entity fromResponse:response]);
         NSDictionary *attributes = [self.HTTPClient attributesForRepresentation:representation ofEntity:entity fromResponse:response];
         
         __block NSManagedObject *managedObject = nil;
@@ -409,7 +432,7 @@ static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
             }
             
             AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, id responseObject) {
-                NSString *resourceIdentifier = [self.HTTPClient resourceIdentifierForRepresentation:responseObject ofEntity:[insertedObject entity] fromResponse:operation.response];
+                NSString *resourceIdentifier = AFReferenceObjectFromResourceIdentifier([self.HTTPClient resourceIdentifierForRepresentation:responseObject ofEntity:[insertedObject entity] fromResponse:operation.response]);
                 NSManagedObjectID *objectID = [self objectIDForEntity:[insertedObject entity] withResourceIdentifier:resourceIdentifier];
                 insertedObject.af_resourceIdentifier = resourceIdentifier;
                 [insertedObject setValuesForKeysWithDictionary:[self.HTTPClient attributesForRepresentation:responseObject ofEntity:insertedObject.entity fromResponse:operation.response]];
