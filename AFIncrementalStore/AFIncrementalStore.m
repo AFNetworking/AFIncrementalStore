@@ -41,22 +41,35 @@ static NSString * const kAFIncrementalStoreLastModifiedAttributeName = @"__af_la
 
 static NSString * const kAFReferenceObjectPrefix = @"__af_";
 
+static NSDateFormatter * AFRFC1123DateFormatter() {
+    static NSString * const _RFC1123Format = @"EEE',' dd MMM yyyy HH':'mm':'ss z";
+    static NSDateFormatter *_RFC1123DateFormatter = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        _RFC1123DateFormatter = [[NSDateFormatter alloc] init];
+        _RFC1123DateFormatter.locale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
+        _RFC1123DateFormatter.timeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
+        _RFC1123DateFormatter.dateFormat = _RFC1123Format;
+    });
+    
+    return _RFC1123DateFormatter;
+}
+
 static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
-    if ([headers valueForKey:@"Last-Modified"]) {
-        static NSString * const _RFC1123Format = @"EEE',' dd MMM yyyy HH':'mm':'ss z";
-        static NSDateFormatter *_RFC1123DateFormatter = nil;
-        static dispatch_once_t onceToken;
-        dispatch_once(&onceToken, ^{
-            _RFC1123DateFormatter = [[NSDateFormatter alloc] init];
-            _RFC1123DateFormatter.locale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
-            _RFC1123DateFormatter.timeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
-            _RFC1123DateFormatter.dateFormat = _RFC1123Format;
-        });
-        
-        return [_RFC1123DateFormatter dateFromString:[headers valueForKey:@"last-modified"]];
+    NSString *lastModified = [headers valueForKey:@"Last-Modified"];
+    if (lastModified) {
+        return [AFRFC1123DateFormatter() dateFromString:lastModified];        
     }
     
     return nil;
+}
+
+static NSString * AFRFC1123StringFromDate(NSDate *date) {
+    if (!date || ![date isKindOfClass:[NSDate class]]) {
+        return nil;
+    }
+    
+    return [AFRFC1123DateFormatter() stringFromDate:date];
 }
 
 inline NSString * AFReferenceObjectFromResourceIdentifier(NSString *resourceIdentifier) {
@@ -633,7 +646,7 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
     fetchRequest.resultType = NSDictionaryResultType;
     fetchRequest.fetchLimit = 1;
     fetchRequest.includesSubentities = NO;
-    fetchRequest.propertiesToFetch = [[[NSEntityDescription entityForName:fetchRequest.entityName inManagedObjectContext:context] attributesByName] allKeys];
+    fetchRequest.propertiesToFetch = [[[[NSEntityDescription entityForName:fetchRequest.entityName inManagedObjectContext:context] attributesByName] allKeys] arrayByAddingObject:kAFIncrementalStoreLastModifiedAttributeName];
     fetchRequest.predicate = [NSPredicate predicateWithFormat:@"%K = %@", kAFIncrementalStoreResourceIdentifierAttributeName, AFResourceIdentifierFromReferenceObject([self referenceObjectForObjectID:objectID])];
     
     __block NSArray *results;
@@ -652,6 +665,10 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
             childContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy;
             
             NSMutableURLRequest *request = [self.HTTPClient requestWithMethod:@"GET" pathForObjectWithID:objectID withContext:context];
+            NSString *lastModified = AFRFC1123StringFromDate([attributeValues objectForKey:kAFIncrementalStoreLastModifiedAttributeName]);
+            if (lastModified) {
+                [request setValue:lastModified forHTTPHeaderField:@"Last-Modified"];
+            }
             
             if ([request URL]) {
                 if ([attributeValues valueForKey:kAFIncrementalStoreLastModifiedAttributeName]) {
@@ -663,6 +680,7 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
                     
                     NSMutableDictionary *mutableAttributeValues = [attributeValues mutableCopy];
                     [mutableAttributeValues addEntriesFromDictionary:[self.HTTPClient attributesForRepresentation:representation ofEntity:managedObject.entity fromResponse:operation.response]];
+                    [mutableAttributeValues removeObjectForKey:kAFIncrementalStoreLastModifiedAttributeName];
                     [managedObject setValuesForKeysWithDictionary:mutableAttributeValues];
                     
                     NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:[objectID entity] withResourceIdentifier:AFResourceIdentifierFromReferenceObject([self referenceObjectForObjectID:objectID])];
