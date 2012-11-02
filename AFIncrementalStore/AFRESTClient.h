@@ -65,3 +65,12 @@
                         forObject:(NSManagedObject *)object;
 
 @end
+
+///----------------
+/// @name Functions
+///----------------
+
+/**
+ 
+ */
+extern NSDate * AFDateFromISO8601String(NSString *ISO8601String);

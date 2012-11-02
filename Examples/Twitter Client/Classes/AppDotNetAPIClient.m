@@ -72,6 +72,7 @@ static NSString * const kAFAppDotNetAPIBaseURLString = @"https://alpha-api.app.n
     NSMutableDictionary *mutablePropertyValues = [[super attributesForRepresentation:representation ofEntity:entity fromResponse:response] mutableCopy];
     if ([entity.name isEqualToString:@"Post"]) {
         [mutablePropertyValues setValue:[NSNumber numberWithInteger:[[representation valueForKey:@"id"] integerValue]] forKey:@"postID"];
+        [mutablePropertyValues setValue:AFDateFromISO8601String([representation valueForKey:@"created_at"]) forKey:@"createdAt"];
     } else if ([entity.name isEqualToString:@"User"]) {
         [mutablePropertyValues setValue:[NSNumber numberWithInteger:[[representation valueForKey:@"id"] integerValue]] forKey:@"userID"];
         [mutablePropertyValues setValue:[representation valueForKey:@"username"] forKey:@"username"];

@@ -22,7 +22,6 @@
 
 #import "AFIncrementalStore.h"
 #import "AFHTTPClient.h"
-#import "ISO8601DateFormatter.h"
 #import <objc/runtime.h>
 
 NSString * const AFIncrementalStoreUnimplementedMethodException = @"com.alamofire.incremental-store.exceptions.unimplemented-method";
@@ -35,26 +34,30 @@ NSString * const AFIncrementalStoreRequestOperationKey = @"AFIncrementalStoreReq
 NSString * const AFIncrementalStorePersistentStoreRequestKey = @"AFIncrementalStorePersistentStoreRequest";
 NSString * const AFIncrementalStoreFetchedObjectsKey = @"AFIncrementalStoreFetchedObjectsKey";
 
+static char kAFResourceIdentifierObjectKey;
+
 static NSString * const kAFIncrementalStoreResourceIdentifierAttributeName = @"__af_resourceIdentifier";
 static NSString * const kAFIncrementalStoreLastModifiedAttributeName = @"__af_lastModified";
 
-static char kAFResourceIdentifierObjectKey;
+static NSString * const kAFReferenceObjectPrefix = @"__af_";
 
 static NSDate * AFLastModifiedDateFromHTTPHeaders(NSDictionary *headers) {
     if ([headers valueForKey:@"Last-Modified"]) {
-        static ISO8601DateFormatter * _iso8601DateFormatter = nil;
+        static NSString * const _RFC1123Format = @"EEE',' dd MMM yyyy HH':'mm':'ss z";
+        static NSDateFormatter *_RFC1123DateFormatter = nil;
         static dispatch_once_t onceToken;
         dispatch_once(&onceToken, ^{
-            _iso8601DateFormatter = [[ISO8601DateFormatter alloc] init];
+            _RFC1123DateFormatter = [[NSDateFormatter alloc] init];
+            _RFC1123DateFormatter.locale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
+            _RFC1123DateFormatter.timeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
+            _RFC1123DateFormatter.dateFormat = _RFC1123Format;
         });
         
-        return [_iso8601DateFormatter dateFromString:[headers valueForKey:@"last-modified"]];
+        return [_RFC1123DateFormatter dateFromString:[headers valueForKey:@"last-modified"]];
     }
     
     return nil;
 }
-
-static NSString * const kAFReferenceObjectPrefix = @"__af_";
 
 inline NSString * AFReferenceObjectFromResourceIdentifier(NSString *resourceIdentifier) {
     if (!resourceIdentifier) {

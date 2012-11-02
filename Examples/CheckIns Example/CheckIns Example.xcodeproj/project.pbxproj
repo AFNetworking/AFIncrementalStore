@@ -29,7 +29,6 @@
 		F8B77D77161E178D00A88B7F /* AFXMLRequestOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = F8B77D6D161E178D00A88B7F /* AFXMLRequestOperation.m */; };
 		F8B77D78161E178D00A88B7F /* UIImageView+AFNetworking.m in Sources */ = {isa = PBXBuildFile; fileRef = F8B77D6F161E178D00A88B7F /* UIImageView+AFNetworking.m */; };
 		F8B77D7B161E17AF00A88B7F /* CheckIns.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = F8B77D79161E17AF00A88B7F /* CheckIns.xcdatamodeld */; };
-		F8B77D7E161E220B00A88B7F /* ISO8601DateFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = F8B77D7D161E220B00A88B7F /* ISO8601DateFormatter.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		F8B77D98161E43EC00A88B7F /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F8B77D97161E43EC00A88B7F /* SystemConfiguration.framework */; };
 /* End PBXBuildFile section */
 
@@ -79,8 +78,6 @@
 		F8B77D6E161E178D00A88B7F /* UIImageView+AFNetworking.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImageView+AFNetworking.h"; sourceTree = "<group>"; };
 		F8B77D6F161E178D00A88B7F /* UIImageView+AFNetworking.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImageView+AFNetworking.m"; sourceTree = "<group>"; };
 		F8B77D7A161E17AF00A88B7F /* CheckIns.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CheckIns.xcdatamodel; sourceTree = "<group>"; };
-		F8B77D7C161E220B00A88B7F /* ISO8601DateFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ISO8601DateFormatter.h; path = ../../ISO8601DateFormatter/ISO8601DateFormatter.h; sourceTree = "<group>"; };
-		F8B77D7D161E220B00A88B7F /* ISO8601DateFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ISO8601DateFormatter.m; path = ../../ISO8601DateFormatter/ISO8601DateFormatter.m; sourceTree = "<group>"; };
 		F8B77D97161E43EC00A88B7F /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -185,7 +182,6 @@
 			children = (
 				F8B77D55161E178600A88B7F /* AFIncrementalStore */,
 				F8B77D5C161E178D00A88B7F /* AFNetworking */,
-				F8B77D7F161E220F00A88B7F /* ISO8601DateFormatter */,
 			);
 			name = Vendor;
 			sourceTree = "<group>";
@@ -227,15 +223,6 @@
 			);
 			name = AFNetworking;
 			path = ../../AFNetworking/AFNetworking;
-			sourceTree = "<group>";
-		};
-		F8B77D7F161E220F00A88B7F /* ISO8601DateFormatter */ = {
-			isa = PBXGroup;
-			children = (
-				F8B77D7C161E220B00A88B7F /* ISO8601DateFormatter.h */,
-				F8B77D7D161E220B00A88B7F /* ISO8601DateFormatter.m */,
-			);
-			name = ISO8601DateFormatter;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -317,7 +304,6 @@
 				F8B77D77161E178D00A88B7F /* AFXMLRequestOperation.m in Sources */,
 				F8B77D78161E178D00A88B7F /* UIImageView+AFNetworking.m in Sources */,
 				F8B77D7B161E17AF00A88B7F /* CheckIns.xcdatamodeld in Sources */,
-				F8B77D7E161E220B00A88B7F /* ISO8601DateFormatter.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

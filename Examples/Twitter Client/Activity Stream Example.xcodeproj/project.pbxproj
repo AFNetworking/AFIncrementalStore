@@ -33,7 +33,6 @@
 		F8AFAFB415AB4F28003FE5BB /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F8AFAFB315AB4F28003FE5BB /* Foundation.framework */; };
 		F8AFAFB615AB4F28003FE5BB /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F8AFAFB515AB4F28003FE5BB /* CoreGraphics.framework */; };
 		F8AFAFB815AB4F28003FE5BB /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F8AFAFB715AB4F28003FE5BB /* CoreData.framework */; };
-		F8B77D8E161E3F5400A88B7F /* ISO8601DateFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = F8B77D8D161E3F5400A88B7F /* ISO8601DateFormatter.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -85,8 +84,6 @@
 		F8AFAFB315AB4F28003FE5BB /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		F8AFAFB515AB4F28003FE5BB /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		F8AFAFB715AB4F28003FE5BB /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
-		F8B77D8C161E3F5400A88B7F /* ISO8601DateFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ISO8601DateFormatter.h; path = ../../ISO8601DateFormatter/ISO8601DateFormatter.h; sourceTree = "<group>"; };
-		F8B77D8D161E3F5400A88B7F /* ISO8601DateFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ISO8601DateFormatter.m; path = ../../ISO8601DateFormatter/ISO8601DateFormatter.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -251,20 +248,10 @@
 		F8AFB07215AB5010003FE5BB /* Vendor */ = {
 			isa = PBXGroup;
 			children = (
-				F8B77D90161E3F5900A88B7F /* ISO8601DateFormatter */,
 				F8AD92E215D9A0BB00402FE9 /* AFIncrementalStore */,
 				F8AD92C215D9A0B400402FE9 /* AFNetworking */,
 			);
 			name = Vendor;
-			sourceTree = "<group>";
-		};
-		F8B77D90161E3F5900A88B7F /* ISO8601DateFormatter */ = {
-			isa = PBXGroup;
-			children = (
-				F8B77D8C161E3F5400A88B7F /* ISO8601DateFormatter.h */,
-				F8B77D8D161E3F5400A88B7F /* ISO8601DateFormatter.m */,
-			);
-			name = ISO8601DateFormatter;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -350,7 +337,6 @@
 				F8AD92F815D9A2DB00402FE9 /* Post.m in Sources */,
 				F8AD92FB15D9A2E500402FE9 /* User.m in Sources */,
 				F87CD18E15DAB2B200E4C166 /* PostTableViewCell.m in Sources */,
-				F8B77D8E161E3F5400A88B7F /* ISO8601DateFormatter.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

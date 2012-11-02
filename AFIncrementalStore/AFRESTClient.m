@@ -21,7 +21,67 @@
 // THE SOFTWARE.
 
 #import "AFRESTClient.h"
-#import "ISO8601DateFormatter.h"
+#include <time.h>
+#include <xlocale.h>
+
+#define AF_ISO8601_MAX_LENGTH 25
+
+// Adopted from SSToolkit NSDate+SSToolkitAdditions
+// Created by Sam Soffes
+// Copyright (c) 2008-2012 Sam Soffes
+// https://github.com/soffes/sstoolkit/
+NSDate * AFDateFromISO8601String(NSString *ISO8601String) {
+    if (!ISO8601String) {
+        return nil;
+    }
+    
+    const char *str = [ISO8601String cStringUsingEncoding:NSUTF8StringEncoding];
+    char newStr[AF_ISO8601_MAX_LENGTH];
+    bzero(newStr, AF_ISO8601_MAX_LENGTH);
+    
+    size_t len = strlen(str);
+    if (len == 0) {
+        return nil;
+    }
+    
+    // UTC dates ending with Z
+    if (len == 20 && str[len - 1] == 'Z') {
+        memcpy(newStr, str, len - 1);
+        strncpy(newStr + len - 1, "+0000\0", 6);
+    }
+    
+    // Timezone includes a semicolon (not supported by strptime)
+    else if (len == 25 && str[22] == ':') {
+        memcpy(newStr, str, 22);
+        memcpy(newStr + 22, str + 23, 2);
+    }
+    
+    // Fallback: date was already well-formatted OR any other case (bad-formatted)
+    else {
+        memcpy(newStr, str, len > AF_ISO8601_MAX_LENGTH - 1 ? AF_ISO8601_MAX_LENGTH - 1 : len);
+    }
+    
+    // Add null terminator
+    newStr[sizeof(newStr) - 1] = 0;
+    
+    struct tm tm = {
+        .tm_sec = 0,
+        .tm_min = 0,
+        .tm_hour = 0,
+        .tm_mday = 0,
+        .tm_mon = 0,
+        .tm_year = 0,
+        .tm_wday = 0,
+        .tm_yday = 0,
+        .tm_isdst = -1,
+    };
+    
+    if (strptime_l(newStr, "%FT%T%z", &tm, NULL) == NULL) {
+        return nil;
+    }
+    
+    return [NSDate dateWithTimeIntervalSince1970:mktime(&tm)];
+}
 
 static NSString * AFPluralizedString(NSString *string) {
     if ([string hasSuffix:@"ss"] || [string hasSuffix:@"se"] || [string hasSuffix:@"sh"] || [string hasSuffix:@"ch"]) {
@@ -121,12 +181,6 @@ static NSString * AFPluralizedString(NSString *string) {
                                      ofEntity:(NSEntityDescription *)entity
                                  fromResponse:(NSHTTPURLResponse *)response
 {
-    static ISO8601DateFormatter *_iso8601DateFormatter = nil;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        _iso8601DateFormatter = [[ISO8601DateFormatter alloc] init];
-    });
-    
     if ([representation isEqual:[NSNull null]]) {
         return nil;
     }
@@ -147,7 +201,7 @@ static NSString * AFPluralizedString(NSString *string) {
         if ([(NSAttributeDescription *)obj attributeType] == NSDateAttributeType) {
             id value = [mutableAttributes valueForKey:key];
             if (value && ![value isEqual:[NSNull null]]) {
-                [mutableAttributes setValue:[_iso8601DateFormatter dateFromString:value] forKey:key];
+                [mutableAttributes setValue:AFDateFromISO8601String(value) forKey:key];
             }
         }
     }];
