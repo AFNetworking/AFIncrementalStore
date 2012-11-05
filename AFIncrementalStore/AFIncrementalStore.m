@@ -421,7 +421,7 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
                     NSManagedObject *backingObject = [NSEntityDescription insertNewObjectForEntityForName:insertedObject.entity.name inManagedObjectContext:backingContext];
                     [backingObject.managedObjectContext obtainPermanentIDsForObjects:[NSArray arrayWithObject:backingObject] error:nil];
                     [backingObject setValue:resourceIdentifier forKey:kAFIncrementalStoreResourceIdentifierAttributeName];
-                    [backingObject setValuesForKeysWithDictionary:[insertedObject dictionaryWithValuesForKeys:nil]];
+                    [self applyValueFromManagedObject:insertedObject toBackingManagedObject:backingObject];
                     [backingContext save:nil];
                 }];
                 
@@ -451,7 +451,7 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
                     }
                     
                     [backingObject setValue:resourceIdentifier forKey:kAFIncrementalStoreResourceIdentifierAttributeName];
-                    [backingObject setValuesForKeysWithDictionary:[insertedObject dictionaryWithValuesForKeys:nil]];
+                    [self applyValueFromManagedObject:insertedObject toBackingManagedObject:backingObject];
                     [backingContext save:nil];
                 }];
                 
@@ -485,7 +485,7 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
                 
                 [backingContext performBlockAndWait:^{
                     NSManagedObject *backingObject = [backingContext existingObjectWithID:backingObjectID error:nil];
-                    [backingObject setValuesForKeysWithDictionary:[updatedObject dictionaryWithValuesForKeys:nil]];
+                    [self applyValueFromManagedObject:updatedObject toBackingManagedObject:backingObject];
                     [backingContext save:nil];
                 }];
             } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
@@ -788,5 +788,49 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
         [[_registeredObjectIDsByEntityNameAndNestedResourceIdentifier objectForKey:objectID.entity.name] removeObjectForKey:AFResourceIdentifierFromReferenceObject([self referenceObjectForObjectID:objectID])];
     }
 }
+
+- (void)applyValueFromManagedObject:(NSManagedObject *)managedObject
+             toBackingManagedObject:(NSManagedObject *)backingObject {
+    NSDictionary *attributeKeys = managedObject.entity.attributesByName;
+    NSDictionary *relationshipKeys = managedObject.entity.relationshipsByName;
+    NSMutableDictionary *relationships = [[NSMutableDictionary alloc] initWithCapacity:relationshipKeys.count];
+    for (NSString *relationshipName in relationshipKeys) {
+        NSRelationshipDescription *relationshipDescrption = relationshipKeys[relationshipName];
+        id relationshipObject = [managedObject valueForKey:relationshipName];
+        if (!relationshipObject) {
+            continue;
+        }
+        if (relationshipDescrption.isToMany) {
+            id backingRelationshipObjects = (relationshipDescrption.isOrdered ?
+                                             [[NSMutableOrderedSet alloc] initWithCapacity:[relationshipObject count]] :
+                                             [[NSMutableSet alloc] initWithCapacity:[relationshipObject count]]);
+            for (NSManagedObject *relationship in relationshipObject) {
+                NSManagedObjectID *backingRelationshipID = [self objectIDForBackingObjectForEntity:relationshipDescrption.entity
+                                                                            withResourceIdentifier:[self referenceObjectForObjectID:relationship.objectID]];
+                if (backingRelationshipID) {
+                    NSManagedObject *backingRelationshipObject = [backingObject.managedObjectContext existingObjectWithID:backingRelationshipID
+                                                                                                                    error:NULL];
+                    if (backingRelationshipObject) {
+                        [backingRelationshipObjects addObject:backingRelationshipObject];
+                    }
+                }
+            }
+            
+            [backingObject setValue:backingRelationshipObjects forKey:relationshipName];
+        } else {
+            NSManagedObjectID *backingRelationshipID = [self objectIDForBackingObjectForEntity:relationshipDescrption.entity
+                                                                        withResourceIdentifier:[self referenceObjectForObjectID:[relationshipObject objectID]]];
+            if (backingRelationshipID) {
+                NSManagedObject *backingRelationshipObject = [backingObject.managedObjectContext existingObjectWithID:backingRelationshipID
+                                                                                                                error:NULL];
+                [relationships setValue:backingRelationshipObject forKey:relationshipName];
+            }
+        }
+    }
+    
+    [backingObject setValuesForKeysWithDictionary:[managedObject dictionaryWithValuesForKeys:attributeKeys.allKeys]];
+    [backingObject setValuesForKeysWithDictionary:relationships];
+}
+
 
 @end
