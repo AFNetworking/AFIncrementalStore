@@ -253,7 +253,10 @@ static NSString * AFPluralizedString(NSString *string) {
 }
 
 - (NSMutableURLRequest *)requestForUpdatedObject:(NSManagedObject *)updatedObject {
-    return [self requestWithMethod:@"PUT" path:[self pathForObject:updatedObject] parameters:[self representationOfAttributes:[[updatedObject changedValuesForCurrentEvent] dictionaryWithValuesForKeys:[updatedObject.entity.attributesByName allKeys]] ofManagedObject:updatedObject]];
+    NSMutableSet *mutableChangedAttributeKeys = [NSMutableSet setWithArray:[[updatedObject changedValues] allKeys]];
+    [mutableChangedAttributeKeys intersectSet:[NSSet setWithArray:[updatedObject.entity.attributesByName allKeys]]];
+    
+    return [self requestWithMethod:@"PUT" path:[self pathForObject:updatedObject] parameters:[self representationOfAttributes:[[updatedObject changedValues] dictionaryWithValuesForKeys:[mutableChangedAttributeKeys allObjects]] ofManagedObject:updatedObject]];
 }
 
 - (NSMutableURLRequest *)requestForDeletedObject:(NSManagedObject *)deletedObject {
