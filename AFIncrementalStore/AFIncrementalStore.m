@@ -432,6 +432,9 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
             }
             
             AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, id responseObject) {
+                
+                NSMutableArray *managedObjectsWithNewObjectsIds = [NSMutableArray array];
+                
                 NSString *resourceIdentifier = [self.HTTPClient resourceIdentifierForRepresentation:responseObject ofEntity:[insertedObject entity] fromResponse:operation.response];
                 NSManagedObjectID *objectID = [self objectIDForEntity:[insertedObject entity] withResourceIdentifier:resourceIdentifier];
                 insertedObject.af_resourceIdentifier = resourceIdentifier;
@@ -476,6 +479,8 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
                     relatedObject.af_resourceIdentifier = resourceIdentifierForRelatedObject;
                     [relatedObject setValuesForKeysWithDictionary:[self.HTTPClient attributesForRepresentation:relationshipRepresentation ofEntity:relatedObject.entity fromResponse:operation.response]];
                     
+                    [managedObjectsWithNewObjectsIds addObject:relatedObject];
+                    
                     [backingContext performBlockAndWait:^{
                         __block NSManagedObject *backingObjectOfRelatedObject = nil;
                         if (objectIDOfRelatedObject) {
@@ -499,9 +504,19 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
                     [backingContext save:nil];
                 }];
                 
-                [insertedObject willChangeValueForKey:@"objectID"];
-                [context obtainPermanentIDsForObjects:[NSArray arrayWithObject:insertedObject] error:nil];
-                [insertedObject didChangeValueForKey:@"objectID"];
+                [managedObjectsWithNewObjectsIds addObject:insertedObject];
+                
+                for (NSManagedObject *managedObject in managedObjectsWithNewObjectsIds) {
+                    [managedObject willChangeValueForKey:@"objectID"];
+                }
+                
+                [context obtainPermanentIDsForObjects:managedObjectsWithNewObjectsIds error:nil];
+                
+                for (NSManagedObject *managedObject in managedObjectsWithNewObjectsIds) {
+                    [managedObject didChangeValueForKey:@"objectID"];
+                }
+
+                
             } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
                 NSLog(@"Insert Error: %@", error);
             }];
