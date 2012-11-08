@@ -188,12 +188,10 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
     __block NSArray *results = nil;
     __block NSError *error = nil;
     
-    [self.backingPersistentStoreCoordinator lock];
     NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
     [backingContext performBlockAndWait:^{
         results = [backingContext executeFetchRequest:fetchRequest error:&error];
     }];
-    [self.backingPersistentStoreCoordinator unlock];
     
     if (error) {
         NSLog(@"Error: %@", error);
