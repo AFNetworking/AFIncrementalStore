@@ -1,9 +1,6 @@
 # AFIncrementalStore
 **Core Data Persistence with AFNetworking, Done Right**
 
-> _This is still in early stages of development, so proceed with caution when using this in a production application.  
-> Any bug reports, feature requests, or general feedback at this point would be greatly appreciated._
-
 AFIncrementalStore is an [`NSIncrementalStore`](http://nshipster.com/nsincrementalstore/) subclass that uses [AFNetworking](https://github.com/afnetworking/afnetworking) to automatically request resources as properties and relationships are needed. 
 
 Weighing in at just under 500 LOC, AFIncrementalStore is something you can get your head around. Integrating it into your project couldn't be easier--just swap out your `NSPersistentStore` for it. No monkey-patching, no extra properties on your models.
