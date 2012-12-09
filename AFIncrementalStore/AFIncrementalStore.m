@@ -795,36 +795,42 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
     NSDictionary *relationshipKeys = managedObject.entity.relationshipsByName;
     NSMutableDictionary *relationships = [[NSMutableDictionary alloc] initWithCapacity:relationshipKeys.count];
     for (NSString *relationshipName in relationshipKeys) {
-        NSRelationshipDescription *relationshipDescrption = relationshipKeys[relationshipName];
+        NSRelationshipDescription *relationshipDescription = [relationshipKeys objectForKey:relationshipName];
         id relationshipObject = [managedObject valueForKey:relationshipName];
         if (!relationshipObject) {
             continue;
         }
-        if (relationshipDescrption.isToMany) {
-            id backingRelationshipObjects = (relationshipDescrption.isOrdered ?
+        if (relationshipDescription.isToMany) {
+            id backingRelationshipObjects = (relationshipDescription.isOrdered ?
                                              [[NSMutableOrderedSet alloc] initWithCapacity:[relationshipObject count]] :
                                              [[NSMutableSet alloc] initWithCapacity:[relationshipObject count]]);
             for (NSManagedObject *relationship in relationshipObject) {
-                NSManagedObjectID *backingRelationshipID = [self objectIDForBackingObjectForEntity:relationshipDescrption.entity
-                                                                            withResourceIdentifier:AFResourceIdentifierFromReferenceObject([self referenceObjectForObjectID:relationship.objectID])];
-                if (backingRelationshipID) {
-                    NSManagedObject *backingRelationshipObject = [backingObject.managedObjectContext existingObjectWithID:backingRelationshipID
-                                                                                                                    error:NULL];
-                    if (backingRelationshipObject) {
-                        [backingRelationshipObjects addObject:backingRelationshipObject];
-                    }
-                }
+				if (![[relationship objectID] isTemporaryID])
+				{
+					NSManagedObjectID *backingRelationshipID = [self objectIDForBackingObjectForEntity:relationshipDescription.destinationEntity
+																				withResourceIdentifier:AFResourceIdentifierFromReferenceObject([self referenceObjectForObjectID:relationship.objectID])];
+					if (backingRelationshipID) {
+						NSManagedObject *backingRelationshipObject = [backingObject.managedObjectContext existingObjectWithID:backingRelationshipID
+																														error:NULL];
+						if (backingRelationshipObject) {
+							[backingRelationshipObjects addObject:backingRelationshipObject];
+						}
+					}
+				}
             }
             
             [backingObject setValue:backingRelationshipObjects forKey:relationshipName];
         } else {
-            NSManagedObjectID *backingRelationshipID = [self objectIDForBackingObjectForEntity:relationshipDescrption.entity
-                                                                        withResourceIdentifier:AFResourceIdentifierFromReferenceObject([self referenceObjectForObjectID:[relationshipObject objectID]])];
-            if (backingRelationshipID) {
-                NSManagedObject *backingRelationshipObject = [backingObject.managedObjectContext existingObjectWithID:backingRelationshipID
-                                                                                                                error:NULL];
-                [relationships setValue:backingRelationshipObject forKey:relationshipName];
-            }
+			if (![[relationshipObject objectID] isTemporaryID])
+			{
+				NSManagedObjectID *backingRelationshipID = [self objectIDForBackingObjectForEntity:relationshipDescription.destinationEntity
+																			withResourceIdentifier:AFResourceIdentifierFromReferenceObject([self referenceObjectForObjectID:[relationshipObject objectID]])];
+				if (backingRelationshipID) {
+					NSManagedObject *backingRelationshipObject = [backingObject.managedObjectContext existingObjectWithID:backingRelationshipID
+																													error:NULL];
+					[relationships setValue:backingRelationshipObject forKey:relationshipName];
+				}
+			}
         }
     }
     
