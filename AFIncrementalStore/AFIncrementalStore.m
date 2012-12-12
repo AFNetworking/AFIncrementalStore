@@ -362,16 +362,15 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
     }
     
     NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
-    NSArray *results = nil;
-    
-    NSFetchRequestResultType resultType = fetchRequest.resultType;
 	NSFetchRequest *backingFetchRequest = [fetchRequest copy];
 	backingFetchRequest.entity = [NSEntityDescription entityForName:fetchRequest.entityName inManagedObjectContext:backingContext];
-    switch (resultType) {
+
+    switch (fetchRequest.resultType) {
         case NSManagedObjectResultType: {
             backingFetchRequest.resultType = NSDictionaryResultType;
             backingFetchRequest.propertiesToFetch = [NSArray arrayWithObject:kAFIncrementalStoreResourceIdentifierAttributeName];
-            results = [backingContext executeFetchRequest:backingFetchRequest error:error];
+            NSArray *results = [backingContext executeFetchRequest:backingFetchRequest error:error];
+
             NSMutableArray *mutableObjects = [NSMutableArray arrayWithCapacity:[results count]];
             for (NSString *resourceIdentifier in [results valueForKeyPath:kAFIncrementalStoreResourceIdentifierAttributeName]) {
                 NSManagedObjectID *objectID = [self objectIDForEntity:fetchRequest.entity withResourceIdentifier:resourceIdentifier];
