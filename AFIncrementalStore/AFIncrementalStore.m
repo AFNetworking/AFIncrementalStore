@@ -164,7 +164,7 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
         objectID = [objectIDsByResourceIdentifier objectForKey:resourceIdentifier];
     }
         
-    if (objectID == nil) {
+    if (!objectID) {
         objectID = [self newObjectIDForEntity:entity referenceObject:AFReferenceObjectFromResourceIdentifier(resourceIdentifier)];
     }
     
