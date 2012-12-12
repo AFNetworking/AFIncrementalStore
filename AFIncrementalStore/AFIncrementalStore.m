@@ -159,7 +159,7 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
     }
     
     NSManagedObjectID *objectID = nil;
-    NSMutableDictionary *objectIDsByResourceIdentifier = [_registeredObjectIDsByEntityNameAndNestedResourceIdentifier objectForKey:objectID.entity.name];
+    NSMutableDictionary *objectIDsByResourceIdentifier = [_registeredObjectIDsByEntityNameAndNestedResourceIdentifier objectForKey:entity.name];
     if (objectIDsByResourceIdentifier) {
         objectID = [objectIDsByResourceIdentifier objectForKey:resourceIdentifier];
     }
