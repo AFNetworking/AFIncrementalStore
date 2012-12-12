@@ -365,13 +365,13 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
     NSArray *results = nil;
     
     NSFetchRequestResultType resultType = fetchRequest.resultType;
+	NSFetchRequest *backingFetchRequest = [fetchRequest copy];
+	backingFetchRequest.entity = [NSEntityDescription entityForName:fetchRequest.entityName inManagedObjectContext:backingContext];
     switch (resultType) {
         case NSManagedObjectResultType: {
-            fetchRequest = [fetchRequest copy];
-            fetchRequest.entity = [NSEntityDescription entityForName:fetchRequest.entityName inManagedObjectContext:backingContext];
-            fetchRequest.resultType = NSDictionaryResultType;
-            fetchRequest.propertiesToFetch = [NSArray arrayWithObject:kAFIncrementalStoreResourceIdentifierAttributeName];
-            results = [backingContext executeFetchRequest:fetchRequest error:error];
+            backingFetchRequest.resultType = NSDictionaryResultType;
+            backingFetchRequest.propertiesToFetch = [NSArray arrayWithObject:kAFIncrementalStoreResourceIdentifierAttributeName];
+            results = [backingContext executeFetchRequest:backingFetchRequest error:error];
             NSMutableArray *mutableObjects = [NSMutableArray arrayWithCapacity:[results count]];
             for (NSString *resourceIdentifier in [results valueForKeyPath:kAFIncrementalStoreResourceIdentifierAttributeName]) {
                 NSManagedObjectID *objectID = [self objectIDForEntity:fetchRequest.entity withResourceIdentifier:resourceIdentifier];
@@ -383,7 +383,7 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
             return mutableObjects;
         }
         case NSManagedObjectIDResultType: {
-            NSArray *backingObjectIDs = [backingContext executeFetchRequest:fetchRequest error:error];
+            NSArray *backingObjectIDs = [backingContext executeFetchRequest:backingFetchRequest error:error];
             NSMutableArray *managedObjectIDs = [NSMutableArray arrayWithCapacity:[backingObjectIDs count]];
             
             for (NSManagedObjectID *backingObjectID in backingObjectIDs) {
@@ -396,7 +396,7 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
         }
         case NSDictionaryResultType:
         case NSCountResultType:
-            return [backingContext executeFetchRequest:fetchRequest error:error];
+            return [backingContext executeFetchRequest:backingFetchRequest error:error];
         default:
             return nil;
     }
