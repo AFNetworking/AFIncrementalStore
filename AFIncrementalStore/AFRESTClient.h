@@ -24,10 +24,17 @@
 #import "AFHTTPRequestOperation.h"
 #import "AFIncrementalStore.h"
 
+@protocol AFPaginator;
+
 /**
  `AFRESTClient` is a subclass of `AFHTTPClient` that implements the `AFIncrementalStoreHTTPClient` protocol in a way that follows the conventions of a RESTful web service.
  */
 @interface AFRESTClient : AFHTTPClient <AFIncrementalStoreHTTPClient>
+
+/**
+ 
+ */
+@property (nonatomic, strong) id <AFPaginator> paginator;
 
 ///------------------------
 /// @name Determining Paths
@@ -68,27 +75,6 @@
 - (NSString *)pathForRelationship:(NSRelationshipDescription *)relationship
                         forObject:(NSManagedObject *)object;
 
-///-----------------
-/// @name Pagination
-///-----------------
-
-/**
- 
- */
-- (void)setPaginationParametersWithOffset:(NSString *)offsetParameterName
-                                    limit:(NSString *)limitParameterName;
-
-/**
- 
- */
-- (void)setPaginationParametersWithPage:(NSString *)pageParameterName
-                                perPage:(NSString *)perPageParameterName;
-
-/**
- 
- */
-- (NSDictionary *)paginationParametersForFetchRequest:(NSFetchRequest *)fetchRequest;
-
 @end
 
 ///----------------
@@ -99,3 +85,45 @@
  
  */
 extern NSDate * AFDateFromISO8601String(NSString *ISO8601String);
+
+///-----------------
+/// @name Pagination
+///-----------------
+
+/**
+ 
+ */
+@protocol AFPaginator <NSObject>
+- (NSDictionary *)parametersForFetchRequest:(NSFetchRequest *)fetchRequest;
+@end
+
+/**
+ 
+ */
+@interface AFLimitAndOffsetPaginator : NSObject <AFPaginator>
+
+@property (readonly, nonatomic, copy) NSString *limitParameter;
+@property (readonly, nonatomic, copy) NSString *offsetParameter;
+
++ (instancetype)paginatorWithLimitParameter:(NSString *)limitParameterName
+                            offsetParameter:(NSString *)offsetParameterName;
+@end
+
+/**
+ 
+ */
+@interface AFPageAndPerPagePaginator : NSObject <AFPaginator>
+
+@property (readonly, nonatomic, copy) NSString *pageParameter;
+@property (readonly, nonatomic, copy) NSString *perPageParameter;
+
++ (instancetype)paginatorWithPageParameter:(NSString *)pageParameterName
+                          perPageParameter:(NSString *)perPageParameterName;
+@end
+
+/**
+ 
+ */
+@interface AFBlockPaginator : NSObject <AFPaginator>
++ (instancetype)paginatorWithBlock:(NSDictionary * (^)(NSFetchRequest *fetchRequest))block;
+@end
