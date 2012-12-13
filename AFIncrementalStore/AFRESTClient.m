@@ -76,7 +76,7 @@ NSDate * AFDateFromISO8601String(NSString *ISO8601String) {
         .tm_isdst = -1,
     };
     
-    strptime_l(newStr, "%Y-%m-%d %H:%M:%S %z", &tm, NULL);
+    strptime_l(newStr, "%FT%T%z", &tm, NULL);
     
     return [NSDate dateWithTimeIntervalSince1970:mktime(&tm)];
 }
