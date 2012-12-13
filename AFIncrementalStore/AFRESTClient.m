@@ -89,7 +89,35 @@ static NSString * AFPluralizedString(NSString *string) {
     }
 }
 
+static NSString * AFQueryByAppendingParameters(NSString *query, NSDictionary *parameters) {
+    static NSCharacterSet *_componentSeparatorCharacterSet = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        _componentSeparatorCharacterSet = [NSCharacterSet characterSetWithCharactersInString:@"&"];
+    });
+    
+    if (!parameters || [parameters count] == 0) {
+        return query;
+    }
+    
+    query = query ? [[query stringByTrimmingCharactersInSet:_componentSeparatorCharacterSet] stringByAppendingString:@"&"] : @"";
+    
+    NSMutableArray *mutablePairs = [NSMutableArray arrayWithCapacity:[parameters count]];
+    [parameters enumerateKeysAndObjectsUsingBlock:^(id field, id value, BOOL *stop) {
+        [mutablePairs addObject:[NSString stringWithFormat:@"%@=%@", field, value]];
+    }];
+    
+    return [query stringByAppendingString:[mutablePairs componentsJoinedByString:@"&"]];
+}
+
+typedef NSDictionary * (^AFPaginationParametersBlock)(NSFetchRequest *fetchRequest);
+
+@interface AFRESTClient ()
+@property (readwrite, nonatomic, copy) AFPaginationParametersBlock paginationParameters;
+@end
+
 @implementation AFRESTClient
+@synthesize paginationParameters = _paginationParameters;
 
 - (NSString *)pathForEntity:(NSEntityDescription *)entity {
     return AFPluralizedString(entity.name);
@@ -104,6 +132,59 @@ static NSString * AFPluralizedString(NSString *string) {
                         forObject:(NSManagedObject *)object
 {
     return [[self pathForObject:object] stringByAppendingPathComponent:relationship.name];
+}
+
+#pragma mark -
+
+- (void)setPaginationParametersWithOffset:(NSString *)offsetParameterName
+                                    limit:(NSString *)limitParameterName
+{
+    NSParameterAssert(offsetParameterName);
+    NSParameterAssert(limitParameterName);
+    
+    self.paginationParameters = ^NSDictionary *(NSFetchRequest *fetchRequest) {
+        NSMutableDictionary *mutableParameters = [NSMutableDictionary dictionary];
+        if (fetchRequest.fetchOffset > 0) {
+            [mutableParameters setValue:[NSString stringWithFormat:@"%u", fetchRequest.fetchOffset] forKey:offsetParameterName];
+        }
+        
+        if (fetchRequest.fetchLimit > 0) {
+            [mutableParameters setValue:[NSString stringWithFormat:@"%u", fetchRequest.fetchLimit] forKey:limitParameterName];
+        }
+
+        return mutableParameters;
+    };
+}
+
+- (void)setPaginationParametersWithPage:(NSString *)pageParameterName
+                                perPage:(NSString *)perPageParameterName
+{
+    NSParameterAssert(pageParameterName);
+    NSParameterAssert(perPageParameterName);
+    
+    static NSUInteger const kAFPaginationDefaultPage = 1;
+    static NSUInteger const kAFPaginationDefaultPerPage = 20;
+    
+    self.paginationParameters = ^NSDictionary *(NSFetchRequest *fetchRequest) {
+        NSUInteger perPage = fetchRequest.fetchLimit == 0 ? kAFPaginationDefaultPerPage : fetchRequest.fetchLimit;
+        NSUInteger page = fetchRequest.fetchOffset == 0 ? kAFPaginationDefaultPage : (NSUInteger)floorf((float)fetchRequest.fetchOffset / (float)perPage) + 1;
+
+        NSMutableDictionary *mutableParameters = [NSMutableDictionary dictionary];
+        [mutableParameters setValue:[NSString stringWithFormat:@"%u", page] forKey:pageParameterName];
+        [mutableParameters setValue:[NSString stringWithFormat:@"%u", perPage] forKey:perPageParameterName];
+
+        return mutableParameters;
+    };
+}
+
+- (NSDictionary *)paginationParametersForFetchRequest:(NSFetchRequest *)fetchRequest {
+    NSParameterAssert(fetchRequest);
+    
+    if (self.paginationParameters) {
+        return self.paginationParameters(fetchRequest);
+    }
+    
+    return nil;
 }
 
 #pragma mark - AFIncrementalStoreHTTPClient
@@ -210,7 +291,12 @@ static NSString * AFPluralizedString(NSString *string) {
 - (NSMutableURLRequest *)requestForFetchRequest:(NSFetchRequest *)fetchRequest
                                     withContext:(NSManagedObjectContext *)context
 {
-    NSMutableURLRequest *mutableRequest =  [self requestWithMethod:@"GET" path:[self pathForEntity:fetchRequest.entity] parameters:nil];
+    NSMutableDictionary *mutableParameters = [NSMutableDictionary dictionary];
+    if (self.paginationParameters) {
+        [mutableParameters addEntriesFromDictionary:self.paginationParameters(fetchRequest)];
+    }
+    
+    NSMutableURLRequest *mutableRequest =  [self requestWithMethod:@"GET" path:[self pathForEntity:fetchRequest.entity] parameters:[mutableParameters count] == 0 ? nil : mutableParameters];
     mutableRequest.cachePolicy = NSURLRequestReturnCacheDataElseLoad;
     
     return mutableRequest;

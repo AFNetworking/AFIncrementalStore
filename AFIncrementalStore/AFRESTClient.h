@@ -29,6 +29,10 @@
  */
 @interface AFRESTClient : AFHTTPClient <AFIncrementalStoreHTTPClient>
 
+///------------------------
+/// @name Determining Paths
+///------------------------
+
 /**
  Returns the request path for a collection of resources of the specified entity. By default, this returns an imprecise pluralization of the entity name.
  
@@ -63,6 +67,27 @@
  */
 - (NSString *)pathForRelationship:(NSRelationshipDescription *)relationship
                         forObject:(NSManagedObject *)object;
+
+///-----------------
+/// @name Pagination
+///-----------------
+
+/**
+ 
+ */
+- (void)setPaginationParametersWithOffset:(NSString *)offsetParameterName
+                                    limit:(NSString *)limitParameterName;
+
+/**
+ 
+ */
+- (void)setPaginationParametersWithPage:(NSString *)pageParameterName
+                                perPage:(NSString *)perPageParameterName;
+
+/**
+ 
+ */
+- (NSDictionary *)paginationParametersForFetchRequest:(NSFetchRequest *)fetchRequest;
 
 @end
 
