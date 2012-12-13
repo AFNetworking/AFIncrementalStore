@@ -82,7 +82,7 @@ NSDate * AFDateFromISO8601String(NSString *ISO8601String) {
 }
 
 static NSString * AFPluralizedString(NSString *string) {
-    if ([string hasSuffix:@"ss"] || [string hasSuffix:@"se"] || [string hasSuffix:@"sh"] || [string hasSuffix:@"ch"]) {
+    if ([string hasSuffix:@"ss"] || [string hasSuffix:@"sh"] || [string hasSuffix:@"ch"]) {
         return [[string stringByAppendingString:@"es"] lowercaseString];
     } else {
         return [[string stringByAppendingString:@"s"] lowercaseString];
