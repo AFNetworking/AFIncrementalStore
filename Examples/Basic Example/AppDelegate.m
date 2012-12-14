@@ -112,8 +112,6 @@
         abort();
     }
     
-    NSLog(@"SQLite URL: %@", [[self applicationDocumentsDirectory] URLByAppendingPathComponent:@"Songs.sqlite"]);
-    
     return __persistentStoreCoordinator;
 }
 
