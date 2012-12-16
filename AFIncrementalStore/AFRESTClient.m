@@ -289,13 +289,6 @@ static NSString * AFQueryByAppendingParameters(NSString *query, NSDictionary *pa
     return [self requestWithMethod:@"DELETE" path:[self pathForObject:deletedObject] parameters:nil];
 }
 
-#pragma mark - AFHTTPClient
-
-- (void)enqueueHTTPRequestOperation:(AFHTTPRequestOperation *)operation {
-    [self cancelAllHTTPOperationsWithMethod:operation.request.HTTPMethod path:operation.request.URL.path];
-    [super enqueueHTTPRequestOperation:operation];
-}
-
 @end
 
 #pragma mark -
