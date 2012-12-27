@@ -289,6 +289,27 @@ static NSString * AFQueryByAppendingParameters(NSString *query, NSDictionary *pa
     return [self requestWithMethod:@"DELETE" path:[self pathForObject:deletedObject] parameters:nil];
 }
 
+#pragma mark - AFHTTPClient
+
+- (void)enqueueBatchOfHTTPRequestOperations:(NSArray *)operations
+                              progressBlock:(void (^)(NSUInteger, NSUInteger))progressBlock
+                            completionBlock:(void (^)(NSArray *))completionBlock
+{
+    for (AFHTTPRequestOperation *operation in operations) {
+        if ([operation isKindOfClass:[AFHTTPRequestOperation class]]) {
+            if (!operation.successCallbackQueue) {
+                operation.successCallbackQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
+            }
+            
+            if (!operation.failureCallbackQueue) {
+                operation.failureCallbackQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
+            }
+        }
+    }
+    
+    [super enqueueBatchOfHTTPRequestOperations:operations progressBlock:progressBlock completionBlock:completionBlock];
+}
+
 @end
 
 #pragma mark -
