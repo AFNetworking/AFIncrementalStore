@@ -249,7 +249,7 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
 
 #pragma mark -
 
-- (void)insertOrUpdateObjectsFromRepresentations:(id)representationOrArrayOfRepresentations
+- (BOOL)insertOrUpdateObjectsFromRepresentations:(id)representationOrArrayOfRepresentations
                                         ofEntity:(NSEntityDescription *)entity
                                     fromResponse:(NSHTTPURLResponse *)response
                                      withContext:(NSManagedObjectContext *)context
@@ -263,7 +263,7 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
             completionBlock([NSArray array], [NSArray array]);
         }
         
-        return;
+        return NO;
     }
     
     NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
@@ -346,6 +346,8 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
     if (completionBlock) {
         completionBlock(mutableManagedObjects, mutableBackingObjects);
     }
+
+    return YES;
 }
 
 - (id)executeFetchRequest:(NSFetchRequest *)fetchRequest
