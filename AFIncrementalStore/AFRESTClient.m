@@ -207,7 +207,7 @@ static NSString * AFQueryByAppendingParameters(NSString *query, NSDictionary *pa
     NSMutableDictionary *mutableAttributes = [representation mutableCopy];
     @autoreleasepool {
         NSMutableSet *mutableKeys = [NSMutableSet setWithArray:[representation allKeys]];
-        [mutableKeys minusSet:[NSSet setWithArray:[[entity propertiesByName] allKeys]]];
+        [mutableKeys minusSet:[NSSet setWithArray:[[entity attributesByName] allKeys]]];
         [mutableAttributes removeObjectsForKeys:[mutableKeys allObjects]];
     }
     
