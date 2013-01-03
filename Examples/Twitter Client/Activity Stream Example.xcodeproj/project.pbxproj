@@ -16,6 +16,7 @@
 		F8874F1A15B08B770048680F /* AppDotNetIncrementalStore.m in Sources */ = {isa = PBXBuildFile; fileRef = F8874F0D15B08B770048680F /* AppDotNetIncrementalStore.m */; };
 		F8874F1F15B08C2A0048680F /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F8874F1E15B08C2A0048680F /* main.m */; };
 		F8874F2015B08C4B0048680F /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F8874F1B15B08BD30048680F /* AppDelegate.m */; };
+		F89CAE91168CF118006EDF5A /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F89CAE90168CF118006EDF5A /* Default-568h@2x.png */; };
 		F8AD92D815D9A0B400402FE9 /* AFHTTPClient.m in Sources */ = {isa = PBXBuildFile; fileRef = F8AD92C415D9A0B400402FE9 /* AFHTTPClient.m */; };
 		F8AD92D915D9A0B400402FE9 /* AFHTTPRequestOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = F8AD92C615D9A0B400402FE9 /* AFHTTPRequestOperation.m */; };
 		F8AD92DA15D9A0B400402FE9 /* AFImageRequestOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = F8AD92C815D9A0B400402FE9 /* AFImageRequestOperation.m */; };
@@ -52,6 +53,7 @@
 		F8874F1C15B08BD30048680F /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = SOURCE_ROOT; };
 		F8874F1E15B08C2A0048680F /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = SOURCE_ROOT; };
 		F8874F2215B08CA80048680F /* AppDotNet.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = AppDotNet.xcdatamodel; sourceTree = "<group>"; };
+		F89CAE90168CF118006EDF5A /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		F8AD92C315D9A0B400402FE9 /* AFHTTPClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFHTTPClient.h; sourceTree = "<group>"; };
 		F8AD92C415D9A0B400402FE9 /* AFHTTPClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFHTTPClient.m; sourceTree = "<group>"; };
 		F8AD92C515D9A0B400402FE9 /* AFHTTPRequestOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFHTTPRequestOperation.h; sourceTree = "<group>"; };
@@ -122,6 +124,7 @@
 		F87CD19415DAB45D00E4C166 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				F89CAE90168CF118006EDF5A /* Default-568h@2x.png */,
 				F87CD18F15DAB45100E4C166 /* Images */,
 			);
 			name = Resources;
@@ -307,6 +310,7 @@
 			files = (
 				F87CD19215DAB45100E4C166 /* profile-image-placeholder.png in Resources */,
 				F87CD19315DAB45100E4C166 /* profile-image-placeholder@2x.png in Resources */,
+				F89CAE91168CF118006EDF5A /* Default-568h@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

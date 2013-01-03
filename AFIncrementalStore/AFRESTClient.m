@@ -76,17 +76,38 @@ NSDate * AFDateFromISO8601String(NSString *ISO8601String) {
         .tm_isdst = -1,
     };
     
-    strptime_l(newStr, "%Y-%m-%d %H:%M:%S %z", &tm, NULL);
+    strptime_l(newStr, "%FT%T%z", &tm, NULL);
     
     return [NSDate dateWithTimeIntervalSince1970:mktime(&tm)];
 }
 
 static NSString * AFPluralizedString(NSString *string) {
-    if ([string hasSuffix:@"ss"] || [string hasSuffix:@"se"] || [string hasSuffix:@"sh"] || [string hasSuffix:@"ch"]) {
+    if ([string hasSuffix:@"ss"] || [string hasSuffix:@"sh"] || [string hasSuffix:@"ch"]) {
         return [[string stringByAppendingString:@"es"] lowercaseString];
     } else {
         return [[string stringByAppendingString:@"s"] lowercaseString];
     }
+}
+
+static NSString * AFQueryByAppendingParameters(NSString *query, NSDictionary *parameters) {
+    static NSCharacterSet *_componentSeparatorCharacterSet = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        _componentSeparatorCharacterSet = [NSCharacterSet characterSetWithCharactersInString:@"&"];
+    });
+    
+    if (!parameters || [parameters count] == 0) {
+        return query;
+    }
+    
+    query = query ? [[query stringByTrimmingCharactersInSet:_componentSeparatorCharacterSet] stringByAppendingString:@"&"] : @"";
+    
+    NSMutableArray *mutablePairs = [NSMutableArray arrayWithCapacity:[parameters count]];
+    [parameters enumerateKeysAndObjectsUsingBlock:^(id field, id value, BOOL *stop) {
+        [mutablePairs addObject:[NSString stringWithFormat:@"%@=%@", field, value]];
+    }];
+    
+    return [query stringByAppendingString:[mutablePairs componentsJoinedByString:@"&"]];
 }
 
 @implementation AFRESTClient
@@ -210,7 +231,12 @@ static NSString * AFPluralizedString(NSString *string) {
 - (NSMutableURLRequest *)requestForFetchRequest:(NSFetchRequest *)fetchRequest
                                     withContext:(NSManagedObjectContext *)context
 {
-    NSMutableURLRequest *mutableRequest =  [self requestWithMethod:@"GET" path:[self pathForEntity:fetchRequest.entity] parameters:nil];
+    NSMutableDictionary *mutableParameters = [NSMutableDictionary dictionary];
+    if (self.paginator) {
+        [mutableParameters addEntriesFromDictionary:[self.paginator parametersForFetchRequest:fetchRequest]];
+    }
+    
+    NSMutableURLRequest *mutableRequest =  [self requestWithMethod:@"GET" path:[self pathForEntity:fetchRequest.entity] parameters:[mutableParameters count] == 0 ? nil : mutableParameters];
     mutableRequest.cachePolicy = NSURLRequestReturnCacheDataElseLoad;
     
     return mutableRequest;
@@ -265,9 +291,127 @@ static NSString * AFPluralizedString(NSString *string) {
 
 #pragma mark - AFHTTPClient
 
-- (void)enqueueHTTPRequestOperation:(AFHTTPRequestOperation *)operation {
-    [self cancelAllHTTPOperationsWithMethod:operation.request.HTTPMethod path:operation.request.URL.path];
-    [super enqueueHTTPRequestOperation:operation];
+- (void)enqueueBatchOfHTTPRequestOperations:(NSArray *)operations
+                              progressBlock:(void (^)(NSUInteger, NSUInteger))progressBlock
+                            completionBlock:(void (^)(NSArray *))completionBlock
+{
+    for (AFHTTPRequestOperation *operation in operations) {
+        if ([operation isKindOfClass:[AFHTTPRequestOperation class]]) {
+            if (!operation.successCallbackQueue) {
+                operation.successCallbackQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
+            }
+            
+            if (!operation.failureCallbackQueue) {
+                operation.failureCallbackQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
+            }
+        }
+    }
+    
+    [super enqueueBatchOfHTTPRequestOperations:operations progressBlock:progressBlock completionBlock:completionBlock];
+}
+
+@end
+
+#pragma mark -
+
+@interface AFLimitAndOffsetPaginator ()
+@property (readwrite, nonatomic, copy) NSString *limitParameter;
+@property (readwrite, nonatomic, copy) NSString *offsetParameter;
+@end
+
+@implementation AFLimitAndOffsetPaginator
+
++ (instancetype)paginatorWithLimitParameter:(NSString *)limitParameterName
+                            offsetParameter:(NSString *)offsetParameterName
+{
+    NSParameterAssert(offsetParameterName);
+    NSParameterAssert(limitParameterName);
+    
+    AFLimitAndOffsetPaginator *paginator = [[AFLimitAndOffsetPaginator alloc] init];
+    paginator.limitParameter = limitParameterName;
+    paginator.offsetParameter = offsetParameterName;
+    
+    return paginator;
+}
+
+- (NSDictionary *)parametersForFetchRequest:(NSFetchRequest *)fetchRequest {
+    NSMutableDictionary *mutableParameters = [NSMutableDictionary dictionary];
+    if (fetchRequest.fetchOffset > 0) {
+        [mutableParameters setValue:[NSString stringWithFormat:@"%u", fetchRequest.fetchOffset] forKey:self.offsetParameter];
+    }
+    
+    if (fetchRequest.fetchLimit > 0) {
+        [mutableParameters setValue:[NSString stringWithFormat:@"%u", fetchRequest.fetchLimit] forKey:self.limitParameter];
+    }
+    
+    return mutableParameters;
+}
+
+@end
+
+#pragma mark -
+
+static NSUInteger const kAFPaginationDefaultPage = 1;
+static NSUInteger const kAFPaginationDefaultPerPage = 20;
+
+@interface AFPageAndPerPagePaginator ()
+@property (readwrite, nonatomic, copy) NSString *pageParameter;
+@property (readwrite, nonatomic, copy) NSString *perPageParameter;
+@end
+
+@implementation AFPageAndPerPagePaginator
+
++ (instancetype)paginatorWithPageParameter:(NSString *)pageParameterName
+                          perPageParameter:(NSString *)perPageParameterName
+{
+    NSParameterAssert(pageParameterName);
+    NSParameterAssert(perPageParameterName);
+    
+    AFPageAndPerPagePaginator *paginator = [[AFPageAndPerPagePaginator alloc] init];
+    paginator.pageParameter = pageParameterName;
+    paginator.perPageParameter = perPageParameterName;
+    
+    return paginator;
+}
+
+- (NSDictionary *)parametersForFetchRequest:(NSFetchRequest *)fetchRequest {
+    NSUInteger perPage = fetchRequest.fetchLimit == 0 ? kAFPaginationDefaultPerPage : fetchRequest.fetchLimit;
+    NSUInteger page = fetchRequest.fetchOffset == 0 ? kAFPaginationDefaultPage : (NSUInteger)floorf((float)fetchRequest.fetchOffset / (float)perPage) + 1;
+    
+    NSMutableDictionary *mutableParameters = [NSMutableDictionary dictionary];
+    [mutableParameters setValue:[NSString stringWithFormat:@"%u", page] forKey:self.pageParameter];
+    [mutableParameters setValue:[NSString stringWithFormat:@"%u", perPage] forKey:self.perPageParameter];
+    
+    return mutableParameters;
+}
+
+@end
+
+#pragma mark -
+
+typedef NSDictionary * (^AFPaginationParametersBlock)(NSFetchRequest *fetchRequest);
+
+@interface AFBlockPaginator ()
+@property (readwrite, nonatomic, copy) AFPaginationParametersBlock paginationParameters;
+@end
+
+@implementation AFBlockPaginator
+
++ (instancetype)paginatorWithBlock:(NSDictionary * (^)(NSFetchRequest *fetchRequest))block {
+    NSParameterAssert(block);
+    
+    AFBlockPaginator *paginator = [[AFBlockPaginator alloc] init];
+    paginator.paginationParameters = block;
+    
+    return paginator;
+}
+
+- (NSDictionary *)parametersForFetchRequest:(NSFetchRequest *)fetchRequest {
+    if (self.paginationParameters) {
+        return self.paginationParameters(fetchRequest);
+    }
+    
+    return nil;
 }
 
 @end

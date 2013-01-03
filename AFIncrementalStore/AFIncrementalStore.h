@@ -23,7 +23,6 @@
 #import <CoreData/CoreData.h>
 #import "AFNetworking.h"
 
-@protocol AFIncrementalStoreDelegate;
 @protocol AFIncrementalStoreHTTPClient;
 
 /**

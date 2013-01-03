@@ -24,10 +24,21 @@
 #import "AFHTTPRequestOperation.h"
 #import "AFIncrementalStore.h"
 
+@protocol AFPaginator;
+
 /**
  `AFRESTClient` is a subclass of `AFHTTPClient` that implements the `AFIncrementalStoreHTTPClient` protocol in a way that follows the conventions of a RESTful web service.
  */
 @interface AFRESTClient : AFHTTPClient <AFIncrementalStoreHTTPClient>
+
+/**
+ 
+ */
+@property (nonatomic, strong) id <AFPaginator> paginator;
+
+///------------------------
+/// @name Determining Paths
+///------------------------
 
 /**
  Returns the request path for a collection of resources of the specified entity. By default, this returns an imprecise pluralization of the entity name.
@@ -74,3 +85,45 @@
  
  */
 extern NSDate * AFDateFromISO8601String(NSString *ISO8601String);
+
+///-----------------
+/// @name Pagination
+///-----------------
+
+/**
+ 
+ */
+@protocol AFPaginator <NSObject>
+- (NSDictionary *)parametersForFetchRequest:(NSFetchRequest *)fetchRequest;
+@end
+
+/**
+ 
+ */
+@interface AFLimitAndOffsetPaginator : NSObject <AFPaginator>
+
+@property (readonly, nonatomic, copy) NSString *limitParameter;
+@property (readonly, nonatomic, copy) NSString *offsetParameter;
+
++ (instancetype)paginatorWithLimitParameter:(NSString *)limitParameterName
+                            offsetParameter:(NSString *)offsetParameterName;
+@end
+
+/**
+ 
+ */
+@interface AFPageAndPerPagePaginator : NSObject <AFPaginator>
+
+@property (readonly, nonatomic, copy) NSString *pageParameter;
+@property (readonly, nonatomic, copy) NSString *perPageParameter;
+
++ (instancetype)paginatorWithPageParameter:(NSString *)pageParameterName
+                          perPageParameter:(NSString *)perPageParameterName;
+@end
+
+/**
+ 
+ */
+@interface AFBlockPaginator : NSObject <AFPaginator>
++ (instancetype)paginatorWithBlock:(NSDictionary * (^)(NSFetchRequest *fetchRequest))block;
+@end
