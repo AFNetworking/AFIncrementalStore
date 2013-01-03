@@ -226,7 +226,7 @@
 /**
  Returns the attributes representation of an entity from the specified managed object. This method is used to get the attributes of the representation from its managed object.
  
- @discussion For example, if the representation sent to `POST /products` or `PUT /products/123` had a `description` field that corresponded with the `productDescription` attribute in its Core Data model, this method would set the value of the `description` field to the value of the `productDescription` key in representation/dictionary.
+ @discussion For example, if the representation sent to `POST /products` or `PUT /products/123` had a `description` field that corresponded with the `productDescription` attribute in its Core Data model, this method would set the value of the `productDescription` field to the value of the `description` key in representation/dictionary.
  
  @param attributes The resource representation.
  @param managedObject The `NSManagedObject` for the representation.
