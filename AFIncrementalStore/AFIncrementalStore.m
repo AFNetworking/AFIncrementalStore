@@ -229,6 +229,10 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
         [self updateBackingObject:backingObject withAttributeAndRelationshipValuesFromManagedObject:object];
     }];
     
+    [object willChangeValueForKey:@"objectID"];
+    [object.managedObjectContext obtainPermanentIDsForObjects:[NSArray arrayWithObject:object] error:nil];
+    [object didChangeValueForKey:@"objectID"];
+    
     NSDictionary *relationshipRepresentations = [self.HTTPClient representationsForRelationshipsFromRepresentation:representation ofEntity:object.entity fromResponse:response];
     
     for (NSString *relationshipName in relationshipRepresentations) {
@@ -255,11 +259,6 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
     [backingContext performBlockAndWait:^{
         [backingContext save:nil];
     }];
-    
-
-    [object willChangeValueForKey:@"objectID"];
-    [object.managedObjectContext obtainPermanentIDsForObjects:[NSArray arrayWithObject:object] error:nil];
-    [object didChangeValueForKey:@"objectID"];
 }
 
 - (void)updateBackingObject:(NSManagedObject *)backingObject
