@@ -153,7 +153,8 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
 }
 
 - (NSManagedObjectID *)objectIDForEntity:(NSEntityDescription *)entity
-                  withResourceIdentifier:(NSString *)resourceIdentifier {
+                  withResourceIdentifier:(NSString *)resourceIdentifier
+{
     if (!resourceIdentifier) {
         return nil;
     }
