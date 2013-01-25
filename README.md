@@ -99,4 +99,4 @@ Follow AFNetworking on Twitter ([@AFNetworking](https://twitter.com/AFNetworking
 
 ## License
 
-AFNetworking is available under the MIT license. See the LICENSE file for more info.
+AFIncrementalStore and AFNetworking are available under the MIT license. See the LICENSE file for more info.
