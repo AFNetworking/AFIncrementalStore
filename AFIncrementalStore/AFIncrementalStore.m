@@ -122,9 +122,7 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
         [userInfo setObject:fetchedObjects forKey:AFIncrementalStoreFetchedObjectsKey];
     }
     
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [[NSNotificationCenter defaultCenter] postNotificationName:notificationName object:context userInfo:userInfo];
-    });
+    [[NSNotificationCenter defaultCenter] postNotificationName:notificationName object:context userInfo:userInfo];
 }
 
 - (void)notifyManagedObjectContext:(NSManagedObjectContext *)context
