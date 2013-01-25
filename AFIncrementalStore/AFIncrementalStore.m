@@ -220,7 +220,7 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
                 mutableBackingRelationshipValue = [NSMutableSet setWithCapacity:[relationshipValue count]];
             }
             
-            for (NSManagedObject *relationshipManagedObject in mutableBackingRelationshipValue) {
+            for (NSManagedObject *relationshipManagedObject in relationshipValue) {
 				if (![[relationshipManagedObject objectID] isTemporaryID]) {
 					NSManagedObjectID *backingRelationshipObjectID = [self objectIDForBackingObjectForEntity:relationship.destinationEntity withResourceIdentifier:AFResourceIdentifierFromReferenceObject([self referenceObjectForObjectID:relationshipManagedObject.objectID])];
 					if (backingRelationshipObjectID) {
