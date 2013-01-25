@@ -209,12 +209,12 @@ static NSString * AFQueryByAppendingParameters(NSString *query, NSDictionary *pa
         NSMutableSet *mutableKeys = [NSMutableSet setWithArray:[representation allKeys]];
         [mutableKeys minusSet:[NSSet setWithArray:[[entity propertiesByName] allKeys]]];
         [mutableAttributes removeObjectsForKeys:[mutableKeys allObjects]];
-    }
     
-    NSSet *keysWithNestedValues = [mutableAttributes keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop) {
-        return [obj isKindOfClass:[NSArray class]] || [obj isKindOfClass:[NSDictionary class]];
-    }];
-    [mutableAttributes removeObjectsForKeys:[keysWithNestedValues allObjects]];
+        NSSet *keysWithNestedValues = [mutableAttributes keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop) {
+            return [obj isKindOfClass:[NSArray class]] || [obj isKindOfClass:[NSDictionary class]];
+        }];
+        [mutableAttributes removeObjectsForKeys:[keysWithNestedValues allObjects]];
+    }
     
     [[entity attributesByName] enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
         if ([(NSAttributeDescription *)obj attributeType] == NSDateAttributeType) {
