@@ -271,7 +271,15 @@ static NSString * AFQueryByAppendingParameters(NSString *query, NSDictionary *pa
 - (NSDictionary *)representationOfAttributes:(NSDictionary *)attributes
                              ofManagedObject:(NSManagedObject *)managedObject
 {
-    return attributes;
+    NSMutableDictionary *mutableAttributes = [attributes mutableCopy];
+    [attributes enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+        // Use NSString representation of NSDate to avoid NSInvalidArgumentException when serializing JSON
+        if ([obj isKindOfClass:[NSDate class]]) {
+            [mutableAttributes setObject:[obj description] forKey:key];
+        }
+    }];
+
+    return mutableAttributes;
 }
 
 - (NSMutableURLRequest *)requestForInsertedObject:(NSManagedObject *)insertedObject {
