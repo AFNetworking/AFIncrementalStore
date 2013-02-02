@@ -667,7 +667,16 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
     fetchRequest.resultType = NSDictionaryResultType;
     fetchRequest.fetchLimit = 1;
     fetchRequest.includesSubentities = NO;
-    fetchRequest.propertiesToFetch = [[[[NSEntityDescription entityForName:fetchRequest.entityName inManagedObjectContext:context] attributesByName] allKeys] arrayByAddingObject:kAFIncrementalStoreLastModifiedAttributeName];
+    NSArray *attributes = [[[NSEntityDescription entityForName:fetchRequest.entityName inManagedObjectContext:context] attributesByName] allValues];
+    NSMutableArray *validProperties = [[NSMutableArray alloc] initWithCapacity:attributes.count];
+    for (NSAttributeDescription *attribute in attributes){
+        if ([attribute isTransient] == FALSE) {
+            [validProperties addObject:attribute];
+        }
+    }
+    
+    NSArray *propertyNames = [validProperties valueForKey:@"name"];
+    fetchRequest.propertiesToFetch = [propertyNames arrayByAddingObject:kAFIncrementalStoreLastModifiedAttributeName];
     fetchRequest.predicate = [NSPredicate predicateWithFormat:@"%K = %@", kAFIncrementalStoreResourceIdentifierAttributeName, AFResourceIdentifierFromReferenceObject([self referenceObjectForObjectID:objectID])];
     
     __block NSArray *results;
