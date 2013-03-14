@@ -220,7 +220,11 @@ static NSString * AFQueryByAppendingParameters(NSString *query, NSDictionary *pa
         if ([(NSAttributeDescription *)obj attributeType] == NSDateAttributeType) {
             id value = [mutableAttributes valueForKey:key];
             if (value && ![value isEqual:[NSNull null]]) {
-                [mutableAttributes setValue:AFDateFromISO8601String(value) forKey:key];
+                if ([value isKindOfClass:[NSString class]])
+                    [mutableAttributes setValue:AFDateFromISO8601String(value) forKey:key];
+                else if ([value isKindOfClass:[NSNumber class]]){
+                    [mutableAttributes setValue:[NSDate dateWithTimeIntervalSince1970:[value integerValue]] forKey:key];                    
+                }
             }
         }
     }];

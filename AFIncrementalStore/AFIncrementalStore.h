@@ -275,6 +275,11 @@
                                forObjectWithID:(NSManagedObjectID *)objectID
                         inManagedObjectContext:(NSManagedObjectContext *)context;
 
+
+- (NSString *)subEntityNameForRepresentation:(NSDictionary *)representation
+                                         ofEntity:(NSEntityDescription *)entity
+                                     fromResponse:(NSHTTPURLResponse *)response;
+
 @end
 
 ///----------------

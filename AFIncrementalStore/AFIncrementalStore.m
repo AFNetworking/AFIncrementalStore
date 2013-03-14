@@ -281,22 +281,29 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
     
     for (NSDictionary *representation in representations) {
         NSString *resourceIdentifier = [self.HTTPClient resourceIdentifierForRepresentation:representation ofEntity:entity fromResponse:response];
-        NSDictionary *attributes = [self.HTTPClient attributesForRepresentation:representation ofEntity:entity fromResponse:response];
+        NSEntityDescription * entityOrSubEntity = entity;
+        if ([self.HTTPClient respondsToSelector:@selector(subEntityNameForRepresentation:ofEntity:fromResponse:)]) {
+            NSString *subEntityName = [self.HTTPClient subEntityNameForRepresentation:representation ofEntity:entity fromResponse:response];
+            if ([subEntityName length] > 0) {
+                entityOrSubEntity = [entity.subentitiesByName valueForKey:subEntityName];
+            }
+        }
+        NSDictionary *attributes = [self.HTTPClient attributesForRepresentation:representation ofEntity:entityOrSubEntity fromResponse:response];
         
         __block NSManagedObject *managedObject = nil;
         [context performBlockAndWait:^{
-            managedObject = [context existingObjectWithID:[self objectIDForEntity:entity withResourceIdentifier:resourceIdentifier] error:nil];
+            managedObject = [context existingObjectWithID:[self objectIDForEntity:entityOrSubEntity withResourceIdentifier:resourceIdentifier] error:nil];
         }];
         
         [managedObject setValuesForKeysWithDictionary:attributes];
         
-        NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:entity withResourceIdentifier:resourceIdentifier];
+        NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:entityOrSubEntity withResourceIdentifier:resourceIdentifier];
         __block NSManagedObject *backingObject = nil;
         [backingContext performBlockAndWait:^{
             if (backingObjectID) {
                 backingObject = [backingContext existingObjectWithID:backingObjectID error:nil];
             } else {
-                backingObject = [NSEntityDescription insertNewObjectForEntityForName:entity.name inManagedObjectContext:backingContext];
+                backingObject = [NSEntityDescription insertNewObjectForEntityForName:entityOrSubEntity.name inManagedObjectContext:backingContext];
                 [backingObject.managedObjectContext obtainPermanentIDsForObjects:[NSArray arrayWithObject:backingObject] error:nil];
             }
         }];
