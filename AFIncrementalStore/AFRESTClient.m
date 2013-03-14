@@ -182,7 +182,7 @@ static NSString * AFQueryByAppendingParameters(NSString *query, NSDictionary *pa
     static NSArray *_candidateKeys = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        _candidateKeys = [[NSArray alloc] initWithObjects:@"id", @"identifier", @"url", @"URL", nil];
+        _candidateKeys = [[NSArray alloc] initWithObjects:@"id", @"_id", @"identifier", @"url", @"URL", nil];
     });
     
     NSString *key = [[representation allKeys] firstObjectCommonWithArray:_candidateKeys];
