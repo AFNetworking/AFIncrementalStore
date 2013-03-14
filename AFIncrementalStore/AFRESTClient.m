@@ -237,7 +237,6 @@ static NSString * AFQueryByAppendingParameters(NSString *query, NSDictionary *pa
     }
     
     NSMutableURLRequest *mutableRequest =  [self requestWithMethod:@"GET" path:[self pathForEntity:fetchRequest.entity] parameters:[mutableParameters count] == 0 ? nil : mutableParameters];
-    mutableRequest.cachePolicy = NSURLRequestReturnCacheDataElseLoad;
     
     return mutableRequest;
 }
