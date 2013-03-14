@@ -142,7 +142,7 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
 
 - (NSManagedObjectContext *)backingManagedObjectContext {
     if (!_backingManagedObjectContext) {
-        _backingManagedObjectContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
+        _backingManagedObjectContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
         _backingManagedObjectContext.persistentStoreCoordinator = _backingPersistentStoreCoordinator;
         _backingManagedObjectContext.retainsRegisteredObjects = YES;
     }
