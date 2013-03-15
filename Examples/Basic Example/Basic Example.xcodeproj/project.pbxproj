@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F81D904116F3DED80043C85A /* NSValueTransformer+TransformerKit.m in Sources */ = {isa = PBXBuildFile; fileRef = F81D903B16F3DED80043C85A /* NSValueTransformer+TransformerKit.m */; };
+		F81D904216F3DED80043C85A /* TKImageTransformers.m in Sources */ = {isa = PBXBuildFile; fileRef = F81D903D16F3DED80043C85A /* TKImageTransformers.m */; };
+		F81D904316F3DED80043C85A /* TKStringTransformers.m in Sources */ = {isa = PBXBuildFile; fileRef = F81D903F16F3DED80043C85A /* TKStringTransformers.m */; };
+		F81D904916F3DEEB0043C85A /* NSString+InflectorKit.m in Sources */ = {isa = PBXBuildFile; fileRef = F81D904616F3DEEB0043C85A /* NSString+InflectorKit.m */; };
+		F81D904A16F3DEEB0043C85A /* TTTStringInflector.m in Sources */ = {isa = PBXBuildFile; fileRef = F81D904816F3DEEB0043C85A /* TTTStringInflector.m */; };
 		F8874F1415B08B770048680F /* Artist.m in Sources */ = {isa = PBXBuildFile; fileRef = F8874F0715B08B770048680F /* Artist.m */; };
 		F8874F1515B08B770048680F /* ArtistDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F8874F0815B08B770048680F /* ArtistDetailViewController.m */; };
 		F8874F1615B08B770048680F /* ArtistsListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F8874F0915B08B770048680F /* ArtistsListViewController.m */; };
@@ -34,6 +39,17 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		F81D903A16F3DED80043C85A /* NSValueTransformer+TransformerKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSValueTransformer+TransformerKit.h"; sourceTree = "<group>"; };
+		F81D903B16F3DED80043C85A /* NSValueTransformer+TransformerKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSValueTransformer+TransformerKit.m"; sourceTree = "<group>"; };
+		F81D903C16F3DED80043C85A /* TKImageTransformers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TKImageTransformers.h; sourceTree = "<group>"; };
+		F81D903D16F3DED80043C85A /* TKImageTransformers.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TKImageTransformers.m; sourceTree = "<group>"; };
+		F81D903E16F3DED80043C85A /* TKStringTransformers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TKStringTransformers.h; sourceTree = "<group>"; };
+		F81D903F16F3DED80043C85A /* TKStringTransformers.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TKStringTransformers.m; sourceTree = "<group>"; };
+		F81D904016F3DED80043C85A /* TransformerKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TransformerKit.h; sourceTree = "<group>"; };
+		F81D904516F3DEEB0043C85A /* NSString+InflectorKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+InflectorKit.h"; sourceTree = "<group>"; };
+		F81D904616F3DEEB0043C85A /* NSString+InflectorKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+InflectorKit.m"; sourceTree = "<group>"; };
+		F81D904716F3DEEB0043C85A /* TTTStringInflector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TTTStringInflector.h; sourceTree = "<group>"; };
+		F81D904816F3DEEB0043C85A /* TTTStringInflector.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TTTStringInflector.m; sourceTree = "<group>"; };
 		F8874E7515B08AD30048680F /* Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Prefix.pch; sourceTree = SOURCE_ROOT; };
 		F8874E7615B08ADB0048680F /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = SOURCE_ROOT; };
 		F8874F0715B08B770048680F /* Artist.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Artist.m; path = Classes/Artist.m; sourceTree = SOURCE_ROOT; };
@@ -97,6 +113,33 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		F81D903916F3DED80043C85A /* TransformerKit */ = {
+			isa = PBXGroup;
+			children = (
+				F81D903A16F3DED80043C85A /* NSValueTransformer+TransformerKit.h */,
+				F81D903B16F3DED80043C85A /* NSValueTransformer+TransformerKit.m */,
+				F81D903C16F3DED80043C85A /* TKImageTransformers.h */,
+				F81D903D16F3DED80043C85A /* TKImageTransformers.m */,
+				F81D903E16F3DED80043C85A /* TKStringTransformers.h */,
+				F81D903F16F3DED80043C85A /* TKStringTransformers.m */,
+				F81D904016F3DED80043C85A /* TransformerKit.h */,
+			);
+			name = TransformerKit;
+			path = ../../TransformerKit/TransformerKit;
+			sourceTree = "<group>";
+		};
+		F81D904416F3DEEB0043C85A /* InflectorKit */ = {
+			isa = PBXGroup;
+			children = (
+				F81D904516F3DEEB0043C85A /* NSString+InflectorKit.h */,
+				F81D904616F3DEEB0043C85A /* NSString+InflectorKit.m */,
+				F81D904716F3DEEB0043C85A /* TTTStringInflector.h */,
+				F81D904816F3DEEB0043C85A /* TTTStringInflector.m */,
+			);
+			name = InflectorKit;
+			path = ../../InflectorKit/InflectorKit;
+			sourceTree = "<group>";
+		};
 		F8874E5915AF927D0048680F /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
@@ -219,6 +262,8 @@
 			children = (
 				F8AD92E215D9A0BB00402FE9 /* AFIncrementalStore */,
 				F8AD92C215D9A0B400402FE9 /* AFNetworking */,
+				F81D904416F3DEEB0043C85A /* InflectorKit */,
+				F81D903916F3DED80043C85A /* TransformerKit */,
 			);
 			name = Vendor;
 			sourceTree = "<group>";
@@ -304,6 +349,11 @@
 				F8AD92E115D9A0B400402FE9 /* UIImageView+AFNetworking.m in Sources */,
 				F8AD92E715D9A0BB00402FE9 /* AFIncrementalStore.m in Sources */,
 				F8AD92E815D9A0BB00402FE9 /* AFRESTClient.m in Sources */,
+				F81D904116F3DED80043C85A /* NSValueTransformer+TransformerKit.m in Sources */,
+				F81D904216F3DED80043C85A /* TKImageTransformers.m in Sources */,
+				F81D904316F3DED80043C85A /* TKStringTransformers.m in Sources */,
+				F81D904916F3DEEB0043C85A /* NSString+InflectorKit.m in Sources */,
+				F81D904A16F3DEEB0043C85A /* TTTStringInflector.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
