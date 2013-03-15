@@ -81,14 +81,6 @@ NSDate * AFDateFromISO8601String(NSString *ISO8601String) {
     return [NSDate dateWithTimeIntervalSince1970:mktime(&tm)];
 }
 
-static NSString * AFPluralizedString(NSString *string) {
-    if ([string hasSuffix:@"ss"] || [string hasSuffix:@"sh"] || [string hasSuffix:@"ch"]) {
-        return [[string stringByAppendingString:@"es"] lowercaseString];
-    } else {
-        return [[string stringByAppendingString:@"s"] lowercaseString];
-    }
-}
-
 static NSString * AFQueryByAppendingParameters(NSString *query, NSDictionary *parameters) {
     static NSCharacterSet *_componentSeparatorCharacterSet = nil;
     static dispatch_once_t onceToken;
@@ -110,10 +102,29 @@ static NSString * AFQueryByAppendingParameters(NSString *query, NSDictionary *pa
     return [query stringByAppendingString:[mutablePairs componentsJoinedByString:@"&"]];
 }
 
+@interface AFRESTClient ()
+@property (readwrite, nonatomic, strong) TTTStringInflector *inflector;
+@end
+
 @implementation AFRESTClient
+@synthesize paginator = _paginator;
+@synthesize inflector = _inflector;
+
+- (id)initWithBaseURL:(NSURL *)url {
+    self = [super initWithBaseURL:url];
+    if (!self) {
+        return nil;
+    }
+
+    self.inflector = [TTTStringInflector defaultInflector];
+
+    return self;
+}
+
+#pragma mark -
 
 - (NSString *)pathForEntity:(NSEntityDescription *)entity {
-    return AFPluralizedString(entity.name);
+    return [self.inflector pluralize:[entity.name lowercaseString]];
 }
 
 - (NSString *)pathForObject:(NSManagedObject *)object {
