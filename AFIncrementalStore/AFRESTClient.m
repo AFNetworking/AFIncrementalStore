@@ -142,16 +142,22 @@ static NSString * AFQueryByAppendingParameters(NSString *query, NSDictionary *pa
 
 #pragma mark Read Methods
 
-- (id)representationOrArrayOfRepresentationsFromResponseObject:(id)responseObject {
+- (id)representationOrArrayOfRepresentationsOfEntity:(NSEntityDescription *)entity
+                                  fromResponseObject:(id)responseObject
+{
     if ([responseObject isKindOfClass:[NSArray class]]) {
         return responseObject;
     } else if ([responseObject isKindOfClass:[NSDictionary class]]) {
-        // Distinguish between keyed array or individual representation
-        if ([[responseObject allKeys] count] == 1) {
-            id value = [responseObject valueForKey:[[responseObject allKeys] lastObject]];
-            if ([value isKindOfClass:[NSArray class]]) {
-                return value;
-            }
+        id value = nil;
+
+        value = [responseObject valueForKey:[entity.name lowercaseString]];
+        if (value && [value isKindOfClass:[NSDictionary class]]) {
+            return value;
+        }
+
+        value = [responseObject valueForKey:[self.inflector pluralize:[entity.name lowercaseString]]];
+        if (value && [value isKindOfClass:[NSArray class]]) {
+            return value;
         }
         
         return responseObject;
