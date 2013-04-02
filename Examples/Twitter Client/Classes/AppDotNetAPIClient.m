@@ -65,6 +65,22 @@ static NSString * const kAFAppDotNetAPIBaseURLString = @"https://alpha-api.app.n
     return [responseObject valueForKey:@"data"];
 }
 
+- (id)representationOrArrayOfRepresentationsOfEntity:(NSEntityDescription *)entity
+                                  fromResponseObject:(id)responseObject
+{
+    id ro = [super representationOrArrayOfRepresentationsOfEntity:entity fromResponseObject:responseObject];
+    
+    if ([ro isKindOfClass:[NSDictionary class]]) {
+        id value = nil;
+        value = [ro valueForKey:@"data"];
+        if (value) {
+            return value;
+        }
+    }
+    
+    return ro;
+}
+
 - (NSDictionary *)attributesForRepresentation:(NSDictionary *)representation 
                                      ofEntity:(NSEntityDescription *)entity 
                                  fromResponse:(NSHTTPURLResponse *)response 
