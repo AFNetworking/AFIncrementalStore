@@ -205,6 +205,7 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
 - (void)updateBackingObject:(NSManagedObject *)backingObject
 withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedObject
 {
+    NSMutableDictionary *mutableRelationshipValues = [[NSMutableDictionary alloc] init];
     for (NSRelationshipDescription *relationship in [managedObject.entity.relationshipsByName allValues]) {
         id relationshipValue = [managedObject valueForKey:relationship.name];
         if (!relationshipValue) {
@@ -231,18 +232,19 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
 				}
             }
             
-            [backingObject setValue:mutableBackingRelationshipValue forKey:relationship.name];
+            [mutableRelationshipValues setValue:mutableBackingRelationshipValue forKey:relationship.name];
         } else {
 			if (![[relationshipValue objectID] isTemporaryID]) {
 				NSManagedObjectID *backingRelationshipObjectID = [self objectIDForBackingObjectForEntity:relationship.destinationEntity withResourceIdentifier:AFResourceIdentifierFromReferenceObject([self referenceObjectForObjectID:[relationshipValue objectID]])];
 				if (backingRelationshipObjectID) {
 					NSManagedObject *backingRelationshipObject = [backingObject.managedObjectContext existingObjectWithID:backingRelationshipObjectID error:nil];
-					[backingObject setValue:backingRelationshipObject forKey:relationship.name];
+                    [mutableRelationshipValues setValue:backingRelationshipObject forKey:relationship.name];
 				}
 			}
         }
     }
     
+    [backingObject setValuesForKeysWithDictionary:mutableRelationshipValues];
     [backingObject setValuesForKeysWithDictionary:[managedObject dictionaryWithValuesForKeys:[managedObject.entity.attributesByName allKeys]]];
 }
 
