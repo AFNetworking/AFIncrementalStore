@@ -298,15 +298,22 @@ static NSString * AFQueryByAppendingParameters(NSString *query, NSDictionary *pa
     return mutableAttributes;
 }
 
-- (NSMutableURLRequest *)requestForInsertedObject:(NSManagedObject *)insertedObject {
+- (NSMutableURLRequest *)requestForInsertedObject:(NSManagedObject *)insertedObject
+{
     return [self requestWithMethod:@"POST" path:[self pathForEntity:insertedObject.entity] parameters:[self representationOfAttributes:[insertedObject dictionaryWithValuesForKeys:[insertedObject.entity.attributesByName allKeys]] ofManagedObject:insertedObject]];
 }
 
-- (NSMutableURLRequest *)requestForUpdatedObject:(NSManagedObject *)updatedObject {
+- (NSMutableURLRequest *)requestForUpdatedObject:(NSManagedObject *)updatedObject
+{
     NSMutableSet *mutableChangedAttributeKeys = [NSMutableSet setWithArray:[[updatedObject changedValues] allKeys]];
     [mutableChangedAttributeKeys intersectSet:[NSSet setWithArray:[updatedObject.entity.attributesByName allKeys]]];
     
-    return [self requestWithMethod:@"PUT" path:[self pathForObject:updatedObject] parameters:[self representationOfAttributes:[[updatedObject changedValues] dictionaryWithValuesForKeys:[mutableChangedAttributeKeys allObjects]] ofManagedObject:updatedObject]];
+    if ([mutableChangedAttributeKeys count] == 0) {
+        // Avoid sending an empty PUT request
+        return nil;
+    } else {
+        return [self requestWithMethod:@"PUT" path:[self pathForObject:updatedObject] parameters:[self representationOfAttributes:[[updatedObject changedValues] dictionaryWithValuesForKeys:[mutableChangedAttributeKeys allObjects]] ofManagedObject:updatedObject]];
+    }
 }
 
 - (NSMutableURLRequest *)requestForDeletedObject:(NSManagedObject *)deletedObject {
