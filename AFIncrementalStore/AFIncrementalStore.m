@@ -439,6 +439,32 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
             return managedObjectIDs;
         }
         case NSDictionaryResultType:
+            if (fetchRequest.propertiesToFetch) {
+                NSMutableArray *fetchProperties = [NSMutableArray array];
+                for (id object in fetchRequest.propertiesToFetch) {
+                    if ([object isKindOfClass:[NSExpressionDescription class]]) {
+                        [fetchProperties addObject:object];
+                    } else {
+                        NSPropertyDescription *property = (NSPropertyDescription *)object;
+                        NSEntityDescription *entity = [NSEntityDescription entityForName:property.entity.name inManagedObjectContext:backingContext];
+                        [fetchProperties addObject:[entity.propertiesByName objectForKey:property.name]];
+                    }
+                }
+                [backingFetchRequest setPropertiesToFetch:fetchProperties];
+            }
+            if (fetchRequest.propertiesToGroupBy) {
+                NSMutableArray *groupByProperties = [NSMutableArray array];
+                for (id object in fetchRequest.propertiesToGroupBy) {
+                    if ([object isKindOfClass:[NSExpressionDescription class]]) {
+                        [groupByProperties addObject:object];
+                    } else {
+                        NSPropertyDescription *property = (NSPropertyDescription *)object;
+                        NSEntityDescription *entity = [NSEntityDescription entityForName:property.entity.name inManagedObjectContext:backingContext];
+                        [groupByProperties addObject:[entity.attributesByName objectForKey:property.name]];
+                    }
+                }
+                [backingFetchRequest setPropertiesToGroupBy:groupByProperties];
+            }
         case NSCountResultType:
             return [backingContext executeFetchRequest:backingFetchRequest error:error];
         default:
