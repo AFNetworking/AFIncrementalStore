@@ -98,7 +98,7 @@ static NSString * AFQueryByAppendingParameters(NSString *query, NSDictionary *pa
     [parameters enumerateKeysAndObjectsUsingBlock:^(id field, id value, BOOL *stop) {
         [mutablePairs addObject:[NSString stringWithFormat:@"%@=%@", field, value]];
     }];
-    
+
     return [query stringByAppendingString:[mutablePairs componentsJoinedByString:@"&"]];
 }
 
@@ -236,7 +236,7 @@ static NSString * AFQueryByAppendingParameters(NSString *query, NSDictionary *pa
     [[entity attributesByName] enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
         if ([(NSAttributeDescription *)obj attributeType] == NSDateAttributeType) {
             id value = [mutableAttributes valueForKey:key];
-            if (value && ![value isEqual:[NSNull null]]) {
+            if (value && ![value isEqual:[NSNull null]] && [value isKindOfClass:[NSString class]]) {
                 [mutableAttributes setValue:AFDateFromISO8601String(value) forKey:key];
             }
         }
