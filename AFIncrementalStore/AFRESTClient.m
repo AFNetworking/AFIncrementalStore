@@ -305,6 +305,9 @@ static NSString * AFQueryByAppendingParameters(NSString *query, NSDictionary *pa
 - (NSMutableURLRequest *)requestForUpdatedObject:(NSManagedObject *)updatedObject {
     NSMutableSet *mutableChangedAttributeKeys = [NSMutableSet setWithArray:[[updatedObject changedValues] allKeys]];
     [mutableChangedAttributeKeys intersectSet:[NSSet setWithArray:[updatedObject.entity.attributesByName allKeys]]];
+    if ([mutableChangedAttributeKeys count] == 0) {
+        return nil;
+    }
     
     return [self requestWithMethod:@"PUT" path:[self pathForObject:updatedObject] parameters:[self representationOfAttributes:[[updatedObject changedValues] dictionaryWithValuesForKeys:[mutableChangedAttributeKeys allObjects]] ofManagedObject:updatedObject]];
 }
