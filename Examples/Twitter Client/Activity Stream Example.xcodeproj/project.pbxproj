@@ -8,8 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		F81D903616F3DED30043C85A /* NSValueTransformer+TransformerKit.m in Sources */ = {isa = PBXBuildFile; fileRef = F81D903016F3DED30043C85A /* NSValueTransformer+TransformerKit.m */; };
-		F81D903716F3DED30043C85A /* TKImageTransformers.m in Sources */ = {isa = PBXBuildFile; fileRef = F81D903216F3DED30043C85A /* TKImageTransformers.m */; };
-		F81D903816F3DED30043C85A /* TKStringTransformers.m in Sources */ = {isa = PBXBuildFile; fileRef = F81D903416F3DED30043C85A /* TKStringTransformers.m */; };
 		F81D905016F3DEF00043C85A /* NSString+InflectorKit.m in Sources */ = {isa = PBXBuildFile; fileRef = F81D904D16F3DEF00043C85A /* NSString+InflectorKit.m */; };
 		F81D905116F3DEF00043C85A /* TTTStringInflector.m in Sources */ = {isa = PBXBuildFile; fileRef = F81D904F16F3DEF00043C85A /* TTTStringInflector.m */; };
 		F8478A69162729B80026615F /* AppDotNet.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = F8874F2115B08CA80048680F /* AppDotNet.xcdatamodeld */; };
@@ -41,15 +39,14 @@
 		F8AFAFB815AB4F28003FE5BB /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F8AFAFB715AB4F28003FE5BB /* CoreData.framework */; };
 		F8B6873416F29811001909E6 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F8B6873316F29811001909E6 /* MobileCoreServices.framework */; };
 		F8B6873616F2981B001909E6 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F8B6873516F2981B001909E6 /* SystemConfiguration.framework */; };
+		F8F82416173893D400ED7E21 /* TTTDateTransformers.m in Sources */ = {isa = PBXBuildFile; fileRef = F8F82413173893D400ED7E21 /* TTTDateTransformers.m */; };
+		F8F82417173893D400ED7E21 /* TTTImageTransformers.m in Sources */ = {isa = PBXBuildFile; fileRef = F8F82414173893D400ED7E21 /* TTTImageTransformers.m */; };
+		F8F82418173893D400ED7E21 /* TTTStringTransformers.m in Sources */ = {isa = PBXBuildFile; fileRef = F8F82415173893D400ED7E21 /* TTTStringTransformers.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		F81D902F16F3DED30043C85A /* NSValueTransformer+TransformerKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSValueTransformer+TransformerKit.h"; sourceTree = "<group>"; };
 		F81D903016F3DED30043C85A /* NSValueTransformer+TransformerKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSValueTransformer+TransformerKit.m"; sourceTree = "<group>"; };
-		F81D903116F3DED30043C85A /* TKImageTransformers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TKImageTransformers.h; sourceTree = "<group>"; };
-		F81D903216F3DED30043C85A /* TKImageTransformers.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TKImageTransformers.m; sourceTree = "<group>"; };
-		F81D903316F3DED30043C85A /* TKStringTransformers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TKStringTransformers.h; sourceTree = "<group>"; };
-		F81D903416F3DED30043C85A /* TKStringTransformers.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TKStringTransformers.m; sourceTree = "<group>"; };
 		F81D903516F3DED30043C85A /* TransformerKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TransformerKit.h; sourceTree = "<group>"; };
 		F81D904C16F3DEF00043C85A /* NSString+InflectorKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+InflectorKit.h"; sourceTree = "<group>"; };
 		F81D904D16F3DEF00043C85A /* NSString+InflectorKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+InflectorKit.m"; sourceTree = "<group>"; };
@@ -106,6 +103,12 @@
 		F8AFAFB715AB4F28003FE5BB /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		F8B6873316F29811001909E6 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		F8B6873516F2981B001909E6 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		F8F82410173893D400ED7E21 /* TTTDateTransformers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TTTDateTransformers.h; sourceTree = "<group>"; };
+		F8F82411173893D400ED7E21 /* TTTImageTransformers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TTTImageTransformers.h; sourceTree = "<group>"; };
+		F8F82412173893D400ED7E21 /* TTTStringTransformers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TTTStringTransformers.h; sourceTree = "<group>"; };
+		F8F82413173893D400ED7E21 /* TTTDateTransformers.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TTTDateTransformers.m; sourceTree = "<group>"; };
+		F8F82414173893D400ED7E21 /* TTTImageTransformers.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TTTImageTransformers.m; sourceTree = "<group>"; };
+		F8F82415173893D400ED7E21 /* TTTStringTransformers.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TTTStringTransformers.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -128,13 +131,15 @@
 		F81D902E16F3DED30043C85A /* TransformerKit */ = {
 			isa = PBXGroup;
 			children = (
+				F81D903516F3DED30043C85A /* TransformerKit.h */,
 				F81D902F16F3DED30043C85A /* NSValueTransformer+TransformerKit.h */,
 				F81D903016F3DED30043C85A /* NSValueTransformer+TransformerKit.m */,
-				F81D903116F3DED30043C85A /* TKImageTransformers.h */,
-				F81D903216F3DED30043C85A /* TKImageTransformers.m */,
-				F81D903316F3DED30043C85A /* TKStringTransformers.h */,
-				F81D903416F3DED30043C85A /* TKStringTransformers.m */,
-				F81D903516F3DED30043C85A /* TransformerKit.h */,
+				F8F82410173893D400ED7E21 /* TTTDateTransformers.h */,
+				F8F82411173893D400ED7E21 /* TTTImageTransformers.h */,
+				F8F82412173893D400ED7E21 /* TTTStringTransformers.h */,
+				F8F82413173893D400ED7E21 /* TTTDateTransformers.m */,
+				F8F82414173893D400ED7E21 /* TTTImageTransformers.m */,
+				F8F82415173893D400ED7E21 /* TTTStringTransformers.m */,
 			);
 			name = TransformerKit;
 			path = ../../TransformerKit/TransformerKit;
@@ -395,10 +400,11 @@
 				F8AD92FB15D9A2E500402FE9 /* User.m in Sources */,
 				F87CD18E15DAB2B200E4C166 /* PostTableViewCell.m in Sources */,
 				F81D903616F3DED30043C85A /* NSValueTransformer+TransformerKit.m in Sources */,
-				F81D903716F3DED30043C85A /* TKImageTransformers.m in Sources */,
-				F81D903816F3DED30043C85A /* TKStringTransformers.m in Sources */,
 				F81D905016F3DEF00043C85A /* NSString+InflectorKit.m in Sources */,
 				F81D905116F3DEF00043C85A /* TTTStringInflector.m in Sources */,
+				F8F82416173893D400ED7E21 /* TTTDateTransformers.m in Sources */,
+				F8F82417173893D400ED7E21 /* TTTImageTransformers.m in Sources */,
+				F8F82418173893D400ED7E21 /* TTTStringTransformers.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
