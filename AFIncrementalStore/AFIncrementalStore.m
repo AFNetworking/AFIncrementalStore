@@ -701,9 +701,12 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
                 if ([attributeValues valueForKey:kAFIncrementalStoreLastModifiedAttributeName]) {
                     [request setValue:[[attributeValues valueForKey:kAFIncrementalStoreLastModifiedAttributeName] description] forHTTPHeaderField:@"If-Modified-Since"];
                 }
-                
+
+
+                __weak NSManagedObjectContext *weakChildContext = childContext;
                 AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, NSDictionary *representation) {
-                    NSManagedObject *managedObject = [childContext existingObjectWithID:objectID error:error];
+                    __strong NSManagedObjectContext *strongChildContext = weakChildContext;
+                    NSManagedObject *managedObject = [strongChildContext existingObjectWithID:objectID error:error];
                     
                     NSMutableDictionary *mutableAttributeValues = [attributeValues mutableCopy];
                     [mutableAttributeValues addEntriesFromDictionary:[self.HTTPClient attributesForRepresentation:representation ofEntity:managedObject.entity fromResponse:operation.response]];
@@ -719,12 +722,12 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
                         [backingObject setValue:lastModified forKey:kAFIncrementalStoreLastModifiedAttributeName];
                     }
 
-                    id observer = [[NSNotificationCenter defaultCenter] addObserverForName:NSManagedObjectContextDidSaveNotification object:childContext queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
+                    id observer = [[NSNotificationCenter defaultCenter] addObserverForName:NSManagedObjectContextDidSaveNotification object:strongChildContext queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
                         [context mergeChangesFromContextDidSaveNotification:note];
                     }];
-                    
-                    [childContext performBlockAndWait:^{
-                        if (![[self backingManagedObjectContext] save:error] || ![childContext save:error]) {
+
+                    [strongChildContext performBlockAndWait:^{
+                        if (![[self backingManagedObjectContext] save:error] || ![strongChildContext save:error]) {
                             @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[*error localizedFailureReason] userInfo:[NSDictionary dictionaryWithObject:*error forKey:NSUnderlyingErrorKey]];
                         }
                     }];
