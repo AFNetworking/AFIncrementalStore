@@ -702,7 +702,6 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
                     [request setValue:[[attributeValues valueForKey:kAFIncrementalStoreLastModifiedAttributeName] description] forHTTPHeaderField:@"If-Modified-Since"];
                 }
 
-
                 __weak NSManagedObjectContext *weakChildContext = childContext;
                 AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, NSDictionary *representation) {
                     __strong NSManagedObjectContext *strongChildContext = weakChildContext;
@@ -757,13 +756,16 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
             NSManagedObjectContext *childContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
             childContext.parentContext = context;
             childContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy;
-                        
+
+            __weak NSManagedObjectContext *weakChildContext = childContext;
             AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, id responseObject) {
+                __strong NSManagedObjectContext *strongChildContext = weakChildContext;
+                
                 id representationOrArrayOfRepresentations = [self.HTTPClient representationOrArrayOfRepresentationsOfEntity:relationship.entity fromResponseObject:responseObject];
                 
                 [childContext performBlockAndWait:^{
-                    [self insertOrUpdateObjectsFromRepresentations:representationOrArrayOfRepresentations ofEntity:relationship.destinationEntity fromResponse:operation.response withContext:childContext error:error completionBlock:^(NSArray *managedObjects, NSArray *backingObjects) {
-                        NSManagedObject *managedObject = [childContext objectWithID:objectID];
+                    [self insertOrUpdateObjectsFromRepresentations:representationOrArrayOfRepresentations ofEntity:relationship.destinationEntity fromResponse:operation.response withContext:strongChildContext error:error completionBlock:^(NSArray *managedObjects, NSArray *backingObjects) {
+                        NSManagedObject *managedObject = [strongChildContext objectWithID:objectID];
                         NSManagedObject *backingObject = [[self backingManagedObjectContext] existingObjectWithID:objectID error:nil];
                         
                         if ([relationship isToMany]) {
@@ -779,11 +781,11 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
                             [backingObject setValue:[backingObjects lastObject] forKey:relationship.name];
                         }
                         
-                        id observer = [[NSNotificationCenter defaultCenter] addObserverForName:NSManagedObjectContextDidSaveNotification object:childContext queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
+                        id observer = [[NSNotificationCenter defaultCenter] addObserverForName:NSManagedObjectContextDidSaveNotification object:strongChildContext queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
                             [context mergeChangesFromContextDidSaveNotification:note];
                         }];
                         
-                        if (![[self backingManagedObjectContext] save:error] || ![childContext save:error]) {
+                        if (![[self backingManagedObjectContext] save:error] || ![strongChildContext save:error]) {
                             @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[*error localizedFailureReason] userInfo:[NSDictionary dictionaryWithObject:*error forKey:NSUnderlyingErrorKey]];
                         }
                         
