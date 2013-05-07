@@ -483,15 +483,15 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
                     NSDictionary *representation = (NSDictionary *)representationOrArrayOfRepresentations;
 
                     NSString *resourceIdentifier = [self.HTTPClient resourceIdentifierForRepresentation:representation ofEntity:[insertedObject entity] fromResponse:operation.response];
-                    NSManagedObjectID *objectID = [self objectIDForEntity:[insertedObject entity] withResourceIdentifier:resourceIdentifier];
+                    NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:[insertedObject entity] withResourceIdentifier:resourceIdentifier];
                     insertedObject.af_resourceIdentifier = resourceIdentifier;
                     [insertedObject setValuesForKeysWithDictionary:[self.HTTPClient attributesForRepresentation:representation ofEntity:insertedObject.entity fromResponse:operation.response]];
-                    
+
                     [backingContext performBlockAndWait:^{
                         __block NSManagedObject *backingObject = nil;
-                        if (objectID) {
+                        if (backingObjectID) {
                             [backingContext performBlockAndWait:^{
-                                backingObject = [backingContext existingObjectWithID:objectID error:nil];
+                                backingObject = [backingContext existingObjectWithID:backingObjectID error:nil];
                             }];
                         }
 
