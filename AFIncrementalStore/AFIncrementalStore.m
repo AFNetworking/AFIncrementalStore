@@ -23,6 +23,7 @@
 #import "AFIncrementalStore.h"
 #import "AFHTTPClient.h"
 #import <objc/runtime.h>
+#import <CoreData/CoreDataErrors.h>
 
 NSString * const AFIncrementalStoreUnimplementedMethodException = @"com.alamofire.incremental-store.exceptions.unimplemented-method";
 
@@ -736,6 +737,10 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
 
                     [strongChildContext performBlockAndWait:^{
                         if (![[self backingManagedObjectContext] save:error] || ![strongChildContext save:error]) {
+                            if (error == NULL)
+                            {
+                                *error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSCoreDataError userInfo:[NSDictionary dictionary]];
+                            }
                             @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[*error localizedFailureReason] userInfo:[NSDictionary dictionaryWithObject:*error forKey:NSUnderlyingErrorKey]];
                         }
                     }];
@@ -795,6 +800,10 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
                         }];
                         
                         if (![[self backingManagedObjectContext] save:error] || ![strongChildContext save:error]) {
+                            if (error == NULL)
+                            {
+                                *error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSCoreDataError userInfo:[NSDictionary dictionary]];
+                            }
                             @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[*error localizedFailureReason] userInfo:[NSDictionary dictionaryWithObject:*error forKey:NSUnderlyingErrorKey]];
                         }
                         
