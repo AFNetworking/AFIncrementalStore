@@ -678,78 +678,81 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
     fetchRequest.resultType = NSDictionaryResultType;
     fetchRequest.fetchLimit = 1;
     fetchRequest.includesSubentities = NO;
-    
+
     NSArray *attributes = [[[NSEntityDescription entityForName:fetchRequest.entityName inManagedObjectContext:context] attributesByName] allValues];
     NSArray *intransientAttributes = [attributes filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isTransient == NO"]];
     fetchRequest.propertiesToFetch = [[intransientAttributes valueForKeyPath:@"name"] arrayByAddingObject:kAFIncrementalStoreLastModifiedAttributeName];
-    
+
     fetchRequest.predicate = [NSPredicate predicateWithFormat:@"%K = %@", kAFIncrementalStoreResourceIdentifierAttributeName, AFResourceIdentifierFromReferenceObject([self referenceObjectForObjectID:objectID])];
-    
+
     __block NSArray *results;
     NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
     [backingContext performBlockAndWait:^{
         results = [backingContext executeFetchRequest:fetchRequest error:error];
     }];
-    
+
     NSDictionary *attributeValues = [results lastObject] ?: [NSDictionary dictionary];
     NSIncrementalStoreNode *node = [[NSIncrementalStoreNode alloc] initWithObjectID:objectID withValues:attributeValues version:1];
-    
+
     if ([self.HTTPClient respondsToSelector:@selector(shouldFetchRemoteAttributeValuesForObjectWithID:inManagedObjectContext:)] && [self.HTTPClient shouldFetchRemoteAttributeValuesForObjectWithID:objectID inManagedObjectContext:context]) {
         if (attributeValues) {
-            NSManagedObjectContext *childContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
+
+            NSManagedObjectContext *childContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
             childContext.parentContext = context;
             childContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy;
-            
+
             NSMutableURLRequest *request = [self.HTTPClient requestWithMethod:@"GET" pathForObjectWithID:objectID withContext:context];
             NSString *lastModified = [attributeValues objectForKey:kAFIncrementalStoreLastModifiedAttributeName];
             if (lastModified) {
                 [request setValue:lastModified forHTTPHeaderField:@"Last-Modified"];
             }
-            
+
             if ([request URL]) {
                 if ([attributeValues valueForKey:kAFIncrementalStoreLastModifiedAttributeName]) {
                     [request setValue:[[attributeValues valueForKey:kAFIncrementalStoreLastModifiedAttributeName] description] forHTTPHeaderField:@"If-Modified-Since"];
                 }
 
-                __weak NSManagedObjectContext *weakChildContext = childContext;
+
                 AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, NSDictionary *representation) {
-                    __strong NSManagedObjectContext *strongChildContext = weakChildContext;
-                    NSManagedObject *managedObject = [strongChildContext existingObjectWithID:objectID error:error];
-                    
+                    NSManagedObject *managedObject = [childContext existingObjectWithID:objectID error:error];
+
                     NSMutableDictionary *mutableAttributeValues = [attributeValues mutableCopy];
                     [mutableAttributeValues addEntriesFromDictionary:[self.HTTPClient attributesForRepresentation:representation ofEntity:managedObject.entity fromResponse:operation.response]];
                     [mutableAttributeValues removeObjectForKey:kAFIncrementalStoreLastModifiedAttributeName];
                     [managedObject setValuesForKeysWithDictionary:mutableAttributeValues];
-                    
+
                     NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:[objectID entity] withResourceIdentifier:AFResourceIdentifierFromReferenceObject([self referenceObjectForObjectID:objectID])];
                     NSManagedObject *backingObject = [[self backingManagedObjectContext] existingObjectWithID:backingObjectID error:nil];
                     [backingObject setValuesForKeysWithDictionary:mutableAttributeValues];
-                    
+
                     NSString *lastModified = [[operation.response allHeaderFields] valueForKey:@"Last-Modified"];
                     if (lastModified) {
                         [backingObject setValue:lastModified forKey:kAFIncrementalStoreLastModifiedAttributeName];
                     }
 
-                    id observer = [[NSNotificationCenter defaultCenter] addObserverForName:NSManagedObjectContextDidSaveNotification object:strongChildContext queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
+                    id observer = [[NSNotificationCenter defaultCenter] addObserverForName:NSManagedObjectContextDidSaveNotification object:childContext queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
                         [context mergeChangesFromContextDidSaveNotification:note];
                     }];
 
-                    [strongChildContext performBlockAndWait:^{
-                        if (![[self backingManagedObjectContext] save:error] || ![strongChildContext save:error]) {
+                    [childContext performBlock:^{
+
+                        if (![[self backingManagedObjectContext] save:error] || ![childContext save:error]) {
                             @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[*error localizedFailureReason] userInfo:[NSDictionary dictionaryWithObject:*error forKey:NSUnderlyingErrorKey]];
                         }
+
+                        [[NSNotificationCenter defaultCenter] removeObserver:observer];
+
                     }];
-                    
-                    [[NSNotificationCenter defaultCenter] removeObserver:observer];
+
                 } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
                     NSLog(@"Error: %@, %@", operation, error);
                 }];
-                
+
                 [self.HTTPClient enqueueHTTPRequestOperation:operation];
             }
         }
     }
-    
+
     return node;
 }
 
