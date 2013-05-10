@@ -737,11 +737,17 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
 
                     [strongChildContext performBlockAndWait:^{
                         if (![[self backingManagedObjectContext] save:error] || ![strongChildContext save:error]) {
+                            NSError *__autoreleasing *errorToThrow = nil;
                             if (error == NULL)
                             {
-                                *error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSCoreDataError userInfo:[NSDictionary dictionary]];
+                                NSError __autoreleasing *unknownError = [NSError errorWithDomain:NSCocoaErrorDomain code:NSCoreDataError userInfo:[NSDictionary dictionary]];
+                                errorToThrow = &unknownError;
                             }
-                            @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[*error localizedFailureReason] userInfo:[NSDictionary dictionaryWithObject:*error forKey:NSUnderlyingErrorKey]];
+                            else
+                            {
+                                errorToThrow = error;
+                            }
+                            @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[*errorToThrow localizedFailureReason] userInfo:[NSDictionary dictionaryWithObject:*errorToThrow forKey:NSUnderlyingErrorKey]];
                         }
                     }];
                     
@@ -800,11 +806,17 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
                         }];
                         
                         if (![[self backingManagedObjectContext] save:error] || ![strongChildContext save:error]) {
+                            NSError *__autoreleasing *errorToThrow = nil;
                             if (error == NULL)
                             {
-                                *error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSCoreDataError userInfo:[NSDictionary dictionary]];
+                                NSError __autoreleasing *unknownError = [NSError errorWithDomain:NSCocoaErrorDomain code:NSCoreDataError userInfo:[NSDictionary dictionary]];
+                                errorToThrow = &unknownError;
                             }
-                            @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[*error localizedFailureReason] userInfo:[NSDictionary dictionaryWithObject:*error forKey:NSUnderlyingErrorKey]];
+                            else
+                            {
+                                errorToThrow = error;
+                            }
+                            @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[*errorToThrow localizedFailureReason] userInfo:[NSDictionary dictionaryWithObject:*errorToThrow forKey:NSUnderlyingErrorKey]];
                         }
                         
                         [[NSNotificationCenter defaultCenter] removeObserver:observer];
