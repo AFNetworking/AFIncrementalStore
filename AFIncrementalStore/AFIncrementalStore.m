@@ -373,11 +373,6 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
                     if (![[self backingManagedObjectContext] save:error] || ![childContext save:error]) {
                         @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[*error localizedFailureReason] userInfo:[NSDictionary dictionaryWithObject:*error forKey:NSUnderlyingErrorKey]];
                     }
-                    
-                    for (NSManagedObject *childObject in childObjects) {
-                        NSManagedObject *parentObject = [context objectWithID:childObject.objectID];
-                        [parentObject.managedObjectContext refreshObject:parentObject mergeChanges:NO];
-                    }
 
                     [context performBlockAndWait:^{
                         for (NSManagedObject *childObject in childObjects) {
