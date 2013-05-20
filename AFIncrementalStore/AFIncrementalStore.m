@@ -380,11 +380,6 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
                             AFSaveManagedObjectContextOrThrowInternalConsistencyException(backingContext, error);
                         }];
 
-                        for (NSManagedObject *childObject in childObjects) {
-                            NSManagedObject *parentObject = [context objectWithID:childObject.objectID];
-                            [parentObject.managedObjectContext refreshObject:parentObject mergeChanges:NO];
-                        }
-
                         [context performBlockAndWait:^{
                             for (NSManagedObject *childObject in childObjects) {
                                 NSManagedObject *parentObject = [context objectWithID:childObject.objectID];
