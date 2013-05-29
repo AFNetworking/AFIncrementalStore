@@ -31,7 +31,6 @@ The only thing you need to do is tell `AFIncrementalStore` how to map Core Data 
 > Don't worry if this looks like a lot of work--if your web service is RESTful, `AFRESTClient` does a lot of the heavy lifting for you. If your target web service is SOAP, RPC, or kinda ad-hoc, you can easily use these protocol methods to get everything hooked up.
 
 ```objective-c
-- (id)representationOrArrayOfRepresentationsFromResponseObject:(id)responseObject;
 
 - (NSDictionary *)representationsForRelationshipsFromRepresentation:(NSDictionary *)representation
                                                            ofEntity:(NSEntityDescription *)entity
