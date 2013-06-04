@@ -180,7 +180,7 @@ static NSString * AFQueryByAppendingParameters(NSString *query, NSDictionary *pa
         if ([(NSAttributeDescription *)obj attributeType] == NSDateAttributeType) {
             id value = [mutableAttributes valueForKey:key];
             if (value && ![value isEqual:[NSNull null]] && [value isKindOfClass:[NSString class]]) {
-                [mutableAttributes setValue:[[NSValueTransformer valueTransformerForName:TTTISO8601DateTransformerName] transformedValue:value] forKey:key];
+                [mutableAttributes setValue:[[NSValueTransformer valueTransformerForName:TTTISO8601DateTransformerName] reverseTransformedValue:value] forKey:key];
             }
         }
     }];
