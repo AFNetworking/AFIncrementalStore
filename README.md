@@ -77,7 +77,7 @@ Here's an example podfile that installs AFIncrementalStore and its dependency, A
 ```ruby
 platform :ios, '5.0'
 
-pod 'AFIncrementalStore', '0.3.0'
+pod 'AFIncrementalStore', '0.4.1'
 ```
 
 Note the specification of iOS 5.0 as the platform; leaving out the 5.0 will cause CocoaPods to fail with the following message:
