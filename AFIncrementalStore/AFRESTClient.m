@@ -89,8 +89,7 @@ static NSString * AFQueryByAppendingParameters(NSString *query, NSDictionary *pa
     if(fetchRequest.predicate) {
         NSString *predicate = fetchRequest.predicate.predicateFormat;
         
-        NSError *error;
-        NSRegularExpression *expression = [NSRegularExpression regularExpressionWithPattern:@"([^.= ]*)\\.([^.= ]*)\\s*==\\s*([^.= ]*)" options:NSRegularExpressionCaseInsensitive error:&error];
+        NSRegularExpression *expression = [NSRegularExpression regularExpressionWithPattern:@"([^.= ]*)\\.([^.= ]*)\\s*==\\s*([^.= ]*)" options:NSRegularExpressionCaseInsensitive error:nil];
         
         [expression enumerateMatchesInString:predicate options:0 range:NSMakeRange(0, [predicate length]) usingBlock:^(NSTextCheckingResult *result, NSMatchingFlags flags, BOOL *stop) {
             for (int x = 1; x <= [expression numberOfCaptureGroups]; x++) {
@@ -103,14 +102,18 @@ static NSString * AFQueryByAppendingParameters(NSString *query, NSDictionary *pa
                     
                     NSRelationshipDescription *rel = relationships[relationshipName];
                     // Find relating object
-                    NSPredicate *p = [NSPredicate predicateWithFormat:@"%K = %@", propertyName, propertyValue];
-                    NSFetchRequest *r = [[NSFetchRequest alloc] initWithEntityName:rel.destinationEntity.name];
-                    r.predicate = p;
-                    NSArray *m = [context executeFetchRequest:r error:nil];
+                    NSPredicate *relationPredicate = [NSPredicate predicateWithFormat:@"%K = %@", propertyName, propertyValue];
+                    NSFetchRequest *relationFetchRequest = [[NSFetchRequest alloc] initWithEntityName:rel.destinationEntity.name];
+                    relationFetchRequest.predicate = relationPredicate;
                     
-                    if([m count] > 0) {
+                    NSError *error;
+                    NSArray *m = [context executeFetchRequest:relationFetchRequest error:&error];
+                    
+                    if(!error && [m count] > 0) {
                         path = [self pathForRelationship:rel.inverseRelationship forObject:m[0]];
                         break;
+                    } else if(!error) {
+                        NSLog(@"Error: %@", error);
                     }
                 }
             }
