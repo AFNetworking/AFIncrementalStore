@@ -81,6 +81,48 @@ static NSString * AFQueryByAppendingParameters(NSString *query, NSDictionary *pa
     return [[self pathForObject:object] stringByAppendingPathComponent:relationship.name];
 }
 
+- (NSString *)pathForFetchRequest:(NSFetchRequest *)fetchRequest withContext:(NSManagedObjectContext *)context
+{
+    __block NSString *path = [self pathForEntity:fetchRequest.entity];
+    NSDictionary *relationships = [fetchRequest.entity relationshipsByName];
+    
+    if(fetchRequest.predicate) {
+        NSString *predicate = fetchRequest.predicate.predicateFormat;
+        
+        NSRegularExpression *expression = [NSRegularExpression regularExpressionWithPattern:@"([^.= ]*)\\.([^.= ]*)\\s*==\\s*([^.= ]*)" options:NSRegularExpressionCaseInsensitive error:nil];
+        
+        [expression enumerateMatchesInString:predicate options:0 range:NSMakeRange(0, [predicate length]) usingBlock:^(NSTextCheckingResult *result, NSMatchingFlags flags, BOOL *stop) {
+            for (int x = 1; x <= [expression numberOfCaptureGroups]; x++) {
+                
+                NSString *relationshipName = [predicate substringWithRange:[result rangeAtIndex:1]];
+                NSString *propertyName = [predicate substringWithRange:[result rangeAtIndex:2]];
+                NSString *propertyValue = [predicate substringWithRange:[result rangeAtIndex:3]];
+                
+                if(relationships[relationshipName]) {
+                    
+                    NSRelationshipDescription *rel = relationships[relationshipName];
+                    // Find relating object
+                    NSPredicate *relationPredicate = [NSPredicate predicateWithFormat:@"%K = %@", propertyName, propertyValue];
+                    NSFetchRequest *relationFetchRequest = [[NSFetchRequest alloc] initWithEntityName:rel.destinationEntity.name];
+                    relationFetchRequest.predicate = relationPredicate;
+                    
+                    NSError *error;
+                    NSArray *m = [context executeFetchRequest:relationFetchRequest error:&error];
+                    
+                    if(!error && [m count] > 0) {
+                        path = [self pathForRelationship:rel.inverseRelationship forObject:m[0]];
+                        break;
+                    } else if(!error) {
+                        NSLog(@"Error: %@", error);
+                    }
+                }
+            }
+        }];
+    }
+    
+    return path;
+}
+
 #pragma mark - AFIncrementalStoreHTTPClient
 
 #pragma mark Read Methods
@@ -196,7 +238,7 @@ static NSString * AFQueryByAppendingParameters(NSString *query, NSDictionary *pa
         [mutableParameters addEntriesFromDictionary:[self.paginator parametersForFetchRequest:fetchRequest]];
     }
     
-    NSMutableURLRequest *mutableRequest =  [self requestWithMethod:@"GET" path:[self pathForEntity:fetchRequest.entity] parameters:[mutableParameters count] == 0 ? nil : mutableParameters];
+    NSMutableURLRequest *mutableRequest =  [self requestWithMethod:@"GET" path:[self pathForFetchRequest:fetchRequest withContext:context] parameters:[mutableParameters count] == 0 ? nil : mutableParameters];
     
     return mutableRequest;
 }

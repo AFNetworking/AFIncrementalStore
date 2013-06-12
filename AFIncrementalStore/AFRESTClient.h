@@ -47,6 +47,19 @@
 ///------------------------
 
 /**
+ Returns the request path for a fetch request by introspecting it's predicate for relationship paths
+ 
+ @discussion For example, if you want to pull all tracks for an album with the id `4`, the returned path would be `/albums/4/tracks' for a fetch request on the `Track` entity with a predicate of `album.id = 4`.
+ 
+ @param fetchRequest The fetch request to translate into a URL request.
+ @param context The managed object context executing the fetch request.
+ 
+ @return An `NSString` representing the request path.
+ */
+- (NSString *)pathForFetchRequest:(NSFetchRequest *)fetchRequest
+                      withContext:(NSManagedObjectContext *)context;
+
+/**
  Returns the request path for a collection of resources of the specified entity. By default, this returns an imprecise pluralization of the entity name.
  
  @discussion The return value of this method is used as the `path` parameter in other `AFHTTPClient` methods.
