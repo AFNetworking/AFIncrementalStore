@@ -58,6 +58,12 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
     return [string hasPrefix:kAFReferenceObjectPrefix] ? [string substringFromIndex:[kAFReferenceObjectPrefix length]] : string;
 }
 
+static inline void AFSaveManagedObjectContextOrThrowInternalConsistencyException(NSManagedObjectContext *managedObjectContext, NSError * __autoreleasing *error) {
+    if (![managedObjectContext save:error]) {
+        @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[*error localizedFailureReason] userInfo:[NSDictionary dictionaryWithObject:*error forKey:NSUnderlyingErrorKey]];
+    }
+}
+
 @interface NSManagedObject (_AFIncrementalStore)
 @property (readwrite, nonatomic, copy, setter = af_setResourceIdentifier:) NSString *af_resourceIdentifier;
 @end
@@ -368,20 +374,12 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
                 [self insertOrUpdateObjectsFromRepresentations:representationOrArrayOfRepresentations ofEntity:fetchRequest.entity fromResponse:operation.response withContext:childContext error:error completionBlock:^(NSArray *managedObjects, NSArray *backingObjects) {
                 
                     NSSet *childObjects = [childContext registeredObjects];
-                    
-					__block BOOL saveSuccessful = NO;
-					saveSuccessful = [childContext save:error];
-					if (saveSuccessful) {
-						NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
-						[backingContext performBlockAndWait:^{
-							saveSuccessful = [backingContext save:error];
-						}];
-					}
-					
-					if (NO == saveSuccessful) {
-						@throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[*error localizedFailureReason] userInfo:[NSDictionary dictionaryWithObject:*error forKey:NSUnderlyingErrorKey]];
-					}
+                    AFSaveManagedObjectContextOrThrowInternalConsistencyException(childContext, error);
 
+                    NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
+                    [backingContext performBlockAndWait:^{
+                        AFSaveManagedObjectContextOrThrowInternalConsistencyException(backingContext, error);
+                    }];
 
                     for (NSManagedObject *childObject in childObjects) {
                         NSManagedObject *parentObject = [context objectWithID:childObject.objectID];
@@ -742,19 +740,13 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
                         [context mergeChangesFromContextDidSaveNotification:note];
                     }];
 
-					__block BOOL saveSuccessful = NO;
                     [childContext performBlockAndWait:^{
-						saveSuccessful = [childContext save:error];
-						if (saveSuccessful) {
-							NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
-							[backingContext performBlockAndWait:^{
-								saveSuccessful = [backingContext save:error];
-							}];
-						}
-						
-						if (!saveSuccessful) {
-							@throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[*error localizedFailureReason] userInfo:[NSDictionary dictionaryWithObject:*error forKey:NSUnderlyingErrorKey]];
-						}
+                        AFSaveManagedObjectContextOrThrowInternalConsistencyException(childContext, error);
+
+                        NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
+                        [backingContext performBlockAndWait:^{
+                            AFSaveManagedObjectContextOrThrowInternalConsistencyException(backingContext, error);
+                        }];
                     }];
                     
                     [[NSNotificationCenter defaultCenter] removeObserver:observer];
@@ -808,19 +800,14 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
                         id observer = [[NSNotificationCenter defaultCenter] addObserverForName:NSManagedObjectContextDidSaveNotification object:childContext queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
                             [context mergeChangesFromContextDidSaveNotification:note];
                         }];
-                        
-						__block BOOL saveSuccessful = [childContext save:error];
-						if (saveSuccessful) {
-							NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
-							[backingContext performBlockAndWait:^{
-								saveSuccessful = [backingContext save:error];
-							}];
-						}
-						
-						if (!saveSuccessful) {
-							@throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[*error localizedFailureReason] userInfo:[NSDictionary dictionaryWithObject:*error forKey:NSUnderlyingErrorKey]];
-						}
-                        
+
+                        AFSaveManagedObjectContextOrThrowInternalConsistencyException(childContext, error);
+
+                        NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
+                        [backingContext performBlockAndWait:^{
+                            AFSaveManagedObjectContextOrThrowInternalConsistencyException(backingContext, error);
+                        }];
+
                         [[NSNotificationCenter defaultCenter] removeObserver:observer];
                     }];
                 }];
