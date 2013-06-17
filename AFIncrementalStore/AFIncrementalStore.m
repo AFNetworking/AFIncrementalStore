@@ -369,10 +369,20 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
                 
                     NSSet *childObjects = [childContext registeredObjects];
                     
-                    if (![[self backingManagedObjectContext] save:error] || ![childContext save:error]) {
-                        @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[*error localizedFailureReason] userInfo:[NSDictionary dictionaryWithObject:*error forKey:NSUnderlyingErrorKey]];
-                    }
-                    
+					__block BOOL saveSuccessful = NO;
+					saveSuccessful = [childContext save:error];
+					if (saveSuccessful) {
+						NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
+						[backingContext performBlockAndWait:^{
+							saveSuccessful = [backingContext save:error];
+						}];
+					}
+					
+					if (NO == saveSuccessful) {
+						@throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[*error localizedFailureReason] userInfo:[NSDictionary dictionaryWithObject:*error forKey:NSUnderlyingErrorKey]];
+					}
+
+
                     for (NSManagedObject *childObject in childObjects) {
                         NSManagedObject *parentObject = [context objectWithID:childObject.objectID];
                         [parentObject.managedObjectContext refreshObject:parentObject mergeChanges:NO];
@@ -799,20 +809,17 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
                             [context mergeChangesFromContextDidSaveNotification:note];
                         }];
                         
-						__block BOOL saveSuccessful = NO;
-						[childContext performBlockAndWait:^{
-							saveSuccessful = [childContext save:error];
-							if (saveSuccessful) {
-								NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
-								[backingContext performBlockAndWait:^{
-									saveSuccessful = [backingContext save:error];
-								}];
-							}
-							
-							if (!saveSuccessful) {
-								@throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[*error localizedFailureReason] userInfo:[NSDictionary dictionaryWithObject:*error forKey:NSUnderlyingErrorKey]];
-							}
-						}];
+						__block BOOL saveSuccessful = [childContext save:error];
+						if (saveSuccessful) {
+							NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
+							[backingContext performBlockAndWait:^{
+								saveSuccessful = [backingContext save:error];
+							}];
+						}
+						
+						if (!saveSuccessful) {
+							@throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[*error localizedFailureReason] userInfo:[NSDictionary dictionaryWithObject:*error forKey:NSUnderlyingErrorKey]];
+						}
                         
                         [[NSNotificationCenter defaultCenter] removeObserver:observer];
                     }];
