@@ -712,8 +712,8 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
                 }
 
                 __weak NSManagedObjectContext *weakChildContext = childContext;
+				__strong NSManagedObjectContext *strongChildContext = weakChildContext;
                 AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, NSDictionary *representation) {
-                    __strong NSManagedObjectContext *strongChildContext = weakChildContext;
                     NSManagedObject *managedObject = [strongChildContext existingObjectWithID:objectID error:error];
                     
                     NSMutableDictionary *mutableAttributeValues = [attributeValues mutableCopy];
