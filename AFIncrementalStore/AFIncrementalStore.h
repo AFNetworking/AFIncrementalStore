@@ -308,32 +308,38 @@ extern NSString * const AFIncrementalStoreUnimplementedMethodException;
 ///--------------------
 
 /**
- Posted before an HTTP request operation starts. 
+ Posted before an HTTP request operation corresponding to a fetch request starts. 
  The object is the managed object context of the request.
  The notification `userInfo` contains the finished request operation, keyed at `AFIncrementalStoreRequestOperationKey`, as well as the associated persistent store request, if applicable, keyed at `AFIncrementalStorePersistentStoreRequestKey`.
  */
 extern NSString * const AFIncrementalStoreContextWillFetchRemoteValues;
 
 /**
- 
+ Posted before an HTTP request operation corresponding to a fetch request starts.
+ The object is the managed object context of the request.
+ The notification `userInfo` contains an array of request operations, keyed at `AFIncrementalStoreRequestOperationKey`, as well as the associated persistent store request, if applicable, keyed at `AFIncrementalStorePersistentStoreRequestKey`.
  */
 extern NSString * const AFIncrementalStoreContextWillSaveRemoteValues;
 
 /**
- Posted after an HTTP request operation finishes. 
+ Posted after an HTTP request operation corresponding to a fetch request finishes. 
  The object is the managed object context of the request. 
  The notification `userInfo` contains the finished request operation, keyed at `AFIncrementalStoreRequestOperationKey`, as well as the associated persistent store request, if applicable, keyed at `AFIncrementalStorePersistentStoreRequestKey`.
  */
 extern NSString * const AFIncrementalStoreContextDidFetchRemoteValues;
 
 /**
- 
+ Posted after an HTTP request operation corresponding to a fetch request finishes.
+ The object is the managed object context of the request.
+ The notification `userInfo` contains an array of request operations, keyed at `AFIncrementalStoreRequestOperationKey`, as well as the associated persistent store request, if applicable, keyed at `AFIncrementalStorePersistentStoreRequestKey`.
  */
 extern NSString * const AFIncrementalStoreContextDidSaveRemoteValues;
 
 /**
- A key in the `userInfo` dictionary in a `AFIncrementalStoreContextWillFetchRemoteValues` or `AFIncrementalStoreContextDidFetchRemoteValues` notification.
- The corresponding value is an `AFHTTPRequestOperation` object representing the associated request. */
+ A key in the `userInfo` dictionary in a `AFIncrementalStoreContextWillFetchRemoteValues` and `AFIncrementalStoreContextDidFetchRemoteValues` as well as `AFIncrementalStoreContextWillSaveRemoteValues` and `AFIncrementalStoreContextDidSaveRemoteValues` notifications.
+ For `AFIncrementalStoreContextWillFetchRemoteValues` and `AFIncrementalStoreContextDidFetchRemoteValues` notifications the corresponding value is an `AFHTTPRequestOperation` object representing the associated fetch request.
+ For `AFIncrementalStoreContextWillSaveRemoteValues` and `AFIncrementalStoreContextDidSaveRemoteValues` notifications, the corresponding value is an `NSArray` of `AFHTTPRequestOperation` objects corresponding to the request operations triggered by the save changes request. 
+ */
 extern NSString * const AFIncrementalStoreRequestOperationKey;
 
 /**
