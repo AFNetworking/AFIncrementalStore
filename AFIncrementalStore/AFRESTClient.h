@@ -83,15 +83,6 @@
 
 @end
 
-///----------------
-/// @name Functions
-///----------------
-
-/**
- 
- */
-extern NSDate * AFDateFromISO8601String(NSString *ISO8601String);
-
 ///-----------------
 /// @name Pagination
 ///-----------------
