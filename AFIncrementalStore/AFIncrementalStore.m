@@ -426,9 +426,7 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
                         [context performBlockAndWait:^{
                             for (NSManagedObject *childObject in childObjects) {
                                 NSManagedObject *parentObject = [context objectWithID:childObject.objectID];
-                                [parentObject willChangeValueForKey:@"self"];
                                 [context refreshObject:parentObject mergeChanges:NO];
-                                [parentObject didChangeValueForKey:@"self"];
                             }
                         }];
 
