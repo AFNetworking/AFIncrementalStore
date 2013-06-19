@@ -336,14 +336,14 @@ extern NSString * const AFIncrementalStoreContextDidFetchRemoteValues;
 extern NSString * const AFIncrementalStoreContextDidSaveRemoteValues;
 
 /**
- A key in the `userInfo` dictionary in a `AFIncrementalStoreContextWillFetchRemoteValues` and `AFIncrementalStoreContextDidFetchRemoteValues` as well as `AFIncrementalStoreContextWillSaveRemoteValues` and `AFIncrementalStoreContextDidSaveRemoteValues` notifications.
- For `AFIncrementalStoreContextWillFetchRemoteValues` and `AFIncrementalStoreContextDidFetchRemoteValues` notifications the corresponding value is an `AFHTTPRequestOperation` object representing the associated fetch request.
- For `AFIncrementalStoreContextWillSaveRemoteValues` and `AFIncrementalStoreContextDidSaveRemoteValues` notifications, the corresponding value is an `NSArray` of `AFHTTPRequestOperation` objects corresponding to the request operations triggered by the save changes request. 
+ A key in the `userInfo` dictionary in a `AFIncrementalStoreContextWillFetchRemoteValues` or `AFIncrementalStoreContextDidFetchRemoteValues` as well as `AFIncrementalStoreContextWillSaveRemoteValues` or `AFIncrementalStoreContextDidSaveRemoteValues` notifications.
+ The corresponding value is an `NSArray` of `AFHTTPRequestOperation` objects corresponding to the request operations triggered by the fetch or save changes request. 
  */
-extern NSString * const AFIncrementalStoreRequestOperationKey;
+extern NSString * const AFIncrementalStoreRequestOperationsKey;
 
 /**
-
+ A key in the `userInfo` dictionary in a `AFIncrementalStoreContextWillFetchRemoteValues` or `AFIncrementalStoreContextDidFetchRemoteValues` notification.
+ The corresponding value is an `NSArray` of `NSManagedObjectIDs` for the objects returned by the remote HTTP request for the associated fetch request.
  */
 extern NSString * const AFIncrementalStoreFetchedObjectIDsKey;
 
