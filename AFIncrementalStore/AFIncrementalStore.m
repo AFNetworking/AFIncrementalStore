@@ -128,15 +128,15 @@ static inline void AFSaveManagedObjectContextOrThrowInternalConsistencyException
 - (void)notifyManagedObjectContext:(NSManagedObjectContext *)context
              aboutRequestOperation:(AFHTTPRequestOperation *)operation
                    forFetchRequest:(NSFetchRequest *)fetchRequest
-                    fetchedObjects:(NSArray *)fetchedObjects
+                  fetchedObjectIDs:(NSArray *)fetchedObjectIDs
 {
     NSString *notificationName = [operation isFinished] ? AFIncrementalStoreContextDidFetchRemoteValues : AFIncrementalStoreContextWillFetchRemoteValues;
     
     NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
     [userInfo setObject:[NSArray arrayWithObject:operation] forKey:AFIncrementalStoreRequestOperationsKey];
     [userInfo setObject:fetchRequest forKey:AFIncrementalStorePersistentStoreRequestKey];
-    if ([operation isFinished] && fetchedObjects) {
-        [userInfo setObject:[fetchedObjects valueForKeyPath:@"objectID"] forKey:AFIncrementalStoreFetchedObjectIDsKey];
+    if ([operation isFinished] && fetchedObjectIDs) {
+        [userInfo setObject:fetchedObjectIDs forKey:AFIncrementalStoreFetchedObjectIDsKey];
     }
     
     [[NSNotificationCenter defaultCenter] postNotificationName:notificationName object:context userInfo:userInfo];
@@ -414,7 +414,6 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
 
                 [childContext performBlockAndWait:^{
                     [self insertOrUpdateObjectsFromRepresentations:representationOrArrayOfRepresentations ofEntity:fetchRequest.entity fromResponse:operation.response withContext:childContext error:error completionBlock:^(NSArray *managedObjects, NSArray *backingObjects) {
-                    
                         NSSet *childObjects = [childContext registeredObjects];
                         AFSaveManagedObjectContextOrThrowInternalConsistencyException(childContext, error);
 
@@ -430,25 +429,16 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
                             }
                         }];
 
-                        NSMutableArray *fetchedObjects = [[NSMutableArray alloc] initWithCapacity:[managedObjects count]];
-                        for (NSManagedObject *managedObject in managedObjects) {
-                            NSManagedObject *fetchedObject = [context existingObjectWithID:managedObject.objectID error:NULL];
-                            if (fetchedObject) {
-                                [fetchedObjects addObject:fetchedObject];
-                            }
-                        }
-                        [fetchedObjects sortUsingDescriptors:fetchRequest.sortDescriptors];
-
-                        [self notifyManagedObjectContext:context aboutRequestOperation:operation forFetchRequest:fetchRequest fetchedObjects:fetchedObjects];
+                        [self notifyManagedObjectContext:context aboutRequestOperation:operation forFetchRequest:fetchRequest fetchedObjectIDs:[managedObjects valueForKeyPath:@"objectID"]];
                     }];
                 }];
             }];
         } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
             NSLog(@"Error: %@", error);
-            [self notifyManagedObjectContext:context aboutRequestOperation:operation forFetchRequest:fetchRequest fetchedObjects:nil];
+            [self notifyManagedObjectContext:context aboutRequestOperation:operation forFetchRequest:fetchRequest fetchedObjectIDs:nil];
         }];
 
-        [self notifyManagedObjectContext:context aboutRequestOperation:operation forFetchRequest:fetchRequest fetchedObjects:nil];
+        [self notifyManagedObjectContext:context aboutRequestOperation:operation forFetchRequest:fetchRequest fetchedObjectIDs:nil];
         [self.HTTPClient enqueueHTTPRequestOperation:operation];
     }
     
