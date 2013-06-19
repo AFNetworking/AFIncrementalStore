@@ -265,6 +265,10 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
                                            error:(NSError *__autoreleasing *)error
                                  completionBlock:(void (^)(NSArray *managedObjects, NSArray *backingObjects))completionBlock
 {
+    if (!representationOrArrayOfRepresentations) {
+        return NO;
+    }
+
     NSParameterAssert([representationOrArrayOfRepresentations isKindOfClass:[NSArray class]] || [representationOrArrayOfRepresentations isKindOfClass:[NSDictionary class]]);
     
     if ([representationOrArrayOfRepresentations count] == 0) {
