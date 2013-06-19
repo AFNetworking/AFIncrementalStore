@@ -60,6 +60,10 @@ inline NSString * AFResourceIdentifierFromReferenceObject(id referenceObject) {
 
 static inline void AFSaveManagedObjectContextOrThrowInternalConsistencyException(NSManagedObjectContext *managedObjectContext, NSError * __autoreleasing *error) {
     if (![managedObjectContext save:error]) {
+        if (!error) {
+            *error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSCoreDataError userInfo:nil];
+        }
+
         @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[*error localizedFailureReason] userInfo:[NSDictionary dictionaryWithObject:*error forKey:NSUnderlyingErrorKey]];
     }
 }
