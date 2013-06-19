@@ -718,36 +718,39 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
                 }
 
                 AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, NSDictionary *representation) {
-                    NSManagedObject *managedObject = [childContext existingObjectWithID:objectID error:error];
-                    
-                    NSMutableDictionary *mutableAttributeValues = [attributeValues mutableCopy];
-                    [mutableAttributeValues addEntriesFromDictionary:[self.HTTPClient attributesForRepresentation:representation ofEntity:managedObject.entity fromResponse:operation.response]];
-                    [mutableAttributeValues removeObjectForKey:kAFIncrementalStoreLastModifiedAttributeName];
-                    [managedObject setValuesForKeysWithDictionary:mutableAttributeValues];
-                    
-                    NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:[objectID entity] withResourceIdentifier:AFResourceIdentifierFromReferenceObject([self referenceObjectForObjectID:objectID])];
-                    NSManagedObject *backingObject = [[self backingManagedObjectContext] existingObjectWithID:backingObjectID error:nil];
-                    [backingObject setValuesForKeysWithDictionary:mutableAttributeValues];
-                    
-                    NSString *lastModified = [[operation.response allHeaderFields] valueForKey:@"Last-Modified"];
-                    if (lastModified) {
-                        [backingObject setValue:lastModified forKey:kAFIncrementalStoreLastModifiedAttributeName];
-                    }
+                    [childContext performBlock:^{
+                        NSManagedObject *managedObject = [childContext existingObjectWithID:objectID error:error];
 
-                    id observer = [[NSNotificationCenter defaultCenter] addObserverForName:NSManagedObjectContextDidSaveNotification object:childContext queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
-                        [context mergeChangesFromContextDidSaveNotification:note];
-                    }];
+                        NSMutableDictionary *mutableAttributeValues = [attributeValues mutableCopy];
+                        [mutableAttributeValues addEntriesFromDictionary:[self.HTTPClient attributesForRepresentation:representation ofEntity:managedObject.entity fromResponse:operation.response]];
+                        [mutableAttributeValues removeObjectForKey:kAFIncrementalStoreLastModifiedAttributeName];
+                        [managedObject setValuesForKeysWithDictionary:mutableAttributeValues];
 
-                    [childContext performBlockAndWait:^{
-                        AFSaveManagedObjectContextOrThrowInternalConsistencyException(childContext, error);
+                        NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:[objectID entity] withResourceIdentifier:AFResourceIdentifierFromReferenceObject([self referenceObjectForObjectID:objectID])];
+                        NSManagedObject *backingObject = [[self backingManagedObjectContext] existingObjectWithID:backingObjectID error:nil];
+                        [backingObject setValuesForKeysWithDictionary:mutableAttributeValues];
 
-                        NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
-                        [backingContext performBlockAndWait:^{
-                            AFSaveManagedObjectContextOrThrowInternalConsistencyException(backingContext, error);
+                        NSString *lastModified = [[operation.response allHeaderFields] valueForKey:@"Last-Modified"];
+                        if (lastModified) {
+                            [backingObject setValue:lastModified forKey:kAFIncrementalStoreLastModifiedAttributeName];
+                        }
+
+                        id observer = [[NSNotificationCenter defaultCenter] addObserverForName:NSManagedObjectContextDidSaveNotification object:childContext queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
+                            [context mergeChangesFromContextDidSaveNotification:note];
                         }];
+
+                        [childContext performBlockAndWait:^{
+                            AFSaveManagedObjectContextOrThrowInternalConsistencyException(childContext, error);
+
+                            NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
+                            [backingContext performBlockAndWait:^{
+                                AFSaveManagedObjectContextOrThrowInternalConsistencyException(backingContext, error);
+                            }];
+                        }];
+                        
+                        [[NSNotificationCenter defaultCenter] removeObserver:observer];
                     }];
-                    
-                    [[NSNotificationCenter defaultCenter] removeObserver:observer];
+
                 } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
                     NSLog(@"Error: %@, %@", operation, error);
                 }];
@@ -774,9 +777,9 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
             childContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy;
 
             AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, id responseObject) {
-                id representationOrArrayOfRepresentations = [self.HTTPClient representationOrArrayOfRepresentationsOfEntity:relationship.entity fromResponseObject:responseObject];
+                [childContext performBlock:^{
+                    id representationOrArrayOfRepresentations = [self.HTTPClient representationOrArrayOfRepresentationsOfEntity:relationship.entity fromResponseObject:responseObject];
                 
-                [childContext performBlockAndWait:^{
                     [self insertOrUpdateObjectsFromRepresentations:representationOrArrayOfRepresentations ofEntity:relationship.destinationEntity fromResponse:operation.response withContext:childContext error:error completionBlock:^(NSArray *managedObjects, NSArray *backingObjects) {
 						NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:[objectID entity] withResourceIdentifier:AFResourceIdentifierFromReferenceObject([self referenceObjectForObjectID:objectID])];
                         NSManagedObject *managedObject = [childContext objectWithID:objectID];
@@ -799,11 +802,13 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
                             [context mergeChangesFromContextDidSaveNotification:note];
                         }];
 
-                        AFSaveManagedObjectContextOrThrowInternalConsistencyException(childContext, error);
+                        [childContext performBlockAndWait:^{
+                            AFSaveManagedObjectContextOrThrowInternalConsistencyException(childContext, error);
 
-                        NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
-                        [backingContext performBlockAndWait:^{
-                            AFSaveManagedObjectContextOrThrowInternalConsistencyException(backingContext, error);
+                            NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
+                            [backingContext performBlockAndWait:^{
+                                AFSaveManagedObjectContextOrThrowInternalConsistencyException(backingContext, error);
+                            }];
                         }];
 
                         [[NSNotificationCenter defaultCenter] removeObserver:observer];
