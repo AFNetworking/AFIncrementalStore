@@ -32,7 +32,7 @@ NSString * const AFIncrementalStoreContextDidFetchRemoteValues = @"AFIncremental
 NSString * const AFIncrementalStoreContextDidSaveRemoteValues = @"AFIncrementalStoreContextDidSaveRemoteValues";
 NSString * const AFIncrementalStoreRequestOperationKey = @"AFIncrementalStoreRequestOperation";
 NSString * const AFIncrementalStorePersistentStoreRequestKey = @"AFIncrementalStorePersistentStoreRequest";
-NSString * const AFIncrementalStoreFetchedObjectsKey = @"AFIncrementalStoreFetchedObjectsKey";
+NSString * const AFIncrementalStoreFetchedObjectIDsKey = @"AFIncrementalStoreFetchedObjectIDsKey";
 
 static char kAFResourceIdentifierObjectKey;
 
@@ -125,7 +125,7 @@ static inline void AFSaveManagedObjectContextOrThrowInternalConsistencyException
     [userInfo setObject:operation forKey:AFIncrementalStoreRequestOperationKey];
     [userInfo setObject:fetchRequest forKey:AFIncrementalStorePersistentStoreRequestKey];
     if ([operation isFinished] && fetchedObjects) {
-        [userInfo setObject:fetchedObjects forKey:AFIncrementalStoreFetchedObjectsKey];
+        [userInfo setObject:[fetchedObjects valueForKeyPath:@"objectID"] forKey:AFIncrementalStoreFetchedObjectIDsKey];
     }
     
     [[NSNotificationCenter defaultCenter] postNotificationName:notificationName object:context userInfo:userInfo];
