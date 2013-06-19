@@ -362,47 +362,49 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
     NSURLRequest *request = [self.HTTPClient requestForFetchRequest:fetchRequest withContext:context];
     if ([request URL]) {
         AFHTTPRequestOperation *operation = [self.HTTPClient HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, id responseObject) {
-            id representationOrArrayOfRepresentations = [self.HTTPClient representationOrArrayOfRepresentationsOfEntity:fetchRequest.entity fromResponseObject:responseObject];
-    
-            NSManagedObjectContext *childContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
-            childContext.parentContext = context;
-            childContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy;
-                        
-            [childContext performBlockAndWait:^{
-                [self insertOrUpdateObjectsFromRepresentations:representationOrArrayOfRepresentations ofEntity:fetchRequest.entity fromResponse:operation.response withContext:childContext error:error completionBlock:^(NSArray *managedObjects, NSArray *backingObjects) {
-                
-                    NSSet *childObjects = [childContext registeredObjects];
-                    AFSaveManagedObjectContextOrThrowInternalConsistencyException(childContext, error);
+            [context performBlockAndWait:^{
+                id representationOrArrayOfRepresentations = [self.HTTPClient representationOrArrayOfRepresentationsOfEntity:fetchRequest.entity fromResponseObject:responseObject];
+        
+                NSManagedObjectContext *childContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
+                childContext.parentContext = context;
+                childContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy;
 
-                    NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
-                    [backingContext performBlockAndWait:^{
-                        AFSaveManagedObjectContextOrThrowInternalConsistencyException(backingContext, error);
-                    }];
+                [childContext performBlockAndWait:^{
+                    [self insertOrUpdateObjectsFromRepresentations:representationOrArrayOfRepresentations ofEntity:fetchRequest.entity fromResponse:operation.response withContext:childContext error:error completionBlock:^(NSArray *managedObjects, NSArray *backingObjects) {
+                    
+                        NSSet *childObjects = [childContext registeredObjects];
+                        AFSaveManagedObjectContextOrThrowInternalConsistencyException(childContext, error);
 
-                    for (NSManagedObject *childObject in childObjects) {
-                        NSManagedObject *parentObject = [context objectWithID:childObject.objectID];
-                        [parentObject.managedObjectContext refreshObject:parentObject mergeChanges:NO];
-                    }
+                        NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
+                        [backingContext performBlockAndWait:^{
+                            AFSaveManagedObjectContextOrThrowInternalConsistencyException(backingContext, error);
+                        }];
 
-                    [context performBlockAndWait:^{
                         for (NSManagedObject *childObject in childObjects) {
                             NSManagedObject *parentObject = [context objectWithID:childObject.objectID];
-                            [parentObject willChangeValueForKey:@"self"];
-                            [context refreshObject:parentObject mergeChanges:NO];
-                            [parentObject didChangeValueForKey:@"self"];
+                            [parentObject.managedObjectContext refreshObject:parentObject mergeChanges:NO];
                         }
-                    }];
 
-                    NSMutableArray *fetchedObjects = [[NSMutableArray alloc] initWithCapacity:[managedObjects count]];
-                    for (NSManagedObject *managedObject in managedObjects) {
-                        NSManagedObject *fetchedObject = [context existingObjectWithID:managedObject.objectID error:NULL];
-                        if (fetchedObject) {
-                            [fetchedObjects addObject:fetchedObject];
+                        [context performBlockAndWait:^{
+                            for (NSManagedObject *childObject in childObjects) {
+                                NSManagedObject *parentObject = [context objectWithID:childObject.objectID];
+                                [parentObject willChangeValueForKey:@"self"];
+                                [context refreshObject:parentObject mergeChanges:NO];
+                                [parentObject didChangeValueForKey:@"self"];
+                            }
+                        }];
+
+                        NSMutableArray *fetchedObjects = [[NSMutableArray alloc] initWithCapacity:[managedObjects count]];
+                        for (NSManagedObject *managedObject in managedObjects) {
+                            NSManagedObject *fetchedObject = [context existingObjectWithID:managedObject.objectID error:NULL];
+                            if (fetchedObject) {
+                                [fetchedObjects addObject:fetchedObject];
+                            }
                         }
-                    }
-                    [fetchedObjects sortUsingDescriptors:fetchRequest.sortDescriptors];
-                    
-                    [self notifyManagedObjectContext:context aboutRequestOperation:operation forFetchRequest:fetchRequest fetchedObjects:fetchedObjects];
+                        [fetchedObjects sortUsingDescriptors:fetchRequest.sortDescriptors];
+
+                        [self notifyManagedObjectContext:context aboutRequestOperation:operation forFetchRequest:fetchRequest fetchedObjects:fetchedObjects];
+                    }];
                 }];
             }];
         } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
