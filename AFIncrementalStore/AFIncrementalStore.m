@@ -563,7 +563,9 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
 						destinationObjects = [insertedObject valueForKey:relationshipName];
 					} else {
 						NSManagedObject *destinationObject = [insertedObject valueForKey:relationshipName];
-						destinationObjects = @[destinationObject];
+						if (destinationObject) {
+							destinationObjects = @[destinationObject];
+						}
 					}
 					
 					for (NSManagedObject *destinationObject in destinationObjects) {
