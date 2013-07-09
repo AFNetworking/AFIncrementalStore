@@ -553,23 +553,19 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
             } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
 				 NSLog(@"Insert Error: %@", error);
 				
-				// Reset destination objects to prevent dangling relationships!
+				// Reset destination objects to prevent dangling relationships
 				for (NSRelationshipDescription *relationship in [insertedObject.entity.relationshipsByName allValues]) {
-
-					NSString *relationshipName = relationship.name;
-					NSRelationshipDescription *inverseRelationship = relationship.inverseRelationship;
-					NSArray *destinationObjects = nil;
-
-					if (nil == inverseRelationship) {
+					if (!relationship.inverseRelationship) {
 						continue;
 					}
-					
+
+                    id <NSFastEnumeration> destinationObjects = nil;
 					if ([relationship isToMany]) {
-						destinationObjects = [insertedObject valueForKey:relationshipName];
+						destinationObjects = [insertedObject valueForKey:relationship.name];
 					} else {
-						NSManagedObject *destinationObject = [insertedObject valueForKey:relationshipName];
+						NSManagedObject *destinationObject = [insertedObject valueForKey:relationship.name];
 						if (destinationObject) {
-							destinationObjects = @[destinationObject];
+							destinationObjects = [NSArray arrayWithObject:destinationObject];
 						}
 					}
 					
