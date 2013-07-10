@@ -858,10 +858,6 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
                             [managedObject setValue:[managedObjects lastObject] forKey:relationship.name];
                             [backingObject setValue:[backingObjects lastObject] forKey:relationship.name];
                         }
-                        
-                        id observer = [[NSNotificationCenter defaultCenter] addObserverForName:NSManagedObjectContextDidSaveNotification object:childContext queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
-                            [context mergeChangesFromContextDidSaveNotification:note];
-                        }];
 
                         [childContext performBlockAndWait:^{
                             AFSaveManagedObjectContextOrThrowInternalConsistencyException(childContext, error);
@@ -871,8 +867,6 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
                                 AFSaveManagedObjectContextOrThrowInternalConsistencyException(backingContext, error);
                             }];
                         }];
-
-                        [[NSNotificationCenter defaultCenter] removeObserver:observer];
 
                         [self notifyManagedObjectContext:context aboutRequestOperation:operation forNewValuesForRelationship:relationship forObjectWithID:objectID];
                     }];
