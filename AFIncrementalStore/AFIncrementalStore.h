@@ -277,13 +277,44 @@
                                forObjectWithID:(NSManagedObjectID *)objectID
                         inManagedObjectContext:(NSManagedObjectContext *)context;
 
+/**
+ Returns whether the client should update managed object with remote attributes values for a particular managed object.
+ Gives a chance to not update an object, for example based on an object attribute such as 'locked' or 'dirty'
+ This method is consulted when remote values are returned from a fetch request, and will update object if YES or if not implemented.
+ 
+ @param managedObjectID is the ID of the managed object
+ @param context is the context of the fetch request.
+ @param representation is the response representation containing remote attribute values.
+ 
+ @return `YES` if an HTTP request should be made, otherwise `NO.
+ */
+-(BOOL)shouldUpdateAttributesOfObjectWithID:(NSManagedObjectID*)managedObjectID
+                                withContext:(NSManagedObjectContext*)context
+                         fromRepresentation:(NSDictionary*)representation;
+
+
+/**
+ Returns whether the client should update managed object with remote relationship values for a particular managed object.
+ Gives a chance to not update an object, for example based on an object attribute such as 'locked' or 'dirty'
+ This method is consulted when remote values are returned from a fetch request, and will update object if YES or if not implemented.
+ 
+ @param managedObjectID is the ID of the managed object
+ @param context is the context of the fetch request.
+ @param representation is the response representation containing remote attribute values.
+ 
+ @return `YES` if an HTTP request should be made, otherwise `NO.
+ */
+-(BOOL)shouldUpdateRelationshipsOfObjectWithID:(NSManagedObjectID*)managedObjectID
+                                   withContext:(NSManagedObjectContext*)context
+                            fromRepresentation:(NSDictionary*)representation;
+
 @end
 
 ///----------------
 /// @name Functions
 ///----------------
 
-/** 
+/**
  There is a bug in Core Data wherein managed object IDs whose reference object is a string beginning with a digit will incorrectly strip any subsequent non-numeric characters from the reference object. This breaks any functionality related to URI representations of the managed object ID, and likely other methods as well. For example, an object ID with a reference object of @"123ABC" would generate one with a URI represenation `coredata://store-UUID/Entity/123`, rather than the expected `coredata://store-UUID/Entity/123ABC`. As a fix, rather than resource identifiers being used directly as reference objects, they are prepended with a non-numeric constant first.
  
  Thus, in order to get the resource identifier of a managed object's reference object, you must use the function `AFResourceIdentifierFromReferenceObject()`.
