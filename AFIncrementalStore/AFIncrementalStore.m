@@ -325,7 +325,14 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
     }
     
     NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
-    NSString *lastModified = [[response allHeaderFields] valueForKey:@"Last-Modified"];
+    NSString *lastModified = nil;
+    
+    if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
+        lastModified = [[response allHeaderFields] valueForKey:@"Last-Modified"];
+    }
+    else {
+        lastModified = [NSDate description];
+    }
 
     NSArray *representations = nil;
     if ([representationOrArrayOfRepresentations isKindOfClass:[NSArray class]]) {
