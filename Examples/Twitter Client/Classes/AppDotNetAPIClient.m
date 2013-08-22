@@ -44,9 +44,10 @@ static NSString * const kAFAppDotNetAPIBaseURLString = @"https://alpha-api.app.n
         return nil;
     }
     
-    [self registerHTTPOperationClass:[AFJSONRequestOperation class]];
-    [self setDefaultHeader:@"Accept" value:@"application/json"];
-    
+    //[self registerHTTPOperationClass:[AFJSONRequestOperation class]];
+    //[self setDefaultHeader:@"Accept" value:@"application/json"];
+    self.responseSerializer = [AFJSONSerializer serializer];
+
     return self;
 }
 
