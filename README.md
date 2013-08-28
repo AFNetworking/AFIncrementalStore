@@ -5,6 +5,8 @@ AFIncrementalStore is an [`NSIncrementalStore`](http://nshipster.com/nsincrement
 
 Weighing in at just a few hundred LOC, in a single `{.h,.m}` file pair, AFIncrementalStore is something you can get your head around. Integrating it into your project couldn't be easier--just swap out your `NSPersistentStore` for it. No monkey-patching, no extra properties on your models.
 
+> That said, unless you're pretty confident in your Core Data jitsu, you'll probably be much better off rolling your own simple [NSCoding / NSKeyedArchiver](http://nshipster.com/nscoding/)-based solution (at least to start off).
+
 ## Incremental Store Persistence
 
 `AFIncrementalStore` does not persist data directly. Instead, _it manages a persistent store coordinator_ that can be configured to communicate with any number of persistent stores of your choice.
