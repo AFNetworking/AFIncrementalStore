@@ -96,7 +96,8 @@ AFIncrementalStore requires Xcode 4.4 with either the [iOS 5.0](http://developer
 
 [CocoaPods](http://cocoapods.org) is the recommended way to add AFIncrementalStore to your project.
 
-Here's an example podfile that installs AFIncrementalStore and its dependency, AFNetworking. 
+Here's an example podfile that installs AFIncrementalStore and its dependency, AFNetworking:
+
 ### Podfile
 
 ```ruby
