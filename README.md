@@ -34,28 +34,52 @@ The only thing you need to do is tell `AFIncrementalStore` how to map Core Data 
 
 ```objective-c
 
+@required
+
+- (id)representationOrArrayOfRepresentationsOfEntity:(NSEntityDescription *)entity
+                                  fromResponseObject:(id)responseObject;
+
 - (NSDictionary *)representationsForRelationshipsFromRepresentation:(NSDictionary *)representation
                                                            ofEntity:(NSEntityDescription *)entity
                                                        fromResponse:(NSHTTPURLResponse *)response;
 
 - (NSString *)resourceIdentifierForRepresentation:(NSDictionary *)representation
-                                         ofEntity:(NSEntityDescription *)entity;
-
-- (NSDictionary *)attributesForRepresentation:(NSDictionary *)representation
                                          ofEntity:(NSEntityDescription *)entity
                                      fromResponse:(NSHTTPURLResponse *)response;
 
-- (NSURLRequest *)requestForFetchRequest:(NSFetchRequest *)fetchRequest
-                             withContext:(NSManagedObjectContext *)context;
+- (NSDictionary *)attributesForRepresentation:(NSDictionary *)representation
+                                     ofEntity:(NSEntityDescription *)entity
+                                 fromResponse:(NSHTTPURLResponse *)response;
 
-- (NSURLRequest *)requestWithMethod:(NSString *)method
-                pathForObjectWithID:(NSManagedObjectID *)objectID
-                        withContext:(NSManagedObjectContext *)context;
+- (NSMutableURLRequest *)requestForFetchRequest:(NSFetchRequest *)fetchRequest
+                                    withContext:(NSManagedObjectContext *)context;
 
-- (NSURLRequest *)requestWithMethod:(NSString *)method
-                pathForRelationship:(NSRelationshipDescription *)relationship
-                    forObjectWithID:(NSManagedObjectID *)objectID
-                        withContext:(NSManagedObjectContext *)context;
+- (NSMutableURLRequest *)requestWithMethod:(NSString *)method
+                       pathForObjectWithID:(NSManagedObjectID *)objectID
+                               withContext:(NSManagedObjectContext *)context;
+
+- (NSMutableURLRequest *)requestWithMethod:(NSString *)method
+                       pathForRelationship:(NSRelationshipDescription *)relationship
+                           forObjectWithID:(NSManagedObjectID *)objectID
+                               withContext:(NSManagedObjectContext *)context;
+
+@optional
+
+- (NSDictionary *)representationOfAttributes:(NSDictionary *)attributes
+                             ofManagedObject:(NSManagedObject *)managedObject;
+
+- (NSMutableURLRequest *)requestForInsertedObject:(NSManagedObject *)insertedObject;
+
+- (NSMutableURLRequest *)requestForUpdatedObject:(NSManagedObject *)updatedObject;
+
+- (NSMutableURLRequest *)requestForDeletedObject:(NSManagedObject *)deletedObject;
+
+- (BOOL)shouldFetchRemoteAttributeValuesForObjectWithID:(NSManagedObjectID *)objectID
+                                 inManagedObjectContext:(NSManagedObjectContext *)context;
+
+- (BOOL)shouldFetchRemoteValuesForRelationship:(NSRelationshipDescription *)relationship
+                               forObjectWithID:(NSManagedObjectID *)objectID
+                        inManagedObjectContext:(NSManagedObjectContext *)context;
 ```
 
 ## Getting Started
