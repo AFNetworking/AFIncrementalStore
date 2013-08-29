@@ -196,7 +196,9 @@ static NSString * AFQueryByAppendingParameters(NSString *query, NSDictionary *pa
         [mutableParameters addEntriesFromDictionary:[self.paginator parametersForFetchRequest:fetchRequest]];
     }
     
-    NSMutableURLRequest *mutableRequest =  [self requestWithMethod:@"GET" path:[self pathForEntity:fetchRequest.entity] parameters:[mutableParameters count] == 0 ? nil : mutableParameters];
+    NSMutableURLRequest *mutableRequest = [self requestWithMethod:@"GET"
+                                                        URLString:[self pathForEntity:fetchRequest.entity]
+                                                       parameters:[mutableParameters count] == 0 ? nil : mutableParameters];
     
     return mutableRequest;
 }
@@ -206,7 +208,7 @@ static NSString * AFQueryByAppendingParameters(NSString *query, NSDictionary *pa
                                withContext:(NSManagedObjectContext *)context
 {
     NSManagedObject *object = [context objectWithID:objectID];
-    return [self requestWithMethod:method path:[self pathForObject:object] parameters:nil];
+    return [self requestWithMethod:method URLString:[self pathForObject:object] parameters:nil];
 }
 
 - (NSMutableURLRequest *)requestWithMethod:(NSString *)method
@@ -215,7 +217,7 @@ static NSString * AFQueryByAppendingParameters(NSString *query, NSDictionary *pa
                                withContext:(NSManagedObjectContext *)context
 {
     NSManagedObject *object = [context objectWithID:objectID];
-    return [self requestWithMethod:method path:[self pathForRelationship:relationship forObject:object] parameters:nil];
+    return [self requestWithMethod:method URLString:[self pathForRelationship:relationship forObject:object] parameters:nil];
 }
 
 - (BOOL)shouldFetchRemoteValuesForRelationship:(NSRelationshipDescription *)relationship
@@ -242,7 +244,7 @@ static NSString * AFQueryByAppendingParameters(NSString *query, NSDictionary *pa
 }
 
 - (NSMutableURLRequest *)requestForInsertedObject:(NSManagedObject *)insertedObject {
-    return [self requestWithMethod:@"POST" path:[self pathForEntity:insertedObject.entity] parameters:[self representationOfAttributes:[insertedObject dictionaryWithValuesForKeys:[insertedObject.entity.attributesByName allKeys]] ofManagedObject:insertedObject]];
+    return [self requestWithMethod:@"POST" URLString:[self pathForEntity:insertedObject.entity] parameters:[self representationOfAttributes:[insertedObject dictionaryWithValuesForKeys:[insertedObject.entity.attributesByName allKeys]] ofManagedObject:insertedObject]];
 }
 
 - (NSMutableURLRequest *)requestForUpdatedObject:(NSManagedObject *)updatedObject {
@@ -252,11 +254,11 @@ static NSString * AFQueryByAppendingParameters(NSString *query, NSDictionary *pa
         return nil;
     }
     
-    return [self requestWithMethod:@"PUT" path:[self pathForObject:updatedObject] parameters:[self representationOfAttributes:[[updatedObject changedValues] dictionaryWithValuesForKeys:[mutableChangedAttributeKeys allObjects]] ofManagedObject:updatedObject]];
+    return [self requestWithMethod:@"PUT" URLString:[self pathForObject:updatedObject] parameters:[self representationOfAttributes:[[updatedObject changedValues] dictionaryWithValuesForKeys:[mutableChangedAttributeKeys allObjects]] ofManagedObject:updatedObject]];
 }
 
 - (NSMutableURLRequest *)requestForDeletedObject:(NSManagedObject *)deletedObject {
-    return [self requestWithMethod:@"DELETE" path:[self pathForObject:deletedObject] parameters:nil];
+    return [self requestWithMethod:@"DELETE" URLString:[self pathForObject:deletedObject] parameters:nil];
 }
 
 @end

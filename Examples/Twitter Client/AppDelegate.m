@@ -23,6 +23,8 @@
 #import "AppDelegate.h"
 #import "AppDotNetIncrementalStore.h"
 #import "GlobalStreamViewController.h"
+#import "AFNetworkActivityIndicatorManager.h"
+
 
 @implementation AppDelegate
 @synthesize window = _window;
