@@ -6,7 +6,7 @@ Pod::Spec.new do |s|
   s.author       = { "Mattt Thompson" => "m@mattt.me" }
   s.license      = 'MIT'
 
-  s.ios.deployment_target = '5.0'
+  s.ios.deployment_target = '7.0'
   s.osx.deployment_target = '10.7'
 
   s.source       = { :git => "https://github.com/Nitewriter/AFIncrementalStore.git", :tag => "0.6.0" }
