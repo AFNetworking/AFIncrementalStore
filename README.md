@@ -110,6 +110,10 @@ Note the specification of iOS 5.0 as the platform; leaving out the 5.0 will caus
 
 > [!] AFIncrementalStore is not compatible with iOS 4.3.
 
+## References
+
+Apple has recently updated their programming guide for `NSIncrementalStore`, which is [available from the Developer Center](https://developer.apple.com/library/prerelease/ios/documentation/DataManagement/Conceptual/IncrementalStorePG/ImplementationStrategy/ImplementationStrategy.html). You may find this useful in debugging the behavior of `AFIncrementalStore`, and its interactions with your app's Core Data stack.
+
 ## Credits
 
 AFIncrementalStore was created by [Mattt Thompson](https://github.com/mattt/).
