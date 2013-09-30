@@ -38,19 +38,6 @@ static NSString * const kAFAppDotNetAPIBaseURLString = @"https://alpha-api.app.n
     return _sharedClient;
 }
 
-- (id)initWithBaseURL:(NSURL *)url {
-    self = [super initWithBaseURL:url];
-    if (!self) {
-        return nil;
-    }
-    
-    [self setResponseSerializer:[AFJSONSerializer serializer]];
-//    [self registerHTTPOperationClass:[AFJSONRequestOperation class]];
-//    [self setDefaultHeader:@"Accept" value:@"application/json"];
-    
-    return self;
-}
-
 #pragma mark - AFIncrementalStore
 
 - (NSURLRequest *)requestForFetchRequest:(NSFetchRequest *)fetchRequest
@@ -58,7 +45,11 @@ static NSString * const kAFAppDotNetAPIBaseURLString = @"https://alpha-api.app.n
 {
     NSMutableURLRequest *mutableURLRequest = nil;
     if ([fetchRequest.entityName isEqualToString:@"Post"]) {
-        mutableURLRequest = [self requestWithMethod:@"GET" path:@"stream/0/posts/stream/global" parameters:nil];
+        
+        NSString *URLString = @"stream/0/posts/stream/global";
+        mutableURLRequest = [[self requestSerializer] requestWithMethod:@"GET"
+                                                              URLString:[[NSURL URLWithString:URLString relativeToURL:self.baseURL] absoluteString]
+                                                             parameters:nil];
     }
     
     return mutableURLRequest;
