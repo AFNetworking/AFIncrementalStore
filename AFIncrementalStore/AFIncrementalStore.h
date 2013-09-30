@@ -57,7 +57,7 @@
 /**
  The HTTP client used to manage requests and responses with the associated web services.
  */
-@property (nonatomic, strong) AFHTTPClient <AFIncrementalStoreHTTPClient> *HTTPClient;
+@property (nonatomic, strong) AFHTTPRequestOperationManager <AFIncrementalStoreHTTPClient> *HTTPClient;
 
 /**
  The persistent store coordinator used to persist data from the associated web serivices locally.
