@@ -21,9 +21,9 @@
 // THE SOFTWARE.
 
 #import <CoreData/CoreData.h>
-#import "AFNetworking.h"
 
 @protocol AFIncrementalStoreHTTPClient;
+@class AFHTTPRequestOperationManager;
 
 /**
  `AFIncrementalStore` is an abstract subclass of `NSIncrementalStore`, designed to allow you to load and save data incrementally to and from a one or more web services.

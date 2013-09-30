@@ -21,7 +21,7 @@
 // THE SOFTWARE.
 
 
-#import <AFNetworking/AFNetworking.h>
+#import <AFNetworking/AFHTTPRequestOperationManager.h>
 #import "AFIncrementalStore.h"
 #import "TTTStringInflector.h"
 
