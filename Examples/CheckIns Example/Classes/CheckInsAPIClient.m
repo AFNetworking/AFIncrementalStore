@@ -42,11 +42,13 @@ static NSString * const kAFIncrementalStoreExampleAPIBaseURLString = @"http://lo
         return nil;
     }
     
-    [self registerHTTPOperationClass:[AFJSONRequestOperation class]];
-    [self setDefaultHeader:@"Accept" value:@"application/json"];
+    [self setResponseSerializer:[AFJSONSerializer serializer]];
+//    [self registerHTTPOperationClass:[AFJSONRequestOperation class]];
+//    [self setDefaultHeader:@"Accept" value:@"application/json"];
     
+    __weak AFHTTPClient *__weak_self = self;
     [self setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
-        self.operationQueue.suspended = (status == AFNetworkReachabilityStatusNotReachable);
+        __weak_self.operationQueue.suspended = (status == AFNetworkReachabilityStatusNotReachable);
     }];
     
     return self;
