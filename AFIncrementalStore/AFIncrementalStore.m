@@ -20,9 +20,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "AFIncrementalStore.h"
-#import "AFHTTPClient.h"
 #import <objc/runtime.h>
+
+#import <AFNetworking/AFNetworking.h>
+#import "AFIncrementalStore.h"
 
 NSString * const AFIncrementalStoreUnimplementedMethodException = @"com.alamofire.incremental-store.exceptions.unimplemented-method";
 
@@ -444,12 +445,12 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
                 }];
             }];
         } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-            NSLog(@"Error: %@", error);
+            NSLog(@"%s Error: %@", __PRETTY_FUNCTION__, error);
             [self notifyManagedObjectContext:context aboutRequestOperation:operation forFetchRequest:fetchRequest fetchedObjectIDs:nil];
         }];
 
         [self notifyManagedObjectContext:context aboutRequestOperation:operation forFetchRequest:fetchRequest fetchedObjectIDs:nil];
-        [self.HTTPClient enqueueHTTPRequestOperation:operation];
+        [operation start];
     }
     
     NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
@@ -496,6 +497,7 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
                     withContext:(NSManagedObjectContext *)context
                           error:(NSError *__autoreleasing *)error
 {
+    dispatch_group_t group = dispatch_group_create();
     NSMutableArray *mutableOperations = [NSMutableArray array];
     NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
 
@@ -579,6 +581,7 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
 					}
 				}
             }];
+            operation.completionGroup = group;
             
             [mutableOperations addObject:operation];
         }
@@ -616,6 +619,7 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
                 NSLog(@"Update Error: %@", error);
                 [context refreshObject:updatedObject mergeChanges:NO];
             }];
+            operation.completionGroup = group;
             
             [mutableOperations addObject:operation];
         }
@@ -644,6 +648,7 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
             } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
                 NSLog(@"Delete Error: %@", error);
             }];
+            operation.completionGroup = group;
             
             [mutableOperations addObject:operation];
         }
@@ -654,10 +659,12 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
     
     [self notifyManagedObjectContext:context aboutRequestOperations:mutableOperations forSaveChangesRequest:saveChangesRequestCopy];
 
-    [self.HTTPClient enqueueBatchOfHTTPRequestOperations:mutableOperations progressBlock:nil completionBlock:^(NSArray *operations) {
-        [self notifyManagedObjectContext:context aboutRequestOperations:operations forSaveChangesRequest:saveChangesRequestCopy];
-    }];
-    
+    dispatch_group_notify(group, dispatch_get_main_queue(), ^{
+        [self notifyManagedObjectContext:context aboutRequestOperations:[NSArray arrayWithArray:mutableOperations]
+                   forSaveChangesRequest:saveChangesRequestCopy];
+    });
+    [mutableOperations makeObjectsPerformSelector:@selector(start)];
+
     return [NSArray array];
 }
 
@@ -813,7 +820,7 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
                 }];
 
                 [self notifyManagedObjectContext:context aboutRequestOperation:operation forNewValuesForObjectWithID:objectID];
-                [self.HTTPClient enqueueHTTPRequestOperation:operation];
+                [operation start];
             }
         }
     }
@@ -875,7 +882,7 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
             }];
 			
 			[self notifyManagedObjectContext:context aboutRequestOperation:operation forNewValuesForRelationship:relationship forObjectWithID:objectID];
-            [self.HTTPClient enqueueHTTPRequestOperation:operation];
+            [operation start];
         }
     }
     
