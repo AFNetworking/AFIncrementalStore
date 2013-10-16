@@ -497,7 +497,7 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
                     withContext:(NSManagedObjectContext *)context
                           error:(NSError *__autoreleasing *)error
 {
-    dispatch_group_t group = dispatch_group_create();
+    __block dispatch_group_t group = dispatch_group_create();
     NSMutableArray *mutableOperations = [NSMutableArray array];
     NSManagedObjectContext *backingContext = [self backingManagedObjectContext];
 
@@ -557,6 +557,8 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
 
                     [context refreshObject:insertedObject mergeChanges:NO];
                 }
+
+                dispatch_group_leave(group);
             } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
 				 NSLog(@"Insert Error: %@", error);
 				
@@ -580,8 +582,9 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
 						[context refreshObject:destinationObject mergeChanges:NO];
 					}
 				}
+
+                dispatch_group_leave(group);
             }];
-            operation.completionGroup = group;
             
             [mutableOperations addObject:operation];
         }
@@ -615,11 +618,13 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
 
                     [context refreshObject:updatedObject mergeChanges:YES];
                 }
+                dispatch_group_leave(group);
+
             } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
                 NSLog(@"Update Error: %@", error);
                 [context refreshObject:updatedObject mergeChanges:NO];
+                dispatch_group_leave(group);
             }];
-            operation.completionGroup = group;
             
             [mutableOperations addObject:operation];
         }
@@ -645,10 +650,11 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
                     [backingContext deleteObject:backingObject];
                     [backingContext save:nil];
                 }];
+                dispatch_group_leave(group);
             } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
                 NSLog(@"Delete Error: %@", error);
+                dispatch_group_leave(group);
             }];
-            operation.completionGroup = group;
             
             [mutableOperations addObject:operation];
         }
@@ -658,6 +664,10 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
     NSSaveChangesRequest *saveChangesRequestCopy = [[NSSaveChangesRequest alloc] initWithInsertedObjects:[saveChangesRequest.insertedObjects copy] updatedObjects:[saveChangesRequest.updatedObjects copy] deletedObjects:[saveChangesRequest.deletedObjects copy] lockedObjects:[saveChangesRequest.lockedObjects copy]];
     
     [self notifyManagedObjectContext:context aboutRequestOperations:mutableOperations forSaveChangesRequest:saveChangesRequestCopy];
+
+    [mutableOperations enumerateObjectsUsingBlock:^(AFHTTPRequestOperation *op, NSUInteger idx, BOOL *stop) {
+        dispatch_group_enter(group);
+    }];
 
     dispatch_group_notify(group, dispatch_get_main_queue(), ^{
         [self notifyManagedObjectContext:context aboutRequestOperations:[NSArray arrayWithArray:mutableOperations]
