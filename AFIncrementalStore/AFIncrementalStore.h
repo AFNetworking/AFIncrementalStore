@@ -219,6 +219,33 @@
                            forObjectWithID:(NSManagedObjectID *)objectID
                                withContext:(NSManagedObjectContext *)context;
 
+/**
+ Returns whether the client should perform an insert request for a particular managed object. This method is consulted when a managed object context is saved and will perform the insert request for every inserted object.
+ 
+ @param insertedObject The inserted `NSManagedObject`
+ 
+ @return `YES` if the object is to be inserted, otherwise `NO`.
+ */
+- (BOOL)shouldPerformRequestForInsertedObject:(NSManagedObject *)insertedObject;
+
+/**
+ Returns whether the client should perform an update request for a particular managed object. This method is consulted when a managed object context is saved and will perform the update request for every updated object.
+ 
+ @param updatedObject The updated `NSManagedObject`
+ 
+ @return `YES` if the object is to be deleted, otherwise `NO`.
+ */
+- (BOOL)shouldPerformRequestForUpdatedObject:(NSManagedObject *)updatedObject;
+
+/**
+ Returns whether the client should perform a delete request for a particular managed object. This method is consulted when a managed object context is saved and will perform the delete request for every deleted object.
+ 
+ @param insertedObject The deleted `NSManagedObject`
+ 
+ @return `YES` if the object is to be persisted, otherwise `NO`.
+ */
+- (BOOL)shouldPerformRequestForDeletedObject:(NSManagedObject *)deletedObject;
+
 @optional
 
 ///-----------------------

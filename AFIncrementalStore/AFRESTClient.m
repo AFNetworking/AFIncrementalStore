@@ -227,6 +227,18 @@ static NSString * AFQueryByAppendingParameters(NSString *query, NSDictionary *pa
 
 #pragma mark Write Methods
 
+- (BOOL)shouldPerformRequestForInsertedObject:(NSManagedObject *)insertedObject {
+  return YES;
+}
+
+- (BOOL)shouldPerformRequestForUpdatedObject:(NSManagedObject *)updatedObject {
+  return YES;
+}
+
+- (BOOL)shouldPerformRequestForDeletedObject:(NSManagedObject *)deletedObject {
+  return YES;
+}
+
 - (NSDictionary *)representationOfAttributes:(NSDictionary *)attributes
                              ofManagedObject:(NSManagedObject *)managedObject
 {

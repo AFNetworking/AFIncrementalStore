@@ -501,6 +501,8 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
 
     if ([self.HTTPClient respondsToSelector:@selector(requestForInsertedObject:)]) {
         for (NSManagedObject *insertedObject in [saveChangesRequest insertedObjects]) {
+            if (![self.HTTPClient shouldPerformRequestForInsertedObject:insertedObject]) { continue; }
+
             NSURLRequest *request = [self.HTTPClient requestForInsertedObject:insertedObject];
             if (!request) {
                 [backingContext performBlockAndWait:^{
@@ -586,6 +588,8 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
     
     if ([self.HTTPClient respondsToSelector:@selector(requestForUpdatedObject:)]) {
         for (NSManagedObject *updatedObject in [saveChangesRequest updatedObjects]) {
+            if (![self.HTTPClient shouldPerformRequestForUpdatedObject:updatedObject]) { continue; }
+
             NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:[updatedObject entity] withResourceIdentifier:AFResourceIdentifierFromReferenceObject([self referenceObjectForObjectID:updatedObject.objectID])];
 
             NSURLRequest *request = [self.HTTPClient requestForUpdatedObject:updatedObject];
@@ -623,6 +627,8 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
     
     if ([self.HTTPClient respondsToSelector:@selector(requestForDeletedObject:)]) {
         for (NSManagedObject *deletedObject in [saveChangesRequest deletedObjects]) {
+            if (![self.HTTPClient shouldPerformRequestForDeletedObject:deletedObject]) { continue; }
+
             NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:[deletedObject entity] withResourceIdentifier:AFResourceIdentifierFromReferenceObject([self referenceObjectForObjectID:deletedObject.objectID])];
 
             NSURLRequest *request = [self.HTTPClient requestForDeletedObject:deletedObject];
