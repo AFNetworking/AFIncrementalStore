@@ -256,7 +256,7 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
     NSMutableDictionary *mutableRelationshipValues = [[NSMutableDictionary alloc] init];
     for (NSRelationshipDescription *relationship in [managedObject.entity.relationshipsByName allValues]) {
         
-        if ([managedObject hasFaultForRelationshipNamed:relationship.name]) {
+        if ([managedObject hasFaultForRelationshipNamed:relationship.name] && [backingObject valueForKey:relationship.name]) {
             continue;
         }
         
