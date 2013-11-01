@@ -24,27 +24,6 @@
 
 #import "TTTDateTransformers.h"
 
-static NSString * AFQueryByAppendingParameters(NSString *query, NSDictionary *parameters) {
-    static NSCharacterSet *_componentSeparatorCharacterSet = nil;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        _componentSeparatorCharacterSet = [NSCharacterSet characterSetWithCharactersInString:@"&"];
-    });
-    
-    if (!parameters || [parameters count] == 0) {
-        return query;
-    }
-    
-    query = query ? [[query stringByTrimmingCharactersInSet:_componentSeparatorCharacterSet] stringByAppendingString:@"&"] : @"";
-    
-    NSMutableArray *mutablePairs = [NSMutableArray arrayWithCapacity:[parameters count]];
-    [parameters enumerateKeysAndObjectsUsingBlock:^(id field, id value, BOOL *stop) {
-        [mutablePairs addObject:[NSString stringWithFormat:@"%@=%@", field, value]];
-    }];
-
-    return [query stringByAppendingString:[mutablePairs componentsJoinedByString:@"&"]];
-}
-
 @interface AFRESTClient ()
 @property (readwrite, nonatomic, strong) TTTStringInflector *inflector;
 @end
