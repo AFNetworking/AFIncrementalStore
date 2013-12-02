@@ -254,6 +254,20 @@
 - (NSMutableURLRequest *)requestForDeletedObject:(NSManagedObject *)deletedObject;
 
 /**
+ Returns whether the object associated with the representation of an entity from the specified response should be deleted from the local store.
+
+ @discussion For example, if the representation returned from `GET /products/123` had a `deletedAt` or `isDeleted` field, this method would return YES to indicate the record was marked for deletion on the server.
+ @param representation The resource representation.
+ @param entity The entity for the representation.
+ @param response The HTTP response for the resource request.
+
+ @return `YES` if the representation indicates the object should be deleted, otherwise `NO`.
+ */
+- (BOOL)shouldDeleteObjectForRepresentation:(NSDictionary *)representation
+                                   ofEntity:(NSEntityDescription *)entity
+                               fromResponse:(NSHTTPURLResponse *)response;
+
+/**
  Returns whether the client should fetch remote attribute values for a particular managed object. This method is consulted when a managed object faults on an attribute, and will call `-requestWithMethod:pathForObjectWithID:withContext:` if `YES`.
  
  @param objectID The object ID for the specified managed object.
