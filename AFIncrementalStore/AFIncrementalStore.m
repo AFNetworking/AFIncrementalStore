@@ -341,12 +341,18 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
     for (NSDictionary *representation in representations) {
         NSString *resourceIdentifier = [self.HTTPClient resourceIdentifierForRepresentation:representation ofEntity:entity fromResponse:response];
         NSDictionary *attributes = [self.HTTPClient attributesForRepresentation:representation ofEntity:entity fromResponse:response];
-        
+
+        BOOL shouldDelete = [self.HTTPClient respondsToSelector:@selector(shouldDeleteObjectForRepresentation:ofEntity:fromResponse:)] && [self.HTTPClient shouldDeleteObjectForRepresentation:representation ofEntity:entity fromResponse:response];
+
         __block NSManagedObject *managedObject = nil;
         [context performBlockAndWait:^{
             managedObject = [context existingObjectWithID:[self objectIDForEntity:entity withResourceIdentifier:resourceIdentifier] error:nil];
+
+            if (shouldDelete) {
+                [context deleteObject:managedObject];
+            }
         }];
-        
+
         [managedObject setValuesForKeysWithDictionary:attributes];
         
         NSManagedObjectID *backingObjectID = [self objectIDForBackingObjectForEntity:entity withResourceIdentifier:resourceIdentifier];
@@ -354,7 +360,10 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
         [backingContext performBlockAndWait:^{
             if (backingObjectID) {
                 backingObject = [backingContext existingObjectWithID:backingObjectID error:nil];
-            } else {
+                if (shouldDelete && backingObject) {
+                    [backingContext deleteObject:backingObject];
+                }
+            } else if (!shouldDelete) {
                 backingObject = [NSEntityDescription insertNewObjectForEntityForName:entity.name inManagedObjectContext:backingContext];
                 [backingObject.managedObjectContext obtainPermanentIDsForObjects:[NSArray arrayWithObject:backingObject] error:nil];
             }
@@ -363,7 +372,7 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
         [backingObject setValue:lastModified forKey:kAFIncrementalStoreLastModifiedAttributeName];
         [backingObject setValuesForKeysWithDictionary:attributes];
         
-        if (!backingObjectID) {
+        if (!backingObjectID && !shouldDelete) {
             [context insertObject:managedObject];
         }
         
@@ -396,9 +405,13 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
                 }
             }];
         }
-        
-        [mutableManagedObjects addObject:managedObject];
-        [mutableBackingObjects addObject:backingObject];
+
+        if (managedObject) {
+            [mutableManagedObjects addObject:managedObject];
+        }
+        if (backingObject) {
+            [mutableBackingObjects addObject:backingObject];
+        }
     }
     
     if (completionBlock) {
