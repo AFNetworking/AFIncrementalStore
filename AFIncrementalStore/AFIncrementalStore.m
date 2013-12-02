@@ -435,7 +435,7 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
                         [context performBlockAndWait:^{
                             for (NSManagedObject *childObject in childObjects) {
                                 NSManagedObject *parentObject = [context objectWithID:childObject.objectID];
-                                [context refreshObject:parentObject mergeChanges:YES];
+                                [context refreshObject:parentObject mergeChanges:NO]; // see https://github.com/AFNetworking/AFIncrementalStore/issues/225
                             }
                         }];
 
