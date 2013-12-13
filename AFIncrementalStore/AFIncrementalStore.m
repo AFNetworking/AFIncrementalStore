@@ -927,6 +927,7 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
     
     for (NSManagedObjectID *objectID in objectIDs) {
         [[_registeredObjectIDsByEntityNameAndNestedResourceIdentifier objectForKey:objectID.entity.name] removeObjectForKey:AFResourceIdentifierFromReferenceObject([self referenceObjectForObjectID:objectID])];
+        [_backingObjectIDByObjectID removeObjectForKey:objectID];
     }
 }
 
