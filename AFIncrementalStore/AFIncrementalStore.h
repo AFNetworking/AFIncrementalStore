@@ -116,32 +116,32 @@
 ///-----------------------
 
 /**
- Returns an `NSDictionary` or an `NSArray` of `NSDictionaries` containing the representations of the resources found in a response object.
+ Returns an `NSDictionary` containing the representations of the resources found in a response object, keyed by entity name.
  
- @discussion For example, if `GET /users` returned an `NSDictionary` with an array of users keyed on `"users"`, this method would return the keyed array. Conversely, if `GET /users/123` returned a dictionary with all of the atributes of the requested user, this method would simply return that dictionary.
-
+ @discussion For example, if `GET /users` returned an `NSDictionary` with an array of users keyed on `"users"`, this method would return the keyed array in an `NSDictionary` under the key "User" if "User" was the associated entity name.
+ 
  @param entity The entity represented
  @param responseObject The response object returned from the server.
  
- @return An `NSDictionary` with the representation or an `NSArray` of `NSDictionaries` containing the resource representations.
+ @return An `NSDictionary` with the representation keyed by entity name.
  */
-- (id)representationOrArrayOfRepresentationsOfEntity:(NSEntityDescription *)entity
-                                  fromResponseObject:(id)responseObject;
+- (NSDictionary *)representationsByEntityOfEntity:(NSEntityDescription *)entity
+                               fromResponseObject:(id)responseObject;
 
 /**
- Returns an `NSDictionary` containing the representations of associated objects found within the representation of a response object, keyed by their relationship name.
+ Returns an `NSDictionary` containing the representations of associated objects found within the representation of a response object, keyed by their relationship name and entity name.
  
- @discussion For example, if `GET /albums/123` returned the representation of an album, including the tracks as sub-entities, keyed under `"tracks"`, this method would return a dictionary with an array of representations for those objects, keyed under the name of the relationship used in the model (which is likely also to be `"tracks"`). Likewise, if an album also contained a representation of its artist, that dictionary would contain a dictionary representation of that artist, keyed under the name of the relationship used in the model (which is likely also to be `"artist"`).
+ @discussion For example, if `GET /albums/123` returned the representation of an album, including the tracks as sub-entities, keyed under `"tracks"`, this method would return a dictionary with an array of representations for those objects, keyed under the name of the relationship used in the model (which is likely also to be `"tracks"`) and the name of its destination entity (likely `"Track"`). Likewise, if an album also contained a representation of its artist, that dictionary would contain a dictionary representation of that artist, keyed under the name of the relationship used in the model (which is likely also to be `"artist"`) and its destination entity (likely `"Artist"`).
  
  @param representation The resource representation.
  @param entity The entity for the representation.
  @param response The HTTP response for the resource request.
  
- @return An `NSDictionary` containing representations of relationships, keyed by relationship name.
+ @return An `NSDictionary` containing representations of relationships, keyed by relationship name and destination entity.
  */
-- (NSDictionary *)representationsForRelationshipsFromRepresentation:(NSDictionary *)representation
-                                                           ofEntity:(NSEntityDescription *)entity
-                                                       fromResponse:(NSHTTPURLResponse *)response;
+- (NSDictionary *)representationsByEntityForRelationshipsFromRepresentation:(NSDictionary *)representation
+                                                                   ofEntity:(NSEntityDescription *)entity
+                                                               fromResponse:(NSHTTPURLResponse *)response;
 
 /**
  Returns the resource identifier for the resource whose representation of an entity came from the specified HTTP response. A resource identifier is a string that uniquely identifies a particular resource among all resource types. If new attributes come back for an existing resource identifier, the managed object associated with that resource identifier will be updated, rather than a new object being created.
@@ -159,7 +159,7 @@
                                      fromResponse:(NSHTTPURLResponse *)response;
 
 /**
- Returns the attributes for the managed object corresponding to the representation of an entity from the specified response. This method is used to get the attributes of the managed object from its representation returned in `-representationOrArrayOfRepresentationsFromResponseObject` or `representationsForRelationshipsFromRepresentation:ofEntity:fromResponse:`.
+ Returns the attributes for the managed object corresponding to the representation of an entity from the specified response. This method is used to get the attributes of the managed object from its representation returned in `-representationsByEntityOfEntity:fromResponseObject:` or `representationsByEntityForRelationshipsFromRepresentation:ofEntity:fromResponse:`.
  
  @discussion For example, if the representation returned from `GET /products/123` had a `description` field that corresponded with the `productDescription` attribute in its Core Data model, this method would set the value of the `productDescription` key in the returned dictionary to the value of the `description` field in representation.
  
@@ -224,6 +224,34 @@
 ///-----------------------
 /// @name Optional Methods
 ///-----------------------
+
+/**
+ Returns an `NSDictionary` or an `NSArray` of `NSDictionaries` containing the representations of the resources found in a response object.
+ 
+ @discussion For example, if `GET /users` returned an `NSDictionary` with an array of users keyed on `"users"`, this method would return the keyed array. Conversely, if `GET /users/123` returned a dictionary with all of the atributes of the requested user, this method would simply return that dictionary.
+ 
+ @param entity The entity represented
+ @param responseObject The response object returned from the server.
+ 
+ @return An `NSDictionary` with the representation or an `NSArray` of `NSDictionaries` containing the resource representations.
+ */
+- (id)representationOrArrayOfRepresentationsOfEntity:(NSEntityDescription *)entity
+                                  fromResponseObject:(id)responseObject;
+
+/**
+ Returns an `NSDictionary` containing the representations of associated objects found within the representation of a response object, keyed by their relationship name.
+ 
+ @discussion For example, if `GET /albums/123` returned the representation of an album, including the tracks as sub-entities, keyed under `"tracks"`, this method would return a dictionary with an array of representations for those objects, keyed under the name of the relationship used in the model (which is likely also to be `"tracks"`). Likewise, if an album also contained a representation of its artist, that dictionary would contain a dictionary representation of that artist, keyed under the name of the relationship used in the model (which is likely also to be `"artist"`).
+ 
+ @param representation The resource representation.
+ @param entity The entity for the representation.
+ @param response The HTTP response for the resource request.
+ 
+ @return An `NSDictionary` containing representations of relationships, keyed by relationship name.
+ */
+- (NSDictionary *)representationsForRelationshipsFromRepresentation:(NSDictionary *)representation
+                                                           ofEntity:(NSEntityDescription *)entity
+                                                       fromResponse:(NSHTTPURLResponse *)response;
 
 /**
  Returns the attributes representation of an entity from the specified managed object. This method is used to get the attributes of the representation from its managed object.
