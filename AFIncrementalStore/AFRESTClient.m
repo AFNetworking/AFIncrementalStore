@@ -127,6 +127,13 @@ static NSString * AFQueryByAppendingParameters(NSString *query, NSDictionary *pa
                                 
                 [mutableRelationshipRepresentations setValue:arrayOfRelationshipRepresentations forKey:name];
             } else {
+                if ([value isKindOfClass:[NSString class]]) {
+                    // support relation by hyperlinked identifier
+                    value = @{@"url": value};
+                } else if ([value isKindOfClass:[NSNumber class]]) {
+                    // support relation by id
+                    value = @{@"id": value};
+                }
                 [mutableRelationshipRepresentations setValue:value forKey:name];
             }
         }
