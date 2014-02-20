@@ -355,11 +355,12 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
                     backingObject = [NSEntityDescription insertNewObjectForEntityForName:entity.name inManagedObjectContext:backingContext];
                     [backingObject.managedObjectContext obtainPermanentIDsForObjects:[NSArray arrayWithObject:backingObject] error:nil];
                 }
+
+                [backingObject setValue:resourceIdentifier forKey:kAFIncrementalStoreResourceIdentifierAttributeName];
+                [backingObject setValue:lastModified forKey:kAFIncrementalStoreLastModifiedAttributeName];
+                [backingObject setValuesForKeysWithDictionary:attributes];
             }];
-            [backingObject setValue:resourceIdentifier forKey:kAFIncrementalStoreResourceIdentifierAttributeName];
-            [backingObject setValue:lastModified forKey:kAFIncrementalStoreLastModifiedAttributeName];
-            [backingObject setValuesForKeysWithDictionary:attributes];
-            
+
             if (!backingObjectID) {
                 [context insertObject:managedObject];
             }
@@ -434,7 +435,8 @@ withAttributeAndRelationshipValuesFromManagedObject:(NSManagedObject *)managedOb
                         [context performBlockAndWait:^{
                             for (NSManagedObject *childObject in childObjects) {
                                 NSManagedObject *parentObject = [context objectWithID:childObject.objectID];
-                                [context refreshObject:parentObject mergeChanges:YES];
+                                // DME - Changed mergeChanges to NO to stop duplicate insert calls
+                                [context refreshObject:parentObject mergeChanges:NO];
                             }
                         }];
 
