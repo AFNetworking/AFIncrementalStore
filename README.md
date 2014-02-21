@@ -36,12 +36,12 @@ The only thing you need to do is tell `AFIncrementalStore` how to map Core Data 
 
 @required
 
-- (id)representationOrArrayOfRepresentationsOfEntity:(NSEntityDescription *)entity
-                                  fromResponseObject:(id)responseObject;
+- (NSDictionary *)representationsByEntityOfEntity:(NSEntityDescription *)entity
+                               fromResponseObject:(id)responseObject;
 
-- (NSDictionary *)representationsForRelationshipsFromRepresentation:(NSDictionary *)representation
-                                                           ofEntity:(NSEntityDescription *)entity
-                                                       fromResponse:(NSHTTPURLResponse *)response;
+- (NSDictionary *)representationsByEntityForRelationshipsFromRepresentation:(NSDictionary *)representation
+                                                                   ofEntity:(NSEntityDescription *)entity
+                                                               fromResponse:(NSHTTPURLResponse *)response;
 
 - (NSString *)resourceIdentifierForRepresentation:(NSDictionary *)representation
                                          ofEntity:(NSEntityDescription *)entity
@@ -64,6 +64,13 @@ The only thing you need to do is tell `AFIncrementalStore` how to map Core Data 
                                withContext:(NSManagedObjectContext *)context;
 
 @optional
+
+- (id)representationOrArrayOfRepresentationsOfEntity:(NSEntityDescription *)entity
+                                  fromResponseObject:(id)responseObject;
+
+- (NSDictionary *)representationsForRelationshipsFromRepresentation:(NSDictionary *)representation
+                                                           ofEntity:(NSEntityDescription *)entity
+                                                       fromResponse:(NSHTTPURLResponse *)response;
 
 - (NSDictionary *)representationOfAttributes:(NSDictionary *)attributes
                              ofManagedObject:(NSManagedObject *)managedObject;

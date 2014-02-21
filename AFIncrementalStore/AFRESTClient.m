@@ -109,6 +109,17 @@ static NSString * AFQueryByAppendingParameters(NSString *query, NSDictionary *pa
     return responseObject;
 }
 
+- (NSDictionary *)representationsByEntityOfEntity:(NSEntityDescription *)entity
+                               fromResponseObject:(id)responseObject
+{
+    id representation = [self representationOrArrayOfRepresentationsOfEntity:entity fromResponseObject:responseObject];
+    if ([representation isKindOfClass:[NSDictionary class]]) {
+        representation = [NSArray arrayWithObject:representation];
+    }
+    
+    return @{entity.name: representation};
+}
+
 - (NSDictionary *)representationsForRelationshipsFromRepresentation:(NSDictionary *)representation
                                                            ofEntity:(NSEntityDescription *)entity
                                                        fromResponse:(NSHTTPURLResponse *)response
@@ -129,6 +140,32 @@ static NSString * AFQueryByAppendingParameters(NSString *query, NSDictionary *pa
             } else {
                 [mutableRelationshipRepresentations setValue:value forKey:name];
             }
+        }
+    }];
+    
+    return mutableRelationshipRepresentations;
+}
+
+- (NSDictionary *)representationsByEntityForRelationshipsFromRepresentation:(NSDictionary *)representation
+                                                                   ofEntity:(NSEntityDescription *)entity
+                                                               fromResponse:(NSHTTPURLResponse *)response
+{
+    NSMutableDictionary *mutableRelationshipRepresentations = [NSMutableDictionary dictionaryWithCapacity:[entity.relationshipsByName count]];
+    
+    NSDictionary *representations = [self representationsForRelationshipsFromRepresentation:representation ofEntity:entity fromResponse:response];
+    [representations enumerateKeysAndObjectsUsingBlock:^(id name, id representation, BOOL *stop) {
+        NSRelationshipDescription *relationship = [entity.relationshipsByName objectForKey:name];
+        NSString *relationshipEntityName = [[relationship destinationEntity] name];
+        NSArray *relationshipRepresentations = nil;
+        if ([representation isKindOfClass:[NSArray class]]) {
+            relationshipRepresentations = representation;
+        } else if ([representation isKindOfClass:[NSDictionary class]]) {
+            relationshipRepresentations = [NSArray arrayWithObject:representation];
+        }
+        
+        if (relationshipRepresentations != nil) {
+            NSDictionary *relationshipRepresentation = @{relationshipEntityName: relationshipRepresentations};
+            [mutableRelationshipRepresentations setValue:relationshipRepresentation forKey:name];
         }
     }];
     

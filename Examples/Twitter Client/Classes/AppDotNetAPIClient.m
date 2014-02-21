@@ -63,10 +63,6 @@ static NSString * const kAFAppDotNetAPIBaseURLString = @"https://alpha-api.app.n
     return mutableURLRequest;
 }
 
-- (id)representationOrArrayOfRepresentationsFromResponseObject:(id)responseObject {
-    return [responseObject valueForKey:@"data"];
-}
-
 - (id)representationOrArrayOfRepresentationsOfEntity:(NSEntityDescription *)entity
                                   fromResponseObject:(id)responseObject
 {
