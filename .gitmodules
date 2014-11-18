@@ -1,9 +1,0 @@
-[submodule "AFNetworking"]
-	path = AFNetworking
-	url = git://github.com/AFNetworking/AFNetworking.git
-[submodule "InflectorKit"]
-	path = InflectorKit
-	url = git://github.com/mattt/InflectorKit.git
-[submodule "TransformerKit"]
-	path = TransformerKit
-	url = git://github.com/mattt/TransformerKit.git
