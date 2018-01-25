@@ -57,6 +57,7 @@
 		662023612019D0E3000F684D /* AFIncrementalStoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AFIncrementalStoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		662023632019D0E3000F684D /* AFIncrementalStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AFIncrementalStoreTests.swift; sourceTree = "<group>"; };
 		662023652019D0E3000F684D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		6620236B2019DC06000F684D /* Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Bridging-Header.h"; sourceTree = "<group>"; };
 		F81D903A16F3DED80043C85A /* NSValueTransformer+TransformerKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSValueTransformer+TransformerKit.h"; sourceTree = "<group>"; };
 		F81D903B16F3DED80043C85A /* NSValueTransformer+TransformerKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSValueTransformer+TransformerKit.m"; sourceTree = "<group>"; };
 		F81D904016F3DED80043C85A /* TransformerKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TransformerKit.h; sourceTree = "<group>"; };
@@ -150,6 +151,7 @@
 			children = (
 				662023632019D0E3000F684D /* AFIncrementalStoreTests.swift */,
 				662023652019D0E3000F684D /* Info.plist */,
+				6620236B2019DC06000F684D /* Bridging-Header.h */,
 			);
 			path = AFIncrementalStoreTests;
 			sourceTree = "<group>";
@@ -505,6 +507,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = ch.sbb.AFIncrementalStoreTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OBJC_BRIDGING_HEADER = "AFIncrementalStoreTests/Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -555,6 +558,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = ch.sbb.AFIncrementalStoreTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "AFIncrementalStoreTests/Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
