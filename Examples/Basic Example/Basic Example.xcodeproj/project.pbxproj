@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		662023642019D0E3000F684D /* AFIncrementalStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 662023632019D0E3000F684D /* AFIncrementalStoreTests.swift */; };
 		F81D904116F3DED80043C85A /* NSValueTransformer+TransformerKit.m in Sources */ = {isa = PBXBuildFile; fileRef = F81D903B16F3DED80043C85A /* NSValueTransformer+TransformerKit.m */; };
 		F81D904916F3DEEB0043C85A /* NSString+InflectorKit.m in Sources */ = {isa = PBXBuildFile; fileRef = F81D904616F3DEEB0043C85A /* NSString+InflectorKit.m */; };
 		F81D904A16F3DEEB0043C85A /* TTTStringInflector.m in Sources */ = {isa = PBXBuildFile; fileRef = F81D904816F3DEEB0043C85A /* TTTStringInflector.m */; };
@@ -42,7 +43,20 @@
 		F8F8240F173893C000ED7E21 /* TTTStringTransformers.m in Sources */ = {isa = PBXBuildFile; fileRef = F8F8240C173893C000ED7E21 /* TTTStringTransformers.m */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		662023662019D0E3000F684D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F8AFAFA415AB4F28003FE5BB /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F8AFAFAC15AB4F28003FE5BB;
+			remoteInfo = Songs;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		662023612019D0E3000F684D /* AFIncrementalStoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AFIncrementalStoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		662023632019D0E3000F684D /* AFIncrementalStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AFIncrementalStoreTests.swift; sourceTree = "<group>"; };
+		662023652019D0E3000F684D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F81D903A16F3DED80043C85A /* NSValueTransformer+TransformerKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSValueTransformer+TransformerKit.h"; sourceTree = "<group>"; };
 		F81D903B16F3DED80043C85A /* NSValueTransformer+TransformerKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSValueTransformer+TransformerKit.m"; sourceTree = "<group>"; };
 		F81D904016F3DED80043C85A /* TransformerKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TransformerKit.h; sourceTree = "<group>"; };
@@ -108,6 +122,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		6620235E2019D0E3000F684D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F8AFAFAA15AB4F28003FE5BB /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -124,6 +145,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		662023622019D0E3000F684D /* AFIncrementalStoreTests */ = {
+			isa = PBXGroup;
+			children = (
+				662023632019D0E3000F684D /* AFIncrementalStoreTests.swift */,
+				662023652019D0E3000F684D /* Info.plist */,
+			);
+			path = AFIncrementalStoreTests;
+			sourceTree = "<group>";
+		};
 		F81D903916F3DED80043C85A /* TransformerKit */ = {
 			isa = PBXGroup;
 			children = (
@@ -220,6 +250,7 @@
 			children = (
 				F81D905916F3E6AC0043C85A /* Default-568h@2x.png */,
 				F8AFAFB915AB4F28003FE5BB /* Basic Example */,
+				662023622019D0E3000F684D /* AFIncrementalStoreTests */,
 				F8AFAFB015AB4F28003FE5BB /* Frameworks */,
 				F8AFAFAE15AB4F28003FE5BB /* Products */,
 				F8AFB07215AB5010003FE5BB /* Vendor */,
@@ -230,6 +261,7 @@
 			isa = PBXGroup;
 			children = (
 				F8AFAFAD15AB4F28003FE5BB /* Songs.app */,
+				662023612019D0E3000F684D /* AFIncrementalStoreTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -288,6 +320,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		662023602019D0E3000F684D /* AFIncrementalStoreTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6620236A2019D0E3000F684D /* Build configuration list for PBXNativeTarget "AFIncrementalStoreTests" */;
+			buildPhases = (
+				6620235D2019D0E3000F684D /* Sources */,
+				6620235E2019D0E3000F684D /* Frameworks */,
+				6620235F2019D0E3000F684D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				662023672019D0E3000F684D /* PBXTargetDependency */,
+			);
+			name = AFIncrementalStoreTests;
+			productName = AFIncrementalStoreTests;
+			productReference = 662023612019D0E3000F684D /* AFIncrementalStoreTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		F8AFAFAC15AB4F28003FE5BB /* Songs */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = F8AFAFCA15AB4F28003FE5BB /* Build configuration list for PBXNativeTarget "Songs" */;
@@ -312,7 +362,15 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = AF;
+				LastSwiftUpdateCheck = 0920;
 				LastUpgradeCheck = 0460;
+				TargetAttributes = {
+					662023602019D0E3000F684D = {
+						CreatedOnToolsVersion = 9.2;
+						ProvisioningStyle = Automatic;
+						TestTargetID = F8AFAFAC15AB4F28003FE5BB;
+					};
+				};
 			};
 			buildConfigurationList = F8AFAFA715AB4F28003FE5BB /* Build configuration list for PBXProject "Basic Example" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -327,11 +385,19 @@
 			projectRoot = "";
 			targets = (
 				F8AFAFAC15AB4F28003FE5BB /* Songs */,
+				662023602019D0E3000F684D /* AFIncrementalStoreTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		6620235F2019D0E3000F684D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F8AFAFAB15AB4F28003FE5BB /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -343,6 +409,14 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		6620235D2019D0E3000F684D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				662023642019D0E3000F684D /* AFIncrementalStoreTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F8AFAFA915AB4F28003FE5BB /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -378,12 +452,121 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		662023672019D0E3000F684D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F8AFAFAC15AB4F28003FE5BB /* Songs */;
+			targetProxy = 662023662019D0E3000F684D /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		662023682019D0E3000F684D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				INFOPLIST_FILE = AFIncrementalStoreTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = ch.sbb.AFIncrementalStoreTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Songs.app/Songs";
+			};
+			name = Debug;
+		};
+		662023692019D0E3000F684D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				INFOPLIST_FILE = AFIncrementalStoreTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = ch.sbb.AFIncrementalStoreTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Songs.app/Songs";
+			};
+			name = Release;
+		};
 		F8AFAFC815AB4F28003FE5BB /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
@@ -412,7 +595,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
@@ -457,6 +640,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		6620236A2019D0E3000F684D /* Build configuration list for PBXNativeTarget "AFIncrementalStoreTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				662023682019D0E3000F684D /* Debug */,
+				662023692019D0E3000F684D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		F8AFAFA715AB4F28003FE5BB /* Build configuration list for PBXProject "Basic Example" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
